@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>УСиЭСКБ ИиКДБ CRM. Основы интеграции систем</title>
+<style>
+:root{--bg:#070b16;--panel:#0f172a;--text:#e5e7eb;--muted:#94a3b8;--blue:#60a5fa;--cyan:#22d3ee;--green:#86efac;--red:#fca5a5;--yellow:#fde68a;--accent:linear-gradient(135deg,#2563eb,#06b6d4 55%,#14b8a6);--shadow:0 18px 50px rgba(0,0,0,.35);--radius:22px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(37,99,235,.22),transparent 34%),radial-gradient(circle at top right,rgba(20,184,166,.16),transparent 32%),var(--bg);color:var(--text);line-height:1.65}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 80%)}header{background:rgba(15,23,42,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);padding:18px 26px;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}header h1{margin:0;font-size:24px;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}.searchBox{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:280px;max-width:560px;flex:1 1 360px;justify-content:flex-end}.searchBox input{width:min(420px,100%);padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.88);color:var(--text);outline:none}.searchBox button,.mobile-toggle{padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.24);background:rgba(30,41,59,.82);color:#fff;cursor:pointer}.search-count{font-size:13px;color:#93c5fd;white-space:nowrap;min-width:88px}.mobile-toggle{display:none;width:100%;margin-top:12px;text-align:left;font-size:16px}.layout{display:flex;min-height:100vh}aside{width:365px;background:rgba(15,23,42,.74);backdrop-filter:blur(16px);padding:18px;border-right:1px solid rgba(148,163,184,.16);position:sticky;top:78px;height:calc(100vh - 78px);overflow:auto;flex-shrink:0}main{flex:1;padding:32px;min-width:0;max-width:1230px;margin:0 auto}.page{display:none}.page.active{display:block}.menu{display:flex;align-items:center;gap:9px;color:#cbd5e1;text-decoration:none;padding:11px 13px;border-radius:14px;margin:6px 0;font-size:15px;border:1px solid transparent;transition:.18s}.menu:hover{background:rgba(30,41,59,.75);color:#fff;border-color:rgba(148,163,184,.18);transform:translateX(2px)}.menu.active,.menu.search-match{background:linear-gradient(135deg,rgba(37,99,235,.26),rgba(6,182,212,.16));color:#fff;border-color:rgba(96,165,250,.38);box-shadow:0 10px 26px rgba(37,99,235,.12)}.menu.search-hidden{display:none!important}.card{background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(15,23,42,.92));border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);padding:22px;margin:18px 0;overflow:hidden;box-shadow:var(--shadow);position:relative}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(96,165,250,.65),transparent)}.card.quiz{border-color:rgba(34,211,238,.28);background:linear-gradient(180deg,rgba(8,47,73,.42),rgba(15,23,42,.94))}.quiz button{padding:11px 14px;border:1px solid rgba(96,165,250,.32);border-radius:13px;background:rgba(37,99,235,.22);color:#fff;cursor:pointer;margin:6px;min-height:42px}.res{margin-top:9px;font-weight:800}.quiz-progress{margin:14px 0 18px;padding:12px 14px;border-radius:16px;background:rgba(20,83,45,.22);border:1px solid rgba(34,197,94,.3);color:#bbf7d0;font-weight:800}.answer-explain{display:none;margin-top:10px;border-left:4px solid #22c55e;padding:12px 14px;background:rgba(20,83,45,.25);border-radius:14px;color:#bbf7d0}.answer-explain.show{display:block}.ok{color:var(--green)}.bad{color:var(--red)}h2{color:#bfdbfe;font-size:30px;margin:0 0 18px;line-height:1.2}h2:after{content:"";display:block;width:72px;height:4px;margin-top:12px;border-radius:999px;background:var(--accent)}h3{color:#dbeafe;margin-top:12px;font-size:20px}p{margin:10px 0}ul,ol{padding-left:23px}li{margin:5px 0}.badge{display:inline-flex;padding:4px 9px;border-radius:999px;background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.26);color:#bfdbfe;font-size:13px}.callout{border-left:4px solid var(--cyan);padding:12px 14px;background:rgba(8,47,73,.28);border-radius:14px;margin:14px 0;color:#dbeafe}.warn{border-left-color:#fbbf24;background:rgba(113,63,18,.25);color:#fde68a}.success{border-left-color:#22c55e;background:rgba(20,83,45,.25);color:#bbf7d0}.danger{border-left-color:#ef4444;background:rgba(127,29,29,.22);color:#fecaca}pre{background:#020617;color:#a7f3d0;padding:15px;border-radius:16px;overflow-x:auto;white-space:pre;max-width:100%;font-size:14px;border:1px solid rgba(148,163,184,.16)}code{background:#020617;color:#a7f3d0;padding:3px 7px;border-radius:8px;border:1px solid rgba(148,163,184,.14)}table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(148,163,184,.2);margin:12px 0}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;vertical-align:top}th{background:rgba(37,99,235,.18);color:#dbeafe}tr:last-child td{border-bottom:0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tile{padding:16px;border-radius:18px;background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.16);transition:.22s;position:relative;overflow:hidden}.tile:hover{transform:translateY(-4px);border-color:rgba(96,165,250,.48);box-shadow:0 16px 34px rgba(37,99,235,.18)}.playbook{display:flex;flex-direction:column;gap:14px;margin:14px 0}.playbook-intro{border-left:4px solid var(--cyan);background:rgba(8,47,73,.28);border-radius:14px;padding:12px 14px;color:#dbeafe}.step{background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:14px;transition:.2s}.step-title{font-weight:800;color:#bfdbfe;margin-bottom:8px;display:flex;align-items:center;gap:8px}.step-title:before{content:"▶";font-size:11px;color:#22d3ee}.small{color:var(--muted);font-size:14px}mark.search-hit{background:#facc15;color:#111827;border-radius:5px;padding:0 3px}.search-empty{display:none;margin:18px 0;padding:16px;border-radius:16px;background:rgba(127,29,29,.22);border:1px solid rgba(252,165,165,.25);color:#fecaca}.search-empty.active{display:block}@media(max-width:900px){header h1{font-size:20px}.mobile-toggle{display:block}.searchBox{order:3;width:100%;max-width:none;min-width:0}.searchBox input{width:100%;flex:1}.layout{display:block}aside{display:none;position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid rgba(148,163,184,.16);padding:10px 14px;background:rgba(15,23,42,.96)}body.menu-open aside{display:block}main{padding:17px}.grid,.grid2{grid-template-columns:1fr}.card{padding:16px}.quiz button{display:block;width:100%;margin:8px 0;text-align:left}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+<script>
+function safeId(id){return String(id||'').replace(/[^a-zA-Z0-9_-]/g,'')}
+function getMenuTargetId(item){const m=(item.getAttribute('onclick')||'').match(/show\(['"]([^'"]+)['"]\)/);return m?safeId(m[1]):''}
+function show(id){const t=document.getElementById(safeId(id));if(!t)return false;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.menu').forEach(i=>i.classList.toggle('active',getMenuTargetId(i)===t.id));document.body.classList.remove('menu-open');window.scrollTo(0,0);return false}
+function updateQuizProgress(){const progress=document.getElementById('quizProgress');if(!progress)return;const total=12;const correct=document.querySelectorAll('#quiz .res.ok').length;progress.textContent=`Прогресс: ${correct}/${total} правильных ответов`;progress.style.display='block'}
+function q(id,a,c,msg){const r=document.getElementById(safeId(id));if(!r)return;const ok=a===c;r.className='res '+(ok?'ok':'bad');r.textContent=ok?'Верно ✅':'Неверно ❌ '+(msg||'Попробуйте ещё раз.');const explain=document.getElementById(safeId(id)+'-explain');if(explain){explain.classList.toggle('show',ok)}updateQuizProgress()}
+function clearMarks(root){root.querySelectorAll('mark.search-hit').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));root.normalize()}
+function highlight(root,term){let count=0;const skip=new Set(['SCRIPT','STYLE','INPUT','BUTTON','MARK']);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){const p=n.parentElement;if(!p||skip.has(p.tagName)||!n.nodeValue.trim())return NodeFilter.FILTER_REJECT;return n.nodeValue.toLowerCase().includes(term)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});const nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(n=>{const text=n.nodeValue,lower=text.toLowerCase(),frag=document.createDocumentFragment();let pos=0,idx=lower.indexOf(term);while(idx!==-1){frag.appendChild(document.createTextNode(text.slice(pos,idx)));const mark=document.createElement('mark');mark.className='search-hit';mark.textContent=text.slice(idx,idx+term.length);frag.appendChild(mark);count++;pos=idx+term.length;idx=lower.indexOf(term,pos)}frag.appendChild(document.createTextNode(text.slice(pos)));n.parentNode.replaceChild(frag,n)});return count}
+function searchCourse(){const input=document.getElementById('courseSearch'),counter=document.getElementById('searchCount'),empty=document.getElementById('searchEmpty'),term=(input.value||'').trim().toLowerCase();let total=0,sections=0,first='';document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'));empty.classList.remove('active');if(!term){counter.textContent='';return}document.querySelectorAll('.page').forEach(p=>{if(p.textContent.toLowerCase().includes(term)){p.dataset.searchMatch='1';sections++;total+=highlight(p,term);if(!first)first=p.id}});document.querySelectorAll('.menu').forEach(i=>{const target=document.getElementById(getMenuTargetId(i));const match=target&&target.dataset.searchMatch==='1';i.classList.toggle('search-hidden',!match);i.classList.toggle('search-match',!!match)});counter.textContent=total?`Найдено: ${total} / разделов: ${sections}`:'Ничего не найдено';if(!total)empty.classList.add('active');if(first)show(first)}
+function clearCourseSearch(){document.getElementById('courseSearch').value='';document.getElementById('searchCount').textContent='';document.getElementById('searchEmpty').classList.remove('active');document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'))}
+document.addEventListener('DOMContentLoaded',()=>show('home'));
+</script>
+  <link rel="stylesheet" href="course-shell.css">
+</head>
+<body>
+<header>
+<h1>УСиЭСКБ ИиКДБ CRM. Основы интеграции систем</h1>
+<div class="searchBox">
+<input id="courseSearch" type="search" placeholder="🔍 Поиск: Kafka, RabbitMQ, ArtemisMQ, REST, DLQ..." oninput="searchCourse()" />
+<button onclick="clearCourseSearch()">Сброс</button>
+<span id="searchCount" class="search-count"></span>
+</div>
+<button class="mobile-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню курса</button>
+</header>
+<div class="layout">
+<aside>
+<a class="menu" href="javascript:void(0)" onclick="return show('home')">🏠 Главная</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('intro')">🧭 1. Что такое интеграция систем</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('patterns')">🔄 2. Виды интеграций и паттерны</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('compare')">⚖️ 3. Kafka, RabbitMQ, ArtemisMQ и REST</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('k8s')">☸️ 4. Интеграции в Kubernetes</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('rest')">🌐 5. REST-интеграция</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('kafka')">🟣 6. Kafka</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('rabbit')">🐇 7. RabbitMQ</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('artemis')">🚀 8. ArtemisMQ</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('choose')">🧩 9. Как выбирать технологию</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('incidents')">🚨 10. Типовые инциденты</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('runbook')">🛠️ 11. Runbook диагностики</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('cheatsheet')">📌 12. Шпаргалка поддержки</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('quiz')">✅ Проверочный квиз</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('cta')">🎯 Призыв к действию</a>
+</aside>
+<main>
+<div id="searchEmpty" class="search-empty">Ничего не найдено. Попробуйте другой запрос.</div>
+<section id="home" class="page">
+<h2>Курс: Основы интеграции систем</h2>
+<div class="card">
+<p>Курс предназначен для прикладных администраторов сопровождения, которые поддерживают интеграции между информационными системами и сервисами. Разбираем четыре основных способа взаимодействия: <b>Kafka</b>, <b>RabbitMQ</b>, <b>ArtemisMQ</b> и <b>REST</b>.</p>
+<div class="grid">
+<div class="tile"><span class="badge">REST</span><h3>🌐 Синхронный вызов</h3><p>Сервис вызывает сервис и ждёт ответ. Важно понимать timeout, retry, HTTP-коды и идемпотентность.</p></div>
+<div class="tile"><span class="badge">Kafka</span><h3>🟣 Поток событий</h3><p>Высокая пропускная способность, топики, партиции, consumer groups, offset и replay.</p></div>
+<div class="tile"><span class="badge">RabbitMQ / ArtemisMQ</span><h3>📨 Очереди сообщений</h3><p>Очереди, маршрутизация, ack/nack, DLQ, TTL, redelivery и гарантия доставки.</p></div>
+</div>
+<div class="callout"><b>Главная идея:</b> интеграция — это договор между системами о формате данных, способе передачи, правилах доставки, обработке ошибок и ответственности при сбоях.</div>
+</div>
+</section>
+<section id="intro" class="page">
+<h2>1. Что такое интеграция систем</h2>
+<div class="card"><h3>Определение</h3><p><b>Интеграция информационных систем</b> — это организованный обмен данными и командами между приложениями. Система-источник формирует событие, запрос или сообщение, а система-получатель принимает его, проверяет, обрабатывает и меняет своё состояние.</p><pre>Система A -> канал интеграции -> Система B
+Источник -> транспорт -> получатель -> обработка -> результат</pre></div>
+<div class="card"><h3>Что важно сопровождению</h3><ol><li>Кто источник и кто получатель.</li><li>Синхронная или асинхронная интеграция.</li><li>Где лежит контракт: OpenAPI, AsyncAPI, JSON Schema, Avro, XSD.</li><li>Какие есть очереди, топики, exchange, consumer groups.</li><li>Что происходит при ошибке: retry, DLQ, компенсация, ручной разбор.</li><li>Какие метрики и логи показывают здоровье интеграции.</li></ol></div>
+</section>
+<section id="patterns" class="page">
+<h2>2. Виды интеграций и паттерны</h2>
+<div class="card"><h3>Синхронная и асинхронная интеграция</h3><table><tr><th>Тип</th><th>Как работает</th><th>Плюсы</th><th>Минусы</th></tr><tr><td>Синхронная</td><td>Сервис вызывает другой сервис и ждёт ответ.</td><td>Просто понять результат, подходит для онлайн-сценариев.</td><td>Зависит от доступности получателя, чувствительна к timeout.</td></tr><tr><td>Асинхронная</td><td>Сервис отправляет сообщение и не ждёт немедленной обработки.</td><td>Развязывает системы, выдерживает пики, повышает устойчивость.</td><td>Сложнее диагностика, eventual consistency, нужны DLQ и мониторинг lag.</td></tr></table></div>
+<div class="card"><h3>Основные паттерны</h3><table><tr><th>Паттерн</th><th>Где встречается</th><th>Смысл</th></tr><tr><td>Request/Response</td><td>REST, иногда брокеры</td><td>Запросили данные или действие и получили ответ.</td></tr><tr><td>Event-driven</td><td>Kafka</td><td>Система публикует факт: «заявка создана», «статус изменён».</td></tr><tr><td>Work Queue</td><td>RabbitMQ, ArtemisMQ</td><td>Задачи распределяются между обработчиками.</td></tr><tr><td>Pub/Sub</td><td>Kafka, RabbitMQ, ArtemisMQ</td><td>Одно событие может получить несколько независимых потребителей.</td></tr><tr><td>Dead Letter Queue</td><td>RabbitMQ, ArtemisMQ, Kafka через отдельный topic</td><td>Ошибочные сообщения складываются отдельно для анализа.</td></tr></table></div>
+</section>
+<section id="compare" class="page">
+<h2>3. Kafka, RabbitMQ, ArtemisMQ и REST: сравнение</h2>
+<div class="card"><table><tr><th>Критерий</th><th>REST</th><th>Kafka</th><th>RabbitMQ</th><th>ArtemisMQ</th></tr><tr><td>Модель</td><td>HTTP request/response</td><td>Event streaming</td><td>Message broker / queues</td><td>Message broker JMS/AMQP/Core</td></tr><tr><td>Лучше для</td><td>Онлайн-запросы, CRUD, получение данных</td><td>Потоки событий, аудит, аналитика, replay</td><td>Очереди задач, маршрутизация, точечная доставка</td><td>Enterprise messaging, JMS, очереди и топики</td></tr><tr><td>Хранение</td><td>Не хранит сообщения</td><td>Хранит события по retention</td><td>Хранит сообщения до обработки/TTL</td><td>Хранит сообщения до обработки/TTL</td></tr><tr><td>Повторная обработка</td><td>Через повторный HTTP-вызов</td><td>Через offset/replay</td><td>Через redelivery/DLQ</td><td>Через redelivery/DLQ</td></tr><tr><td>Главный риск</td><td>Timeout, каскадный отказ</td><td>Lag, неверный offset, партиции</td><td>Застрявшие сообщения, unacked, DLQ</td><td>Адреса/очереди, redelivery, consumer flow</td></tr></table></div>
+<div class="card callout warn"><b>Правило выбора:</b> REST — когда нужен быстрый ответ здесь и сейчас. Kafka — когда важен поток событий и история. RabbitMQ/ArtemisMQ — когда нужна управляемая очередь задач, маршрутизация и надёжная доставка конкретному обработчику.</div>
+</section>
+<section id="k8s" class="page"><h2>4. Интеграции в Kubernetes</h2><div class="card"><h3>Как это выглядит</h3><pre>Pod producer -> Service/DNS -> Broker или REST API -> Pod consumer
+ConfigMap/Secret -> адреса, логины, пароли, имена топиков/очередей
+Deployment/HPA -> количество обработчиков
+Readiness/Liveness -> исключение неготовых экземпляров</pre><p>В Kubernetes интеграционные параметры обычно вынесены в ConfigMap и Secret: адреса bootstrap servers, URL REST API, имена очередей, топиков, exchange, routing key, username/password, TLS-настройки.</p></div><div class="card"><h3>Что проверять в Kubernetes</h3><ol><li>Запущены ли producer и consumer Pods.</li><li>Не растут ли рестарты и CrashLoopBackOff.</li><li>Доступен ли broker/API по DNS и порту из Pod.</li><li>Правильно ли заданы переменные окружения.</li><li>Есть ли HPA для consumer при росте очереди или lag.</li><li>Не блокируют ли NetworkPolicy или service mesh исходящие вызовы.</li></ol><pre>kubectl get pods -n &lt;ns&gt;
+kubectl logs deploy/&lt;app&gt; -n &lt;ns&gt;
+kubectl exec -it &lt;pod&gt; -n &lt;ns&gt; -- sh
+nslookup &lt;broker-service&gt;
+curl -vk http://&lt;service&gt;/actuator/health</pre></div></section>
+<section id="rest" class="page">
+<h2>5. REST-интеграция</h2>
+
+<div class="card">
+<h3>Что такое REST-интеграция</h3>
+<p><b>REST</b> — это синхронная интеграция поверх HTTP. Один сервис вызывает endpoint другого сервиса и ждёт ответ. REST хорошо подходит для онлайн-сценариев: получить данные клиента, проверить статус заявки, создать сущность, изменить параметры или удалить ресурс.</p>
+<p>Для прикладной поддержки важно помнить: REST-запрос — это не просто URL. Это контракт между системами: HTTP-метод, path, query parameters, headers, body, формат ответа, коды ошибок, timeout, retry и правила авторизации.</p>
+<pre>Client service
+   |
+   | HTTP request: GET /api/customers/123
+   v
+Server service
+   |
+   | HTTP response: 200 OK + JSON body
+   v
+Client service</pre>
+<div class="callout"><b>Главная особенность REST:</b> вызывающая система ждёт ответ здесь и сейчас. Если downstream-сервис медленный или недоступен, проблема быстро влияет на пользователя или бизнес-операцию.</div>
+</div>
+
+<div class="card">
+<h3>HTTP-коды ответов: что они значат для сопровождения</h3>
+<table>
+<tr><th>Класс</th><th>Что означает</th><th>Как читать при инциденте</th></tr>
+<tr><td>1xx Informational</td><td>Информационные промежуточные ответы. Сервер сообщает, что запрос принят в обработку или можно продолжать передачу.</td><td>В прикладных логах встречаются редко. Обычно важны для инфраструктуры, прокси, gateway и низкоуровневой HTTP-диагностики.</td></tr>
+<tr><td>2xx Success</td><td>Запрос успешно принят и обработан.</td><td>Смотреть не только код 200, но и бизнес-результат в теле ответа.</td></tr>
+<tr><td>3xx Redirection</td><td>Перенаправление. Клиенту нужно обратиться по другому адресу или использовать кэш.</td><td>Важно при проблемах с gateway, ingress, reverse proxy, балансировщиком, TLS и изменением URL.</td></tr>
+<tr><td>4xx Client Error</td><td>Ошибка на стороне клиента запроса: данные, авторизация, права, формат, ресурс.</td><td>Часто означает проблему контракта, токена, прав, обязательных полей или бизнес-валидации.</td></tr>
+<tr><td>5xx Server Error</td><td>Ошибка на стороне вызываемого сервиса или его зависимостей.</td><td>Проверять логи сервиса-получателя, БД, внешние системы, thread pool, connection pool, downstream timeout.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Подробно про 1xx и 3xx</h3>
+<table>
+<tr><th>Код</th><th>Название</th><th>Что значит</th><th>Что важно поддержке</th></tr>
+<tr><td>100</td><td>Continue</td><td>Клиент может продолжать отправку тела запроса.</td><td>Может встречаться при больших POST/PUT-запросах. Если есть проблемы с загрузкой больших payload, смотреть proxy/gateway и ограничения размера body.</td></tr>
+<tr><td>101</td><td>Switching Protocols</td><td>Сервер согласился переключить протокол.</td><td>Актуально для WebSocket/upgrade-сценариев. Для обычного REST почти не используется.</td></tr>
+<tr><td>102</td><td>Processing</td><td>Сервер обрабатывает запрос, но финального ответа ещё нет.</td><td>Редкий код. Может быть полезен для долгих операций, но в большинстве REST API не применяется.</td></tr>
+<tr><td>301</td><td>Moved Permanently</td><td>Ресурс постоянно переехал на другой URL.</td><td>После изменения маршрутов клиенты могут продолжать ходить на старый endpoint. Проверять конфигурацию клиента, gateway и документацию API.</td></tr>
+<tr><td>302</td><td>Found</td><td>Временное перенаправление.</td><td>Может неожиданно появиться из-за SSO, reverse proxy или балансировщика. Для backend-to-backend REST это часто симптом неверной авторизации или маршрута.</td></tr>
+<tr><td>304</td><td>Not Modified</td><td>Ресурс не изменился, клиент может использовать кэш.</td><td>Важно при кэшировании. Если пользователь видит старые данные, проверить Cache-Control, ETag, If-None-Match, CDN/proxy.</td></tr>
+<tr><td>307</td><td>Temporary Redirect</td><td>Временный redirect с сохранением HTTP-метода.</td><td>Безопаснее 302 для POST/PUT, потому что метод не должен измениться на GET.</td></tr>
+<tr><td>308</td><td>Permanent Redirect</td><td>Постоянный redirect с сохранением HTTP-метода.</td><td>Используется при постоянной миграции endpoint. Проверять, поддерживает ли клиент redirect и не ломается ли авторизация.</td></tr>
+</table>
+<div class="callout warn"><b>Практическое правило:</b> в интеграциях service-to-service 3xx часто нежелательны. Лучше, чтобы сервис сразу ходил на правильный внутренний URL, а не зависел от redirect-логики клиента.</div>
+</div>
+
+<div class="card">
+<h3>Основные HTTP-методы: GET, POST, PUT, DELETE</h3>
+<table>
+<tr><th>Метод</th><th>Назначение</th><th>Идемпотентность</th><th>Пример</th><th>Что проверять поддержке</th></tr>
+<tr><td>GET</td><td>Получить ресурс или список ресурсов.</td><td>Да. Повторный GET не должен менять состояние.</td><td><code>GET /api/customers/123</code></td><td>Query parameters, права на чтение, кэш, корректность ID, 404 если ресурс не найден.</td></tr>
+<tr><td>POST</td><td>Создать ресурс или запустить операцию.</td><td>Обычно нет. Повторный POST может создать дубль.</td><td><code>POST /api/orders</code></td><td>Idempotency-Key, защита от дублей, обязательные поля, бизнес-валидация, 409 при конфликте.</td></tr>
+<tr><td>PUT</td><td>Полностью заменить ресурс или установить состояние по известному ID.</td><td>Да, если реализован корректно. Повторный PUT приводит к тому же состоянию.</td><td><code>PUT /api/customers/123</code></td><td>Полное тело объекта, версия ресурса, optimistic lock, 404/409, не затираются ли поля null-значениями.</td></tr>
+<tr><td>PATCH</td><td>Частично изменить ресурс.</td><td>Зависит от реализации.</td><td><code>PATCH /api/customers/123/status</code></td><td>Какие поля меняются, допустимые переходы статусов, конфликт версий.</td></tr>
+<tr><td>DELETE</td><td>Удалить ресурс или пометить его удалённым.</td><td>Да, если повторное удаление не меняет результат.</td><td><code>DELETE /api/orders/555</code></td><td>Физическое или логическое удаление, права, связанные записи, повторный вызов, 404/204.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Что важно настроить</h3>
+<ul>
+<li><b>Connect timeout</b> — сколько ждём установления соединения.</li>
+<li><b>Read timeout</b> — сколько ждём ответ после отправки запроса.</li>
+<li><b>Retry</b> — повторять только безопасные или идемпотентные операции. Для POST нужна защита от дублей.</li>
+<li><b>Circuit breaker</b> — временно прекращать вызовы в падающую систему, чтобы не усиливать аварию.</li>
+<li><b>Rate limiter</b> — ограничивать количество запросов, чтобы защитить downstream-сервис от перегрузки и не получить каскадный отказ.</li>
+<li><b>Bulkhead</b> — изолировать пул потоков/соединений для конкретной зависимости.</li>
+<li><b>Correlation ID</b> — прокидывать идентификатор операции через все сервисы.</li>
+<li><b>OpenAPI-контракт</b> — фиксировать методы, URL, схемы request/response и коды ошибок.</li>
+<li><b>TLS и авторизация</b> — сертификаты, токены, scopes, service account, mTLS.</li>
+</ul>
+<div class="callout success"><b>Для сопровождения:</b> rate limiter должен быть виден в метриках. Если появляются HTTP 429, нужно понимать, кто ограничивает трафик: сам сервис, API Gateway, Ingress, service mesh или внешний балансировщик.</div>
+</div>
+
+<div class="card">
+<h3>Типовые проблемы REST</h3>
+<table>
+<tr><th>Симптом</th><th>Возможная причина</th><th>Что смотреть</th></tr>
+<tr><td>Timeout</td><td>Downstream медленный, сеть, БД, thread pool, connection pool.</td><td>Latency p95/p99, логи вызывающего и вызываемого сервиса, trace.</td></tr>
+<tr><td>401/403</td><td>Токен истёк, неверный scope, сертификат, service account.</td><td>Headers, auth-service, ingress/gateway, настройки security.</td></tr>
+<tr><td>404</td><td>Неверный path, ID ресурса, route в gateway.</td><td>URL, base path, version API, ingress/VirtualService.</td></tr>
+<tr><td>409</td><td>Конфликт состояния или дубль операции.</td><td>Бизнес-ключ, idempotency key, версия записи.</td></tr>
+<tr><td>429</td><td>Сработал rate limiter.</td><td>Лимиты, burst, кто источник трафика, retry-after.</td></tr>
+<tr><td>5xx</td><td>Ошибка сервиса или его зависимости.</td><td>Stack trace, БД, внешние API, ресурсы Pod.</td></tr>
+</table>
+</div>
+</section>
+<section id="kafka" class="page">
+<h2>6. Kafka</h2>
+
+<div class="card">
+<h3>Как работает Kafka</h3>
+<p><b>Kafka</b> — это распределённая платформа потоковой передачи событий. Producer пишет события в topic. Topic разделён на partitions. Consumer group читает события из partitions и хранит позицию чтения — offset.</p>
+<pre>Producer -> Kafka Topic -> Partitions -> Consumer Group -> Consumer instances</pre>
+<table>
+<tr><th>Понятие</th><th>Смысл</th><th>Что важно поддержке</th></tr>
+<tr><td>Topic</td><td>Логическая лента событий.</td><td>Проверить имя topic, retention, количество partitions.</td></tr>
+<tr><td>Partition</td><td>Часть topic, даёт параллелизм и порядок внутри partition.</td><td>Порядок гарантируется только внутри одной partition.</td></tr>
+<tr><td>Offset</td><td>Позиция сообщения в partition.</td><td>По offset видно, где находится consumer.</td></tr>
+<tr><td>Consumer group</td><td>Группа обработчиков, совместно читающая topic.</td><td>Одна partition в рамках group читается только одним consumer.</td></tr>
+<tr><td>Lag</td><td>Отставание consumer group от конца topic.</td><td>Рост lag = consumer не успевает или не может обработать сообщения.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Kafka-кластер: brokers и ZooKeeper</h3>
+<p>Kafka работает как кластер из нескольких серверов — <b>brokers</b>. Каждый broker хранит часть partitions, принимает записи от producers и отдаёт данные consumers.</p>
+<p>В классической архитектуре Kafka использует <b>ZooKeeper</b> для хранения метаданных кластера, координации broker-ов, выбора controller broker и управления состоянием. В более новых версиях Kafka может работать в режиме без ZooKeeper — через KRaft, где метаданные управляются самим Kafka-кластером. Но во многих enterprise-средах всё ещё встречаются кластеры с ZooKeeper.</p>
+<pre>Producer / Consumer
+        |
+        v
++-------------------------+
+| Kafka Cluster           |
+|  Broker 1               |
+|  Broker 2               |
+|  Broker 3               |
++-------------------------+
+        |
+        v
+ZooKeeper / KRaft metadata quorum</pre>
+<table>
+<tr><th>Компонент</th><th>Роль</th><th>Что проверять</th></tr>
+<tr><td>Broker</td><td>Хранит partitions и обслуживает produce/consume.</td><td>Доступность, disk, CPU, network, under-replicated partitions.</td></tr>
+<tr><td>Controller broker</td><td>Управляет изменениями состояния partitions и leader election.</td><td>Controller changes, стабильность кластера.</td></tr>
+<tr><td>ZooKeeper</td><td>Координация и метаданные в классической архитектуре.</td><td>Quorum, latency, session expiration, доступность ensemble.</td></tr>
+<tr><td>KRaft quorum</td><td>Современная замена ZooKeeper для метаданных Kafka.</td><td>Состояние controller quorum и metadata log.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Как достигается надёжность в Kafka</h3>
+<p>Надёжность Kafka достигается не одним параметром, а набором настроек на уровне topic, producer, broker и consumer.</p>
+<table>
+<tr><th>Механизм</th><th>Как работает</th><th>Почему важно</th></tr>
+<tr><td>Replication factor</td><td>Каждая partition имеет несколько копий на разных brokers.</td><td>При падении одного broker данные остаются на других.</td></tr>
+<tr><td>Leader / follower replicas</td><td>Запись и чтение идут через leader partition, follower replicas копируют данные.</td><td>Если leader падает, выбирается новый leader из актуальных replicas.</td></tr>
+<tr><td>ISR — in-sync replicas</td><td>Набор replicas, которые успевают синхронизироваться с leader.</td><td>Если ISR уменьшается, надёжность снижается.</td></tr>
+<tr><td>acks=all</td><td>Producer считает запись успешной, когда подтвердили in-sync replicas.</td><td>Повышает гарантию записи, но может увеличить latency.</td></tr>
+<tr><td>min.insync.replicas</td><td>Минимум replicas, которые должны подтвердить запись.</td><td>Защищает от записи в единственную оставшуюся копию.</td></tr>
+<tr><td>Idempotent producer</td><td>Защищает от дублей при retry producer-а.</td><td>Важно при сетевых сбоях и повторных отправках.</td></tr>
+<tr><td>Transactions</td><td>Позволяют атомарно записывать несколько сообщений и offset.</td><td>Нужны для обработки без дублей и потерь в сложных сценариях.</td></tr>
+<tr><td>Retention</td><td>Kafka хранит события заданное время или объём.</td><td>Позволяет повторно перечитывать события, но требует контроля места на диске.</td></tr>
+</table>
+<div class="callout warn"><b>Важно:</b> Kafka не делает обработчик автоматически идемпотентным. Даже при надёжной записи в topic consumer может обработать сообщение повторно. Бизнес-операции должны учитывать дубли.</div>
+</div>
+
+<div class="card">
+<h3>Когда выбирать Kafka</h3>
+<ul>
+<li>Нужен поток бизнес-событий между многими системами.</li>
+<li>Нужно хранить историю событий и иметь возможность повторного чтения.</li>
+<li>Высокая нагрузка и большой объём сообщений.</li>
+<li>Одно событие должны независимо обработать несколько consumer groups.</li>
+<li>Важна аналитика, аудит, захват изменений данных, событийная модель или потоковая обработка.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Что мониторить в Kafka</h3>
+<table>
+<tr><th>Метрика</th><th>Почему важна</th></tr>
+<tr><td>Consumer lag</td><td>Показывает, успевают ли consumers обрабатывать поток.</td></tr>
+<tr><td>Under-replicated partitions</td><td>Сигнал, что реплики не синхронизированы и отказоустойчивость снижена.</td></tr>
+<tr><td>Offline partitions</td><td>Критичная проблема: часть данных недоступна.</td></tr>
+<tr><td>Broker disk usage</td><td>Kafka активно использует диск; переполнение диска может остановить кластер.</td></tr>
+<tr><td>Produce/consume rate</td><td>Показывает входящий и исходящий поток сообщений.</td></tr>
+<tr><td>Request latency</td><td>Рост latency влияет на producers и consumers.</td></tr>
+<tr><td>Rebalance count</td><td>Частые rebalance могут тормозить обработку.</td></tr>
+</table>
+</div>
+
+<div class="card danger callout"><b>Частые проблемы:</b> растёт consumer lag, consumer не коммитит offset, неверно выбран key и все события попали в одну partition, нарушен контракт сообщения, producer не может подключиться к bootstrap servers, ISR уменьшается, broker упёрся в диск или сеть.</div>
+</section>
+<section id="rabbit" class="page">
+<h2>7. RabbitMQ</h2>
+
+<div class="card">
+<h3>Как работает RabbitMQ</h3>
+<p><b>RabbitMQ</b> — брокер сообщений с очередями и гибкой маршрутизацией. Producer отправляет сообщение в exchange, exchange по правилам направляет его в queue, consumer читает из queue и подтверждает обработку через ack.</p>
+<pre>Producer -> Exchange -> Binding / Routing key -> Queue -> Consumer</pre>
+<table>
+<tr><th>Exchange</th><th>Как маршрутизирует</th><th>Пример</th></tr>
+<tr><td>direct</td><td>По точному routing key.</td><td><code>crm.order.created</code></td></tr>
+<tr><td>topic</td><td>По шаблону routing key.</td><td><code>crm.order.*</code></td></tr>
+<tr><td>fanout</td><td>Во все связанные очереди.</td><td>Рассылка события всем подписчикам.</td></tr>
+<tr><td>headers</td><td>По заголовкам сообщения.</td><td>Маршрутизация по атрибутам.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>RabbitMQ-кластер</h3>
+<p>RabbitMQ можно запускать как кластер из нескольких nodes. Кластер позволяет централизованно управлять пользователями, virtual hosts, exchanges, queues, bindings и политиками. Но важно понимать: сам факт кластера не означает, что каждая очередь автоматически полностью отказоустойчива.</p>
+<pre>Producer / Consumer
+        |
+        v
++-------------------------+
+| RabbitMQ Cluster        |
+|  Node 1                 |
+|  Node 2                 |
+|  Node 3                 |
++-------------------------+</pre>
+<table>
+<tr><th>Компонент</th><th>Роль</th><th>Что важно поддержке</th></tr>
+<tr><td>Node</td><td>Участник RabbitMQ-кластера.</td><td>Состояние node, память, CPU, диск, сеть.</td></tr>
+<tr><td>Virtual host</td><td>Логическая изоляция ресурсов.</td><td>Права, exchanges, queues и политики внутри vhost.</td></tr>
+<tr><td>Queue leader/master</td><td>Узел, который обслуживает конкретную очередь.</td><td>Если очередь не зеркалирована/не quorum, падение node может сделать очередь недоступной.</td></tr>
+<tr><td>Policy</td><td>Правило, применяемое к очередям/exchanges по шаблону имени.</td><td>Через политики задают TTL, DLX, max length, HA/quorum-параметры.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Зеркалирование очередей, quorum queues и политики</h3>
+<p>В классических версиях RabbitMQ отказоустойчивость очередей часто делали через <b>mirrored queues</b>: очередь имела master и зеркала на других nodes. При падении master одно из зеркал становилось новым master.</p>
+<p>В современных инсталляциях всё чаще используют <b>quorum queues</b>. Они основаны на репликации через консенсус и лучше подходят для надёжной доставки, чем старое зеркалирование classic queues.</p>
+<table>
+<tr><th>Подход</th><th>Что даёт</th><th>Ограничения</th></tr>
+<tr><td>Classic queue без зеркалирования</td><td>Простая очередь на одном node.</td><td>При проблеме node очередь может стать недоступной.</td></tr>
+<tr><td>Mirrored classic queue</td><td>Копии очереди на нескольких nodes.</td><td>Сложнее в эксплуатации, больше сетевых и дисковых затрат.</td></tr>
+<tr><td>Quorum queue</td><td>Репликация и выбор лидера через quorum.</td><td>Требует больше ресурсов, но лучше для надёжности.</td></tr>
+<tr><td>Policy</td><td>Автоматически применяет HA, TTL, DLX, max-length к группам очередей.</td><td>Неверная policy может затронуть много очередей сразу.</td></tr>
+</table>
+<pre># Примеры направлений настроек через policy:
+# - dead-letter-exchange
+# - message-ttl
+# - max-length
+# - queue type: quorum
+# - overflow behavior</pre>
+<div class="callout warn"><b>Для поддержки:</b> после создания очереди обязательно проверяйте, какая политика на неё применилась. Ошибка в шаблоне имени может оставить очередь без DLQ, TTL или отказоустойчивости.</div>
+</div>
+
+<div class="card">
+<h3>Как достигается надёжность в RabbitMQ</h3>
+<table>
+<tr><th>Механизм</th><th>Как работает</th><th>Почему важно</th></tr>
+<tr><td>Durable exchange/queue</td><td>Exchange и queue переживают рестарт broker.</td><td>Без durable инфраструктура маршрутизации может исчезнуть после рестарта.</td></tr>
+<tr><td>Persistent messages</td><td>Сообщения записываются на диск.</td><td>Защита от потери сообщений при рестарте broker.</td></tr>
+<tr><td>Publisher confirms</td><td>Broker подтверждает producer-у, что сообщение принято.</td><td>Producer понимает, что сообщение реально дошло до broker.</td></tr>
+<tr><td>Consumer acknowledgements</td><td>Consumer подтверждает успешную обработку.</td><td>Если consumer упал до ack, сообщение можно доставить повторно.</td></tr>
+<tr><td>DLX / DLQ</td><td>Проблемные сообщения уходят в dead letter exchange/queue.</td><td>Ошибочные сообщения не блокируют основную очередь.</td></tr>
+<tr><td>Quorum queues / mirroring</td><td>Репликация очереди между nodes.</td><td>Повышает отказоустойчивость очередей.</td></tr>
+<tr><td>Policies</td><td>Централизованное применение правил к очередям.</td><td>Упрощает единый стандарт надёжности.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Messages unacked и prefetch count: чем опасны</h3>
+<p><b>Messages unacked</b> — это сообщения, которые RabbitMQ уже отдал consumer-у, но consumer ещё не подтвердил их успешную обработку через ack.</p>
+<p><b>Prefetch count</b> ограничивает, сколько неподтверждённых сообщений broker может одновременно отдать одному consumer-у. Если prefetch слишком большой, один consumer может забрать много сообщений, долго их держать и не отдавать другим обработчикам.</p>
+<table>
+<tr><th>Ситуация</th><th>Риск</th><th>Что делать</th></tr>
+<tr><td>Unacked растёт</td><td>Consumer завис, медленно обрабатывает или не отправляет ack.</td><td>Проверить логи consumer, thread pool, БД, внешние вызовы.</td></tr>
+<tr><td>Prefetch слишком большой</td><td>Один consumer забрал много сообщений, остальные простаивают.</td><td>Уменьшить prefetch, оценить время обработки и количество consumers.</td></tr>
+<tr><td>Consumer упал с unacked</td><td>Сообщения вернутся в очередь и могут быть обработаны повторно.</td><td>Проверить идемпотентность обработки.</td></tr>
+<tr><td>Долгие unacked</td><td>Очередь визуально может быть не большой, но работа фактически застряла.</td><td>Мониторить не только ready, но и unacked.</td></tr>
+</table>
+<div class="callout danger"><b>Опасность:</b> высокий prefetch + медленный consumer = сообщения «разобраны», но не обработаны. В очереди мало ready-сообщений, но бизнес-процесс стоит.</div>
+</div>
+
+<div class="card">
+<h3>Чтение из одной очереди разными consumers</h3>
+<p>Если несколько consumers читают <b>одну и ту же queue</b>, RabbitMQ распределяет сообщения между ними. Одно конкретное сообщение получает один consumer. Это модель competing consumers.</p>
+<pre>Queue: order.processing
+   |       |       |
+   v       v       v
+Consumer  Consumer Consumer
+  A         B        C</pre>
+<table>
+<tr><th>Особенность</th><th>Что значит</th></tr>
+<tr><td>Масштабирование</td><td>Добавление consumers увеличивает параллельную обработку.</td></tr>
+<tr><td>Порядок</td><td>Глобальный порядок обработки может нарушаться, потому что сообщения обрабатываются разными consumers с разной скоростью.</td></tr>
+<tr><td>Ack</td><td>Сообщение удаляется из очереди только после подтверждения.</td></tr>
+<tr><td>Повторная доставка</td><td>Если consumer упал до ack, сообщение может быть доставлено другому consumer.</td></tr>
+<tr><td>Prefetch</td><td>Определяет, сколько сообщений один consumer может держать без ack.</td></tr>
+</table>
+<div class="callout success"><b>Когда это хорошо:</b> очередь задач, где каждый заказ, файл или заявка должны быть обработаны одним свободным worker-ом. <b>Когда осторожно:</b> сценарии, где строгий порядок сообщений критичен.</div>
+</div>
+
+<div class="card">
+<h3>Что важно мониторить в RabbitMQ</h3>
+<table>
+<tr><th>Метрика/ресурс</th><th>Почему важны</th></tr>
+<tr><td>Disk space</td><td>При нехватке места broker может заблокировать publishers или остановить запись сообщений.</td></tr>
+<tr><td>Memory</td><td>RabbitMQ использует memory watermark; при превышении может блокировать публикацию.</td></tr>
+<tr><td>CPU</td><td>Высокий CPU влияет на publish/consume rate и latency.</td></tr>
+<tr><td>Messages ready</td><td>Сообщения ждут обработки в очереди.</td></tr>
+<tr><td>Messages unacked</td><td>Сообщения выданы consumers, но не подтверждены.</td></tr>
+<tr><td>DLQ depth</td><td>Рост DLQ показывает массовые ошибки обработки или контракта.</td></tr>
+<tr><td>Consumers count</td><td>Если consumers = 0, очередь не обрабатывается.</td></tr>
+<tr><td>Incoming traffic</td><td>Publish rate: сколько сообщений поступает.</td></tr>
+<tr><td>Outgoing traffic</td><td>Deliver/ack rate: сколько сообщений реально обрабатывается.</td></tr>
+<tr><td>Connection/channel count</td><td>Утечки соединений или каналов могут привести к деградации.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Когда выбирать RabbitMQ</h3>
+<ul>
+<li>Нужна классическая очередь задач.</li>
+<li>Важна гибкая маршрутизация сообщений через exchange и routing key.</li>
+<li>Нужны ack/nack, TTL, retry, DLQ.</li>
+<li>Нужно распределять задачи между worker-сервисами.</li>
+<li>Не требуется хранить длинную историю событий как в Kafka.</li>
+</ul>
+</div>
+
+<div class="card danger callout"><b>Частые проблемы:</b> messages ready растёт, messages unacked зависли, consumer отключился, сообщения ушли в DLQ, неверный routing key, очередь переполнена, prefetch настроен слишком большим, policy не применилась к нужной очереди, broker упёрся в memory watermark или disk alarm.</div>
+</section>
+<section id="artemis" class="page">
+<h2>8. ArtemisMQ</h2>
+
+<div class="card">
+<h3>Что такое ActiveMQ Artemis</h3>
+<p><b>Apache ActiveMQ Artemis</b> — это высокопроизводительный неблокирующий брокер сообщений с открытым исходным кодом, написанный на Java. Это не просто «новая версия» классического ActiveMQ, а полностью переписанный с нуля проект, который пришёл ему на смену.</p>
+<p>Artemis часто встречается в enterprise-средах, где важны стандарты, надёжная доставка, очереди, топики, транзакционность, поддержка JMS и интеграция со старыми и новыми системами.</p>
+<div class="callout"><b>Простая формулировка:</b> ArtemisMQ — это универсальный enterprise-брокер, который может работать как классическая очередь задач, как pub/sub-брокер и как шлюз между системами с разными протоколами.</div>
+</div>
+
+<div class="card">
+<h3>Зачем создавался Artemis</h3>
+<table>
+<tr><th>Цель</th><th>Что это значит</th><th>Почему важно для enterprise</th></tr>
+<tr><td>Высокая производительность</td><td>Низкая задержка и высокая пропускная способность.</td><td>Брокер должен выдерживать большие потоки сообщений без деградации.</td></tr>
+<tr><td>Поддержка JMS 2.0</td><td>Совместимость со стандартом Java Message Service.</td><td>Многие корпоративные Java-системы интегрируются именно через JMS.</td></tr>
+<tr><td>Гибкость развертывания</td><td>Можно запускать отдельно, встраивать в приложение или поднимать кластер.</td><td>Подходит для разных архитектур: от монолита до Kubernetes.</td></tr>
+<tr><td>Множество протоколов</td><td>Core, AMQP, MQTT, STOMP, OpenWire и другие.</td><td>Позволяет связать системы, написанные на разных стеках.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Что такое JMS</h3>
+<p><b>JMS — Java Message Service</b> — это стандарт Java API для обмена сообщениями между приложениями. JMS описывает, как приложение отправляет, получает и подтверждает сообщения, но конкретную реализацию даёт брокер: например, ArtemisMQ.</p>
+<table>
+<tr><th>JMS-понятие</th><th>Что означает</th><th>Аналогия</th></tr>
+<tr><td>ConnectionFactory</td><td>Фабрика подключений к брокеру.</td><td>Настройка входа в транспортную систему.</td></tr>
+<tr><td>Connection</td><td>Соединение приложения с брокером.</td><td>Канал связи.</td></tr>
+<tr><td>Session</td><td>Контекст отправки/получения сообщений.</td><td>Рабочая смена оператора.</td></tr>
+<tr><td>Queue</td><td>Point-to-point очередь.</td><td>Одну задачу забирает один исполнитель.</td></tr>
+<tr><td>Topic</td><td>Publish-subscribe канал.</td><td>Одно объявление получают все подписчики.</td></tr>
+<tr><td>Message</td><td>Сообщение с body, headers и properties.</td><td>Письмо с содержимым и служебными полями.</td></tr>
+</table>
+<div class="callout success"><b>Для поддержки:</b> если система использует JMS, в настройках приложения ищите connection factory, destination, queue/topic name, acknowledgement mode, transaction mode и credentials.</div>
+</div>
+
+<div class="card">
+<h3>Enterprise messaging</h3>
+<p><b>Enterprise messaging</b> — это подход к обмену сообщениями в корпоративных системах, где важны надёжность, транзакционность, совместимость, безопасность, аудит и управляемость.</p>
+<ul>
+<li>Сообщения не должны теряться при рестарте приложения или брокера.</li>
+<li>Должны быть понятные гарантии доставки и подтверждения обработки.</li>
+<li>Ошибочные сообщения должны уходить в DLQ, а не ломать весь поток.</li>
+<li>Должны поддерживаться транзакции и интеграция с базами данных.</li>
+<li>Нужны права доступа, TLS, разделение адресов и очередей.</li>
+<li>Нужна возможность мониторинга и эксплуатации в production.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Ключевые концепции Artemis</h3>
+<table>
+<tr><th>Понятие</th><th>Смысл</th><th>Что важно поддержке</th></tr>
+<tr><td>Address</td><td>Логическое имя назначения, куда отправляется сообщение.</td><td>Проверить, существует ли address и какие routing types включены.</td></tr>
+<tr><td>Queue</td><td>Очередь, из которой сообщение обычно забирает один consumer.</td><td>Проверять message count, delivering count, consumer count, DLQ.</td></tr>
+<tr><td>Routing type ANYCAST</td><td>Point-to-point доставка: сообщение получает один consumer.</td><td>Подходит для очередей задач.</td></tr>
+<tr><td>Routing type MULTICAST</td><td>Pub/Sub доставка: копии получают подписчики.</td><td>Подходит для топиков и событий для нескольких систем.</td></tr>
+<tr><td>DLQ</td><td>Dead letter queue для сообщений, которые не удалось обработать.</td><td>Рост DLQ требует анализа payload и причины redelivery failure.</td></tr>
+<tr><td>Expiry address</td><td>Куда уходят сообщения после истечения TTL.</td><td>Важно для временных сообщений и SLA обработки.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Модели сообщений</h3>
+<div class="grid2">
+<div class="tile"><span class="badge">Point-to-Point</span><h3>Queues</h3><p>Сообщение отправляется в очередь и потребляется ровно одним потребителем. Идеально для распределения задач: десять worker-ов обрабатывают заказы, и каждый заказ берёт один свободный worker.</p></div>
+<div class="tile"><span class="badge">Publish-Subscribe</span><h3>Topics</h3><p>Сообщение публикуется в topic и доставляется всем подписчикам. Например, событие «вышел новый пост» получают email-сервис, push-сервис и сервис кэширования.</p></div>
+</div>
+<pre>Point-to-Point:
+Producer -> Queue -> one Consumer
+
+Publish-Subscribe:
+Producer -> Topic -> Consumer A
+                  -> Consumer B
+                  -> Consumer C</pre>
+</div>
+
+<div class="card">
+<h3>Гарантии доставки</h3>
+<table>
+<tr><th>Режим</th><th>Как работает</th><th>Риск/польза</th></tr>
+<tr><td>Auto Acknowledgement</td><td>Брокер считает сообщение доставленным после отправки consumer-у.</td><td>Быстро, но при сбое consumer сообщение может считаться обработанным ошибочно.</td></tr>
+<tr><td>Client Acknowledgement</td><td>Клиент явно подтверждает успешную обработку.</td><td>Стандартный подход для надёжной доставки.</td></tr>
+<tr><td>Transactional</td><td>Ack выполняется в рамках транзакции.</td><td>Можно связать обработку сообщений и операции с БД в атомарный сценарий.</td></tr>
+<tr><td>Durable Subscriptions</td><td>Для topics: сообщения сохраняются для отключившегося durable-подписчика.</td><td>Полезно, если подписчик временно недоступен, но не должен пропустить события.</td></tr>
+<tr><td>Persistent messages</td><td>Сообщения сохраняются на диск.</td><td>Защита от потери при рестарте брокера.</td></tr>
+</table>
+<div class="callout warn"><b>Важно:</b> надёжность доставки не отменяет идемпотентность. При redelivery consumer может получить сообщение повторно.</div>
+</div>
+
+<div class="card">
+<h3>Техническая архитектура Artemis</h3>
+<p>Высокая производительность Artemis достигается за счёт неблокирующего I/O, журналирующего хранилища и эффективной работы с объектами сообщений в JVM.</p>
+<table>
+<tr><th>Компонент</th><th>Как работает</th><th>Почему быстро</th></tr>
+<tr><td>Netty / non-blocking I/O</td><td>Один поток может обслуживать множество подключений.</td><td>Не нужен отдельный поток на каждое соединение.</td></tr>
+<tr><td>Journal</td><td>Персистентные сообщения пишутся в последовательный append-only журнал.</td><td>Последовательная запись на диск быстрее случайной.</td></tr>
+<tr><td>Message pooling</td><td>Внутренние объекты сообщений переиспользуются.</td><td>Снижается нагрузка на Garbage Collector.</td></tr>
+<tr><td>Protocol handlers</td><td>Принимают сообщения разных протоколов и переводят во внутренний формат.</td><td>Брокер может быть шлюзом между разными системами.</td></tr>
+</table>
+<pre>[Клиенты: Producer / Consumer]
+        |
+        | Протоколы: Core, AMQP, MQTT, STOMP, OpenWire
+        v
+[Protocol Handlers]
+        |
+        | Внутренняя модель сообщений
+        v
+[Ядро Artemis: Non-blocking I/O, Routing, Journal]
+        |
+        | Persist / Read
+        v
+[Journal files on Disk]</pre>
+<p>Схема читается так: клиенты подключаются к Artemis по разным протоколам. На входе их встречают протокольные модули, которые переводят сообщения во внутренний формат. Далее ядро Artemis решает, куда маршрутизировать сообщение, нужно ли сохранить его на диск и как доставить consumer-у.</p>
+</div>
+
+<div class="card">
+<h3>Кластеризация Artemis</h3>
+<p>Для отказоустойчивости и масштабирования Artemis можно объединять в кластеры. Есть два основных подхода: master-slave для высокой доступности и симметричный кластер для распределения нагрузки.</p>
+<table>
+<tr><th>Подход</th><th>Как работает</th><th>Для чего нужен</th></tr>
+<tr><td>Master-Slave Shared Store</td><td>Master и Slave используют общее хранилище. При падении Master, Slave подхватывает файлы журнала.</td><td>Высокая доступность без копирования журнала по сети, но нужен общий диск.</td></tr>
+<tr><td>Master-Slave Replication</td><td>Slave синхронно получает копию журнала Master по сети.</td><td>Высокая доступность без общего диска.</td></tr>
+<tr><td>Symmetric cluster</td><td>Несколько брокеров равноправно связаны между собой. Сообщения могут перенаправляться между nodes.</td><td>Масштабирование нагрузки и распределение consumers/producers.</td></tr>
+</table>
+<pre>Master-Slave:
+Producer -> Master Broker -> Journal
+                  |
+                  v
+              Slave Broker
+
+Symmetric cluster:
+Broker A <-> Broker B <-> Broker C
+   |            |            |
+Consumer A   Consumer B   Consumer C</pre>
+<div class="callout"><b>Разница:</b> master-slave в первую очередь про отказоустойчивость конкретного брокера, а симметричный кластер — про масштабирование и распределение сообщений между несколькими брокерами.</div>
+</div>
+
+<div class="card">
+<h3>Когда выбирать ArtemisMQ</h3>
+<ul>
+<li>Нужна JMS-совместимость.</li>
+<li>Есть enterprise-системы, которые уже используют JMS/AMQP.</li>
+<li>Нужны очереди, топики, транзакционные сценарии.</li>
+<li>Нужна надёжная доставка, redelivery, DLQ и durable subscriptions.</li>
+<li>Нужно поддержать разные протоколы в одном брокере.</li>
+<li>Нужна гибкая схема развертывания: standalone, embedded или cluster.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Что мониторить в ArtemisMQ</h3>
+<table>
+<tr><th>Метрика</th><th>Почему важна</th></tr>
+<tr><td>Message count</td><td>Сколько сообщений находится в очереди.</td></tr>
+<tr><td>Delivering count</td><td>Сколько сообщений выдано consumers, но ещё не подтверждено.</td></tr>
+<tr><td>Consumer count</td><td>Есть ли активные обработчики.</td></tr>
+<tr><td>Messages added / acknowledged</td><td>Сравнение входящего и обработанного потока.</td></tr>
+<tr><td>DLQ count</td><td>Ошибочные сообщения, требующие анализа.</td></tr>
+<tr><td>Journal disk usage</td><td>Переполнение диска может остановить брокер.</td></tr>
+<tr><td>Connection/session count</td><td>Утечки соединений и сессий могут привести к деградации.</td></tr>
+<tr><td>Heap / GC</td><td>Artemis работает на Java, поэтому важны память и паузы GC.</td></tr>
+</table>
+</div>
+
+<div class="card danger callout"><b>Частые проблемы Artemis:</b> consumer count = 0, растёт delivering count, сообщения уходят в DLQ, истекает TTL и сообщения попадают в expiry address, переполняется journal, неправильно выбран ANYCAST/MULTICAST, durable subscriber отключен слишком долго, redelivery настроен без контроля повторов.</div>
+</section>
+<section id="choose" class="page"><h2>9. Как выбирать технологию интеграции</h2><div class="card"><table><tr><th>Сценарий</th><th>Лучший выбор</th><th>Почему</th></tr><tr><td>Пользователь нажал кнопку и ждёт результат</td><td>REST</td><td>Нужен быстрый синхронный ответ.</td></tr><tr><td>Система публикует бизнес-события для многих потребителей</td><td>Kafka</td><td>Event streaming, replay, масштабирование чтения.</td></tr><tr><td>Нужно обработать очередь задач worker-сервисами</td><td>RabbitMQ / ArtemisMQ</td><td>Очередь, ack/nack, DLQ, redelivery.</td></tr><tr><td>Нужно интегрироваться со старой JMS-системой</td><td>ArtemisMQ</td><td>JMS и enterprise messaging.</td></tr><tr><td>Нужна сложная маршрутизация по routing key</td><td>RabbitMQ</td><td>Exchange и binding хорошо решают эту задачу.</td></tr><tr><td>Нужно перечитать события за прошлый период</td><td>Kafka</td><td>Offset и retention позволяют replay.</td></tr></table></div><div class="card callout success"><b>Практическое правило:</b> не выбирайте брокер только потому, что «так модно». Выбирайте по требованиям: нужен ли немедленный ответ, порядок, replay, маршрутизация, транзакционность, DLQ, объём сообщений и количество потребителей.</div></section>
+<section id="incidents" class="page"><h2>10. Типовые инциденты интеграций</h2><div class="card"><table><tr><th>Симптом</th><th>Где чаще</th><th>Возможная причина</th><th>Первая проверка</th></tr><tr><td>Запросы падают по timeout</td><td>REST</td><td>Недоступна downstream-система, медленный SQL, сеть.</td><td>Логи, latency, HTTP 5xx, curl из Pod.</td></tr><tr><td>Растёт lag</td><td>Kafka</td><td>Consumer не успевает, ошибка обработки, мало реплик.</td><td>Consumer group lag, логи consumer.</td></tr><tr><td>Сообщения копятся в очереди</td><td>RabbitMQ/ArtemisMQ</td><td>Consumer не читает или не подтверждает.</td><td>Ready/Unacked, состояние consumers.</td></tr><tr><td>Сообщения попали в DLQ</td><td>RabbitMQ/ArtemisMQ/Kafka</td><td>Ошибка контракта, бизнес-валидация, max retries.</td><td>Причина ошибки, payload, headers.</td></tr><tr><td>Дубли обработки</td><td>Все</td><td>Retry без идемпотентности, повторная доставка.</td><td>Idempotency key, бизнес-ключи, логи.</td></tr></table></div></section>
+<section id="runbook" class="page"><h2>11. Runbook диагностики</h2><div class="card"><h3>Общий алгоритм</h3><div class="playbook"><div class="step"><div class="step-title">1. Зафиксировать симптом</div><p>Какая система, какой endpoint/topic/queue, время начала, сколько пользователей/операций затронуто.</p></div><div class="step"><div class="step-title">2. Определить тип интеграции</div><p>REST, Kafka, RabbitMQ или ArtemisMQ. От типа зависит порядок диагностики.</p></div><div class="step"><div class="step-title">3. Проверить producer</div><p>Пишет ли система-источник сообщения или отправляет ли HTTP-запросы.</p></div><div class="step"><div class="step-title">4. Проверить транспорт</div><p>Topic/queue/exchange/address, lag, ready/unacked, DLQ, availability broker.</p></div><div class="step"><div class="step-title">5. Проверить consumer</div><p>Запущен ли consumer, есть ли ошибки обработки, коммитится ли offset/ack.</p></div><div class="step"><div class="step-title">6. Проверить контракт</div><p>Схема сообщения, обязательные поля, версия API, формат даты, enum-значения.</p></div></div></div><div class="card"><h3>Команды Kubernetes</h3><pre>kubectl get pods -n &lt;ns&gt;
+kubectl logs deploy/&lt;producer&gt; -n &lt;ns&gt; --since=30m
+kubectl logs deploy/&lt;consumer&gt; -n &lt;ns&gt; --since=30m
+kubectl describe pod &lt;pod&gt; -n &lt;ns&gt;
+kubectl get configmap,secret -n &lt;ns&gt;
+kubectl exec -it &lt;pod&gt; -n &lt;ns&gt; -- sh</pre></div></section>
+<section id="cheatsheet" class="page"><h2>12. Шпаргалка поддержки</h2><div class="card"><h3>Что спросить на аварийной конференции</h3><ol><li>Какая бизнес-операция не проходит?</li><li>Какой канал интеграции: REST, Kafka, RabbitMQ или ArtemisMQ?</li><li>Есть ли correlation ID / request ID / message ID?</li><li>Есть ли ошибка в producer?</li><li>Есть ли lag, очередь, unacked или DLQ?</li><li>Запущены ли consumers и есть ли ошибки обработки?</li><li>Был ли релиз, изменение контракта, сертификата, пароля, DNS, routing key, topic/queue?</li></ol></div><div class="card"><h3>Ключевые метрики</h3><table><tr><th>Технология</th><th>Метрики</th></tr><tr><td>REST</td><td>RPS, latency p95/p99, HTTP 4xx/5xx, timeout, retry count.</td></tr><tr><td>Kafka</td><td>consumer lag, produce/consume rate, error rate, rebalance count, under replicated partitions.</td></tr><tr><td>RabbitMQ</td><td>messages ready, messages unacked, consumers, publish/ack rate, DLQ depth.</td></tr><tr><td>ArtemisMQ</td><td>message count, delivering count, consumer count, messages added/acked, DLQ count.</td></tr></table></div></section>
+<section id="quiz" class="page"><h2>Проверочный квиз</h2><div class="card quiz"><h3>Вопросы</h3><div id="quizProgress" class="quiz-progress">Прогресс: 0/12 правильных ответов</div><p>1. Что лучше выбрать, если пользователь ждёт немедленный ответ?</p><button onclick="q('q1','a','a')">REST</button><button onclick="q('q1','b','a','Kafka обычно асинхронна.')">Kafka</button><button onclick="q('q1','c','a','Очередь не даёт немедленный бизнес-ответ.')">RabbitMQ</button><div id="q1" class="res"></div><div id="q1-explain" class="answer-explain">REST подходит для синхронного request/response.</div><p>2. Что показывает consumer lag в Kafka?</p><button onclick="q('q2','a','b','Это не размер broker.')">Размер broker</button><button onclick="q('q2','b','b')">Отставание consumer group от конца topic</button><button onclick="q('q2','c','b','Это не HTTP latency.')">HTTP-задержку</button><div id="q2" class="res"></div><div id="q2-explain" class="answer-explain">Lag показывает, сколько сообщений consumer group ещё не обработала.</div><p>3. Где в RabbitMQ обычно настраивается маршрутизация?</p><button onclick="q('q3','a','b','Queue хранит сообщения.')">Queue</button><button onclick="q('q3','b','b')">Exchange + binding/routing key</button><button onclick="q('q3','c','b','Offset — термин Kafka.')">Offset</button><div id="q3" class="res"></div><div id="q3-explain" class="answer-explain">Exchange направляет сообщения в очереди по binding/routing key.</div><p>4. Что такое DLQ?</p><button onclick="q('q4','a','c','Это не очередь быстрых сообщений.')">Очередь быстрых сообщений</button><button onclick="q('q4','b','c','Это не балансировщик.')">Балансировщик REST</button><button onclick="q('q4','c','c')">Очередь для сообщений, которые не удалось обработать</button><div id="q4" class="res"></div><div id="q4-explain" class="answer-explain">DLQ нужна для разбора проблемных сообщений.</div><p>5. Что важно для защиты от дублей?</p><button onclick="q('q5','a','b','Timeout сам по себе не защищает.')">Увеличить timeout</button><button onclick="q('q5','b','b')">Идемпотентность и бизнес-ключ</button><button onclick="q('q5','c','b','Логи полезны, но не предотвращают дубли.')">Отключить логи</button><div id="q5" class="res"></div><p>6. Что лучше подходит для повторного чтения истории событий?</p><button onclick="q('q6','a','b','REST не хранит историю сообщений.')">REST</button><button onclick="q('q6','b','b')">Kafka</button><button onclick="q('q6','c','b','RabbitMQ обычно хранит до обработки/TTL.')">RabbitMQ</button><div id="q6" class="res"></div><p>7. Что чаще всего означает рост messages unacked?</p><button onclick="q('q7','a','c','Producer уже отправил.')">Producer не отправляет</button><button onclick="q('q7','b','c','DNS не основной симптом unacked.')">DNS сломан</button><button onclick="q('q7','c','c')">Consumer получил сообщения, но не подтверждает обработку</button><div id="q7" class="res"></div><p>8. Для чего нужен Correlation ID?</p><button onclick="q('q8','a','a')">Связать логи и события одной операции</button><button onclick="q('q8','b','a','Он не шифрует данные.')">Шифровать payload</button><button onclick="q('q8','c','a','Он не заменяет DLQ.')">Удалять ошибки</button><div id="q8" class="res"></div><p>9. Какой протокол часто важен для ArtemisMQ?</p><button onclick="q('q9','a','b','PromQL не протокол брокера.')">PromQL</button><button onclick="q('q9','b','b')">JMS/AMQP</button><button onclick="q('q9','c','b','HTML не протокол брокера.')">HTML</button><div id="q9" class="res"></div><p>10. Что проверять первым при REST 401/403?</p><button onclick="q('q10','a','a')">Токен, права, сертификаты, настройки авторизации</button><button onclick="q('q10','b','a','Lag относится к Kafka.')">Consumer lag</button><button onclick="q('q10','c','a','Exchange относится к RabbitMQ.')">Exchange</button><div id="q10" class="res"></div><p>11. Что может сломать интеграцию после релиза?</p><button onclick="q('q11','a','c','Увеличение количества реплик обычно помогает обработке, если настройки consumer group, подключения и ресурсы заданы корректно.')">Увеличение количества реплик consumer-сервиса</button><button onclick="q('q11','b','c','Увеличение ресурсов container в pod обычно не ломает интеграцию, если не менялись контракт, настройки подключения, имена очередей/топиков и права доступа.')">Увеличение ресурсов у container в pod</button><button onclick="q('q11','c','c')">Изменение контракта, имени topic/queue, routing key, учётных данных или timeout</button><div id="q11" class="res"></div><p>12. Что означает empty endpoints у Kubernetes Service?</p><button onclick="q('q12','a','b','Это не про Kafka offset.')">Offset не найден</button><button onclick="q('q12','b','b')">Service не видит готовые Pods по selector/labels/readiness</button><button onclick="q('q12','c','b','HTTP 200 тут не причина.')">REST всегда успешен</button><div id="q12" class="res"></div></div></section>
+<section id="cta" class="page"><h2>Призыв к действию</h2><div class="card"><h3>Что проверить в своих системах</h3><ol><li>Составьте карту интеграций: кто producer, кто consumer, какие REST API, topic, queue, exchange, address.</li><li>Проверьте, вынесены ли параметры интеграции в ConfigMap/Secret: адреса, логины, пароли, topic/queue, timeout, retry.</li><li>Проверьте, есть ли мониторинг REST latency/5xx, Kafka lag, RabbitMQ/ArtemisMQ queue depth и DLQ.</li><li>Проверьте, есть ли correlation ID во всех интеграционных логах.</li><li>Подготовьте runbook: как найти сообщение, как проверить consumer, как безопасно переобработать DLQ.</li></ol></div></section>
+</main>
+</div>
+  <script src="course-shell.js" defer></script>
+</body>
+</html>

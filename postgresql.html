@@ -1,0 +1,3159 @@
+<!DOCTYPE html>
+<html lang='ru'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>УСиЭСКБ. PostgreSQL Курс для поддержки</title>
+<style>
+:root{
+  --bg:#070b16;--panel:#0f172a;--panel2:#111827;--panel3:#172033;
+  --text:#e5e7eb;--muted:#94a3b8;--line:#263449;
+  --blue:#60a5fa;--cyan:#22d3ee;--green:#86efac;--red:#fca5a5;
+  --accent:linear-gradient(135deg,#2563eb,#06b6d4 55%,#14b8a6);
+  --shadow:0 18px 50px rgba(0,0,0,.35);--radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(37,99,235,.22),transparent 34%),radial-gradient(circle at top right,rgba(20,184,166,.16),transparent 32%),var(--bg);color:var(--text);line-height:1.65}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 80%)}
+header{background:rgba(15,23,42,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);padding:18px 26px;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+header h1{margin:0;font-size:25px;letter-spacing:.2px;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.mobile-toggle{display:none;width:100%;margin-top:12px;padding:12px 14px;border:1px solid rgba(148,163,184,.26);border-radius:15px;background:rgba(2,6,23,.86);color:#fff;font-size:16px;text-align:left;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.layout{display:flex;min-height:100vh;position:relative}aside{width:340px;background:rgba(15,23,42,.74);backdrop-filter:blur(16px);padding:18px;border-right:1px solid rgba(148,163,184,.16);position:sticky;top:78px;height:calc(100vh - 78px);overflow:auto;flex-shrink:0}
+aside::-webkit-scrollbar{width:8px}aside::-webkit-scrollbar-thumb{background:#334155;border-radius:999px}
+main{flex:1;padding:32px;min-width:0;max-width:1180px;margin:0 auto}.page{display:none;animation:fadeUp .24s ease-out}.page.active{display:block}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.menu{display:flex;align-items:center;gap:9px;color:#cbd5e1;text-decoration:none;padding:11px 13px;border-radius:14px;margin:6px 0;font-size:15px;border:1px solid transparent;transition:.18s ease}.menu:hover{background:rgba(30,41,59,.75);color:#fff;border-color:rgba(148,163,184,.18);transform:translateX(2px)}.menu.active{background:linear-gradient(135deg,rgba(37,99,235,.26),rgba(6,182,212,.16));color:#fff;border-color:rgba(96,165,250,.38);box-shadow:0 10px 26px rgba(37,99,235,.12)}
+.card{background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(15,23,42,.92));border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);padding:22px;margin:18px 0;overflow:hidden;box-shadow:var(--shadow);position:relative}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(96,165,250,.65),transparent)}
+.card.quiz{border-color:rgba(34,211,238,.28);background:linear-gradient(180deg,rgba(8,47,73,.42),rgba(15,23,42,.94))}.quiz button{padding:11px 14px;border:1px solid rgba(96,165,250,.32);border-radius:13px;background:rgba(37,99,235,.22);color:#fff;cursor:pointer;margin:6px;min-height:42px;transition:.16s ease}.quiz button:hover{background:rgba(37,99,235,.45);transform:translateY(-1px);box-shadow:0 10px 22px rgba(37,99,235,.18)}
+.res{margin-top:9px;font-weight:800}.ok{color:var(--green)}.bad{color:var(--red)}
+pre{background:#020617;color:#a7f3d0;padding:15px;border-radius:16px;overflow-x:auto;white-space:pre;max-width:100%;font-size:14px;border:1px solid rgba(148,163,184,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}code{background:#020617;color:#a7f3d0;padding:3px 7px;border-radius:8px;border:1px solid rgba(148,163,184,.14)}
+h2{color:#bfdbfe;font-size:30px;margin:0 0 18px;line-height:1.2;letter-spacing:.1px}h2:after{content:"";display:block;width:72px;height:4px;margin-top:12px;border-radius:999px;background:var(--accent)}h3{color:#dbeafe;margin-top:12px;font-size:20px}h4{color:#bae6fd;margin:18px 0 6px}p{margin:10px 0}ul,ol{padding-left:23px}li{margin:5px 0}.small{color:var(--muted);font-size:14px}
+table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(148,163,184,.2);margin:12px 0}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;vertical-align:top}th{background:rgba(37,99,235,.18);color:#dbeafe}tr:last-child td{border-bottom:0}tr:nth-child(even) td{background:rgba(148,163,184,.035)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.26);color:#bfdbfe;font-size:13px}.callout{border-left:4px solid var(--cyan);padding:12px 14px;background:rgba(8,47,73,.28);border-radius:14px;margin:14px 0;color:#dbeafe}
+
+.course-highlights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.highlight-item{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1px solid rgba(148,163,184,.16);border-radius:18px;background:rgba(2,6,23,.24)}
+.highlight-icon{font-size:28px;line-height:1;min-width:34px;text-align:center}
+.highlight-item b{display:block;color:#dbeafe;font-size:16px;margin-bottom:4px}
+.highlight-item p{margin:0;color:var(--muted)}
+@media(max-width:700px){.course-highlights{grid-template-columns:1fr}.highlight-item{padding:12px}}
+
+
+/* Global course search */
+header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.searchBox{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:280px;max-width:560px;flex:1 1 360px;justify-content:flex-end}
+.searchBox input{width:min(420px,100%);padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.88);color:var(--text);outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.searchBox input:focus{border-color:rgba(96,165,250,.75);box-shadow:0 0 0 3px rgba(96,165,250,.14)}
+.searchBox button{padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.24);background:rgba(30,41,59,.82);color:#fff;cursor:pointer;transition:.16s ease;white-space:nowrap}
+.searchBox button:hover{background:rgba(37,99,235,.42);border-color:rgba(96,165,250,.48)}
+.search-count{font-size:13px;color:#93c5fd;white-space:nowrap;min-width:88px;text-align:left}
+mark.search-hit{background:#facc15;color:#111827;border-radius:5px;padding:0 3px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.menu.search-hidden{display:none!important}
+.menu.search-match{background:linear-gradient(135deg,rgba(37,99,235,.42),rgba(6,182,212,.20));color:#fff;border-color:rgba(96,165,250,.45)}
+.search-empty{display:none;margin:18px 0;padding:16px;border-radius:16px;background:rgba(127,29,29,.22);border:1px solid rgba(252,165,165,.25);color:#fecaca}
+.search-empty.active{display:block}
+@media(max-width:900px){.searchBox{order:3;width:100%;max-width:none;min-width:0;justify-content:stretch;margin-left:0}.searchBox input{width:100%;flex:1}.search-count{min-width:auto}.searchBox button{padding:11px 12px}}
+@media(max-width:480px){.searchBox{gap:8px;flex-wrap:wrap}.searchBox button{flex:0 0 auto}.search-count{width:100%}}
+
+@media(max-width:900px){header{padding:14px 16px}header h1{font-size:20px;line-height:1.25}.mobile-toggle{display:block}.layout{display:block}aside{display:none;position:static;width:100%;height:auto;overflow:visible;border-right:0;border-bottom:1px solid rgba(148,163,184,.16);padding:10px 14px;background:rgba(15,23,42,.96)}body.menu-open aside{display:block}main{padding:17px;max-width:none}.menu{font-size:16px;padding:12px 14px;margin:7px 0;background:rgba(17,24,39,.76)}.card{padding:16px;border-radius:18px;margin:13px 0}h2{font-size:23px;line-height:1.25}h3{font-size:19px}p,li{font-size:16px}pre{font-size:13px;padding:11px}.quiz button{display:block;width:100%;margin:8px 0;text-align:left;font-size:16px;min-height:48px}table{display:block;overflow-x:auto;white-space:nowrap}}
+@media(max-width:480px){header h1{font-size:18px}main{padding:12px}.card{padding:14px;border-radius:16px}h2{font-size:21px}pre{font-size:12px}.menu{font-size:15px}}
+</style>
+<script>
+function safeId(id){
+  return String(id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+function show(id){
+  const targetId = safeId(id);
+  const target = document.getElementById(targetId);
+
+  if (!target) {
+    console.warn('Раздел не найден:', targetId);
+    return false;
+  }
+
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+
+  target.classList.add('active');
+
+  document.querySelectorAll('.menu').forEach(item => {
+    const onclickText = item.getAttribute('onclick') || '';
+    item.classList.toggle('active', onclickText.includes("show('" + targetId + "')"));
+  });
+
+  document.body.classList.remove('menu-open');
+  window.scrollTo(0, 0);
+  return true;
+}
+
+function q(id, answer, correct, message){
+  const result = document.getElementById(safeId(id));
+
+  if (!result) {
+    console.warn('Элемент результата квиза не найден:', id);
+    return false;
+  }
+
+  const isCorrect = answer === correct;
+  result.className = 'res ' + (isCorrect ? 'ok' : 'bad');
+  result.textContent = isCorrect ? 'Верно ✅' : 'Неверно ❌ ' + (message || 'Попробуйте ещё раз.');
+  return isCorrect;
+}
+
+
+function clearSearchHighlights(root){
+  if (!root) return;
+  root.querySelectorAll('mark.search-hit').forEach(mark => {
+    mark.replaceWith(document.createTextNode(mark.textContent));
+  });
+  root.normalize();
+}
+
+function highlightSearchTerm(root, term){
+  if (!root || !term) return 0;
+  let count = 0;
+  const skipTags = new Set(['SCRIPT','STYLE','INPUT','TEXTAREA','BUTTON','MARK']);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      const parent = node.parentElement;
+      if (!parent || skipTags.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      return node.nodeValue.toLowerCase().includes(term) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(node => {
+    const text = node.nodeValue;
+    const lower = text.toLowerCase();
+    const fragment = document.createDocumentFragment();
+    let pos = 0;
+    let idx = lower.indexOf(term, pos);
+    while (idx !== -1) {
+      fragment.appendChild(document.createTextNode(text.slice(pos, idx)));
+      const mark = document.createElement('mark');
+      mark.className = 'search-hit';
+      mark.textContent = text.slice(idx, idx + term.length);
+      fragment.appendChild(mark);
+      count++;
+      pos = idx + term.length;
+      idx = lower.indexOf(term, pos);
+    }
+    fragment.appendChild(document.createTextNode(text.slice(pos)));
+    node.parentNode.replaceChild(fragment, node);
+  });
+  return count;
+}
+
+function getMenuTargetId(menuItem){
+  if (!menuItem) return '';
+  const dataTarget = menuItem.getAttribute('data-target');
+  if (dataTarget) return safeId(dataTarget);
+  const onclickText = menuItem.getAttribute('onclick') || '';
+  const match = onclickText.match(/show\(['"]([^'"]+)['"]\)/);
+  return match ? safeId(match[1]) : '';
+}
+
+function searchCourse(){
+  const input = document.getElementById('courseSearch');
+  const counter = document.getElementById('searchCount');
+  const empty = document.getElementById('searchEmpty');
+  const term = (input && input.value ? input.value : '').trim().toLowerCase();
+  let totalMatches = 0;
+  let matchedSections = 0;
+  let firstMatchId = '';
+
+  document.querySelectorAll('.page').forEach(page => {
+    clearSearchHighlights(page);
+    page.dataset.searchMatch = '';
+  });
+  document.querySelectorAll('.menu').forEach(item => {
+    item.classList.remove('search-hidden','search-match');
+  });
+  if (empty) empty.classList.remove('active');
+
+  if (!term) {
+    if (counter) counter.textContent = '';
+    return;
+  }
+
+  document.querySelectorAll('.page').forEach(page => {
+    const text = page.textContent.toLowerCase();
+    if (text.includes(term)) {
+      page.dataset.searchMatch = '1';
+      matchedSections++;
+      totalMatches += highlightSearchTerm(page, term);
+      if (!firstMatchId) firstMatchId = page.id;
+    }
+  });
+
+  document.querySelectorAll('.menu').forEach(item => {
+    const targetId = getMenuTargetId(item);
+    const target = targetId ? document.getElementById(targetId) : null;
+    const isMatch = target && target.dataset.searchMatch === '1';
+    item.classList.toggle('search-hidden', !isMatch);
+    item.classList.toggle('search-match', !!isMatch);
+  });
+
+  if (counter) {
+    counter.textContent = totalMatches
+      ? `Найдено: ${totalMatches} / разделов: ${matchedSections}`
+      : 'Ничего не найдено';
+  }
+  if (!totalMatches && empty) empty.classList.add('active');
+  if (firstMatchId) show(firstMatchId);
+}
+
+function clearCourseSearch(){
+  const input = document.getElementById('courseSearch');
+  const counter = document.getElementById('searchCount');
+  const empty = document.getElementById('searchEmpty');
+  if (input) input.value = '';
+  document.querySelectorAll('.page').forEach(page => {
+    clearSearchHighlights(page);
+    page.dataset.searchMatch = '';
+  });
+  document.querySelectorAll('.menu').forEach(item => {
+    item.classList.remove('search-hidden','search-match');
+  });
+  if (counter) counter.textContent = '';
+  if (empty) empty.classList.remove('active');
+}
+
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  if (window.innerWidth <= 900) {
+    const current = window.pageYOffset || document.documentElement.scrollTop || 0;
+    if (current < lastScroll && current > 80) {
+      document.body.classList.add('menu-open');
+    }
+    lastScroll = current;
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!show('home')) {
+    const firstPage = document.querySelector('.page');
+    if (firstPage) firstPage.classList.add('active');
+  }
+
+  const menuIds = ['home','p1','p4','p5','p6','p7','p8','p10','p12','p13','p14','selfcheck'];
+  const missing = menuIds.filter(id => !document.getElementById(id));
+  if (missing.length) {
+    console.warn('Не найдены разделы меню:', missing.join(', '));
+  }
+});
+</script>
+  <link rel="stylesheet" href="course-shell.css">
+</head><body>
+<header>
+<h1>УСиЭСКБ. PostgreSQL Курс для поддержки</h1>
+<div class="searchBox" role="search">
+  <input id="courseSearch" type="search" placeholder="🔍 Поиск по всему курсу..." autocomplete="off" oninput="searchCourse()">
+  <button type="button" onclick="clearCourseSearch()">Сброс</button>
+  <span id="searchCount" class="search-count" aria-live="polite"></span>
+</div>
+<button class="mobile-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню курса</button>
+</header>
+<div class='layout'>
+<aside>
+<a class='menu' href='#' onclick="show('home')">🏠 Главная</a>
+<a class='menu' href='#' onclick="show('p1')">🏗️ 1. Архитектура</a>
+<a class='menu' href='#' onclick="show('p4')">🧬 2. MVCC</a>
+<a class='menu' href='#' onclick="show('p5')">🧱 3. Изоляции</a>
+<a class='menu' href='#' onclick="show('p6')">🔒 4. Блокировки</a>
+<a class='menu' href='#' onclick="show('p7')">🧹 5. VACUUM</a>
+<a class='menu' href='#' onclick="show('p8')">📜 6. WAL archive</a>
+<a class='menu' href='#' onclick="show('p10')">🔁 7. Репликация</a>
+<a class='menu' href='#' onclick="show('p12')">🔎 8. EXPLAIN ANALYZE</a>
+<a class='menu' href='#' onclick="show('p13')">📊 9. Мониторинг</a>
+<a class="menu" data-target="p14" href="#" onclick="show('p14');return false">🚨 10. Практические инциденты</a>
+<a class="menu" data-target="selfcheck" href="#" onclick="show('selfcheck');return false">✅ 11. Диагностика и самопроверка</a>
+</aside>
+<main>
+<div id="searchEmpty" class="search-empty">Ничего не найдено. Попробуйте другой запрос.</div>
+<section id='home' class='page'>
+  <h2>Практический курс для поддержки и сопровождения PostgreSQL</h2>
+
+  <div class='card'>
+    <h3>О курсе</h3>
+    <p>
+      Курс собран как рабочий справочник для сотрудников поддержки и сопровождения:
+      архитектура, MVCC, изоляции, блокировки, VACUUM, WAL, репликация,
+      EXPLAIN, мониторинг, production-инциденты и самопроверка.
+    </p>
+  </div>
+
+  <div class='card'>
+    <h3>Что внутри</h3>
+    <div class='course-highlights'>
+      <div class='highlight-item'>
+        <div class='highlight-icon'>📚</div>
+        <div>
+          <b>11 учебных разделов</b>
+          <p>От архитектуры PostgreSQL до практических incident-drill сценариев.</p>
+        </div>
+      </div>
+
+      <div class='highlight-item'>
+        <div class='highlight-icon'>🧭</div>
+        <div>
+          <b>Runbook</b>
+          <p>Production-подход: симптомы, гипотезы, диагностика, действия и разбор.</p>
+        </div>
+      </div>
+
+      <div class='highlight-item'>
+        <div class='highlight-icon'>🧠</div>
+        <div>
+          <b>Quiz</b>
+          <p>Самопроверка после теории и закрепление ключевых DBA-навыков.</p>
+        </div>
+      </div>
+
+      <div class='highlight-item'>
+        <div class='highlight-icon'>🔎</div>
+        <div>
+          <b>Search</b>
+          <p>Поиск по всему курсу для быстрого перехода к нужной теме.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class='card'>
+    <h3>Как проходить курс</h3>
+    <p>
+      Иди по разделам слева, используй поиск по курсу, а после теории
+      закрепляй материал через квизы и блоки практических инцидентов.
+    </p>
+  </div>
+</section>
+<section id='p1' class='page'><h2>1. Общее устройство PostgreSQL и HA-кластера Patroni + etcd + HAProxy</h2>
+<div class='card'>
+<h3>PostgreSQL сам по себе</h3>
+<p>PostgreSQL — это сервер базы данных, который хранит данные в <b>data directory</b>. Один экземпляр PostgreSQL состоит из процессов, общей памяти, файлов данных и WAL-журнала.</p>
+<ul>
+<li><b>Postmaster / postgres process</b> — главный процесс, принимает подключения и запускает backend-процессы.</li>
+<li><b>Backend processes</b> — процессы, которые обслуживают клиентские соединения. Обычно одно подключение = один backend-процесс.</li>
+<li><b>Shared Buffers</b> — область общей памяти, где PostgreSQL кэширует страницы таблиц и индексов.</li>
+<li><b>WAL — Write-Ahead Log</b> — журнал предзаписи. Перед изменением data files изменение сначала фиксируется в WAL.</li>
+<li><b>Data files</b> — физические файлы таблиц, индексов, TOAST-данных и системных каталогов.</li>
+<li><b>Autovacuum</b> — фоновый механизм очистки старых версий строк, необходимых из-за MVCC.</li>
+</ul>
+<pre>ps -ef | grep postgres</pre>
+<p><b>Важно для поддержки:</b> если приложение жалуется на медленную БД, проблема может быть не только в SQL, но и в количестве подключений, нехватке памяти, WAL, диске или autovacuum.</p>
+</div>
+
+<div class='card'>
+<h3>Базовая репликация PostgreSQL</h3>
+<p>В production PostgreSQL часто работает не один сервер, а кластер с primary и replica.</p>
+<pre>Primary PostgreSQL
+        |
+        | WAL streaming
+        v
+Replica PostgreSQL
+        |
+        v
+Replica PostgreSQL</pre>
+<p><b>Primary</b> принимает запись: INSERT, UPDATE, DELETE, DDL.</p>
+<p><b>Replica</b> получает WAL с primary и применяет его у себя.</p>
+<ul>
+<li><b>Асинхронная репликация</b> — primary подтверждает транзакцию сразу, не дожидаясь replica. Быстрее, но при аварии можно потерять последние транзакции.</li>
+<li><b>Синхронная репликация</b> — primary ждёт подтверждения от replica. Надёжнее, но медленнее.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Зачем нужен Patroni</h3>
+<p>PostgreSQL сам по себе не является полноценным менеджером автоматического failover. Он умеет репликацию, но не управляет всем жизненным циклом HA-кластера.</p>
+<p><b>Patroni</b> — менеджер высокой доступности PostgreSQL.</p>
+<p>Он выполняет задачи:</p>
+<ul>
+<li>следит за состоянием PostgreSQL;</li>
+<li>выбирает primary;</li>
+<li>переводит replica в primary при аварии;</li>
+<li>настраивает репликацию;</li>
+<li>защищает от split-brain;</li>
+<li>хранит состояние кластера в DCS.</li>
+</ul>
+<p><b>DCS</b> — Distributed Configuration Store. Обычно используется etcd, Consul или ZooKeeper.</p>
+</div>
+
+<div class='card'>
+<h3>Роль etcd</h3>
+<p><b>etcd</b> — распределённое key-value хранилище. В PostgreSQL HA-кластере etcd не хранит данные базы. Он хранит служебное состояние кластера.</p>
+<ul>
+<li>кто сейчас primary;</li>
+<li>какие ноды живы;</li>
+<li>leader lock текущего primary;</li>
+<li>параметры Patroni;</li>
+<li>TTL-состояния участников.</li>
+</ul>
+<pre>/service/postgres-cluster/leader = pg-node-1
+/service/postgres-cluster/members/pg-node-1 = alive
+/service/postgres-cluster/members/pg-node-2 = replica</pre>
+<p>Patroni-ноды постоянно обновляют записи в etcd. Primary держит leader lock. Если primary падает и перестаёт обновлять lock, другая replica может стать новым primary.</p>
+</div>
+
+<div class='card'>
+<h3>Типовая схема HA-кластера</h3>
+<pre>                 Application
+                      |
+                      v
+                  HAProxy / VIP
+                      |
+        +-------------+-------------+
+        |                           |
+        v                           v
+   PostgreSQL node 1           PostgreSQL node 2
+   Patroni + PostgreSQL        Patroni + PostgreSQL
+   Primary or Replica          Primary or Replica
+        |                           |
+        +-------------+-------------+
+                      |
+                      v
+                    etcd cluster
+              etcd-1 / etcd-2 / etcd-3</pre>
+<p>Обычно production-схема включает:</p>
+<ul>
+<li>3 etcd-ноды;</li>
+<li>3 PostgreSQL-ноды с Patroni;</li>
+<li>1–2 HAProxy-ноды;</li>
+<li>опционально Keepalived/VIP перед HAProxy.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Как работает failover</h3>
+<p>Пример исходного состояния:</p>
+<pre>pg-1 = primary
+pg-2 = replica
+pg-3 = replica</pre>
+<p>Если pg-1 падает:</p>
+<ol>
+<li>Patroni на pg-1 перестаёт обновлять lock в etcd.</li>
+<li>etcd удаляет lock после TTL.</li>
+<li>Patroni на репликах видит, что leader отсутствует.</li>
+<li>Самая подходящая replica становится новым primary.</li>
+<li>Например, pg-2 promoted to primary.</li>
+<li>HAProxy через health-check видит, что primary теперь pg-2.</li>
+<li>Новые подключения идут на pg-2.</li>
+</ol>
+<p>После failover:</p>
+<pre>pg-2 = primary
+pg-3 = replica
+pg-1 = бывший primary, требует rejoin/reinit</pre>
+<p><b>Важно для поддержки:</b> после failover старый primary нельзя просто возвращать как primary. Его нужно корректно присоединить обратно через pg_rewind или reinit.</p>
+</div>
+
+<div class='card'>
+<h3>Роль HAProxy</h3>
+<p><b>HAProxy</b> скрывает от приложения, какая PostgreSQL-нода сейчас primary.</p>
+<pre>postgres://app:pass@haproxy:5432/db</pre>
+<p>HAProxy проверяет Patroni REST API на каждой ноде:</p>
+<pre>GET http://pg-1:8008/primary
+GET http://pg-2:8008/primary
+GET http://pg-3:8008/primary</pre>
+<p>Только текущий primary отдаёт успешный ответ на primary/master endpoint. HAProxy отправляет write-трафик туда.</p>
+<p>Часто используют два порта:</p>
+<pre>5000 -> primary, для записи
+5001 -> replicas, для чтения</pre>
+<pre>Application write traffic -> HAProxy:5000 -> current primary
+Application read traffic  -> HAProxy:5001 -> replicas</pre>
+</div>
+
+<div class='card'>
+<h3>Patroni REST API и patronictl</h3>
+<p>Patroni поднимает HTTP API, обычно на порту 8008.</p>
+<ul>
+<li><b>/primary</b> или <b>/master</b> — проверка primary;</li>
+<li><b>/replica</b> — проверка replica;</li>
+<li><b>/health</b> — состояние сервиса;</li>
+<li><b>/patroni</b> — подробная информация Patroni.</li>
+</ul>
+<pre>patronictl list</pre>
+<pre>+ Cluster: pg-cluster --------+---------+---------+----+-----------+
+| Member | Host     | Role    | State   | TL | Lag in MB |
++--------+----------+---------+---------+----+-----------+
+| pg-1   | 10.0.0.1 | Leader  | running |  5 |           |
+| pg-2   | 10.0.0.2 | Replica | running |  5 |         0 |
+| pg-3   | 10.0.0.3 | Replica | running |  5 |         0 |
++--------+----------+---------+---------+----+-----------+</pre>
+</div>
+
+<div class='card'>
+<h3>Split-brain</h3>
+<p><b>Split-brain</b> — опасная ситуация, когда две ноды одновременно считают себя primary.</p>
+<pre>pg-1 принимает записи
+pg-2 тоже принимает записи
+данные расходятся</pre>
+<p>Patroni + etcd нужны, чтобы этого не произошло. Только нода, владеющая leader lock в etcd, имеет право быть primary.</p>
+</div>
+
+<div class='card'>
+<h3>Что происходит со старым primary после аварии</h3>
+<p>Когда бывший primary возвращается после сбоя, Patroni не должен сразу пускать его обратно как primary.</p>
+<p>Обычно выполняется:</p>
+<ul>
+<li>проверка timeline;</li>
+<li>сравнение WAL-позиции;</li>
+<li>попытка pg_rewind;</li>
+<li>если rewind невозможен — reinit.</li>
+</ul>
+<p><b>pg_rewind</b> позволяет быстро превратить бывший primary в replica нового primary, если нужный WAL ещё доступен.</p>
+</div>
+
+<div class='card'>
+<h3>Компоненты и их роли</h3>
+<ul>
+<li><b>PostgreSQL</b> — хранит данные и выполняет SQL.</li>
+<li><b>Patroni</b> — управляет PostgreSQL-нодами, failover, promote, demote, reinit.</li>
+<li><b>etcd</b> — хранит состояние кластера и leader lock.</li>
+<li><b>HAProxy</b> — направляет клиентские подключения на правильную PostgreSQL-ноду.</li>
+<li><b>Keepalived / VIP</b> — даёт единый виртуальный IP для HAProxy.</li>
+<li><b>pgBackRest / Barman</b> — backup и restore.</li>
+<li><b>Prometheus / Grafana</b> — мониторинг.</li>
+<li><b>WAL archive</b> — долговременное хранение WAL для восстановления.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Упрощённый поток записи</h3>
+<ol>
+<li>Приложение подключается к HAProxy.</li>
+<li>HAProxy отправляет соединение на текущий primary.</li>
+<li>PostgreSQL пишет изменения в WAL.</li>
+<li>Primary применяет изменения к data files.</li>
+<li>WAL передаётся replica-нодам.</li>
+<li>Replica применяют WAL.</li>
+<li>Patroni следит за состоянием.</li>
+<li>etcd хранит информацию, кто leader.</li>
+</ol>
+</div>
+
+<div class='card'>
+<h3>Важные настройки PostgreSQL, Patroni и HAProxy</h3>
+<p><b>PostgreSQL:</b></p>
+<pre>wal_level = replica
+max_wal_senders = 10
+max_replication_slots = 10
+hot_standby = on
+archive_mode = on
+archive_command = '...'</pre>
+<p><b>Patroni:</b></p>
+<pre>scope: pg-cluster
+name: pg-1
+
+restapi:
+  listen: 0.0.0.0:8008
+
+etcd3:
+  hosts: etcd-1:2379,etcd-2:2379,etcd-3:2379
+
+postgresql:
+  listen: 0.0.0.0:5432
+  data_dir: /var/lib/postgresql/data</pre>
+<p><b>HAProxy:</b></p>
+<pre>frontend postgres_write
+    bind *:5000
+    default_backend postgres_primary
+
+backend postgres_primary
+    option httpchk GET /primary
+    server pg-1 pg-1:5432 check port 8008
+    server pg-2 pg-2:5432 check port 8008
+    server pg-3 pg-3:5432 check port 8008</pre>
+</div>
+
+<div class='card'>
+<h3>Главное простыми словами</h3>
+<pre>PostgreSQL хранит данные.
+Patroni управляет ролями PostgreSQL-нод.
+etcd решает, кто имеет право быть primary.
+HAProxy отправляет приложение на текущий primary.</pre>
+<p>Самая короткая схема:</p>
+<pre>App -> HAProxy -> PostgreSQL Primary
+                  PostgreSQL Replica
+                  PostgreSQL Replica
+
+Patroni на каждой PostgreSQL-ноде
+etcd как координатор</pre>
+<p>Идея HA-кластера: если primary падает, replica автоматически становится новым primary, а приложение продолжает работать через HAProxy.</p>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по архитектуре PostgreSQL HA</h3>
+<p>1. Что хранит etcd в HA-кластере PostgreSQL?</p>
+<button onclick="q('a1','b','a','Нет. Данные базы хранятся в PostgreSQL data directory.')">Таблицы PostgreSQL</button>
+<button onclick="q('a1','a','a','Верно.')">Служебное состояние кластера и leader lock</button>
+<button onclick="q('a1','c','a','Нет. WAL хранится PostgreSQL и может архивироваться отдельно.')">Только WAL-сегменты</button>
+<div id='a1' class='res'></div>
+
+<p>2. Зачем нужен HAProxy?</p>
+<button onclick="q('a2','b','a','Нет. Failover управляет Patroni.')">Чтобы выполнять promote replica</button>
+<button onclick="q('a2','c','a','Нет. etcd хранит состояние, а не принимает SQL-запросы.')">Чтобы хранить leader lock</button>
+<button onclick="q('a2','a','a','Верно.')">Чтобы направлять подключения на текущий primary или replicas</button>
+<div id='a2' class='res'></div>
+
+<p>3. Что такое split-brain?</p>
+<button onclick="q('a3','a','a','Верно.')">Ситуация, когда две ноды считают себя primary</button>
+<button onclick="q('a3','b','a','Нет. Lag сам по себе не split-brain.')">Обычный replication lag</button>
+<button onclick="q('a3','c','a','Нет. VACUUM не является split-brain.')">Запуск autovacuum на replica</button>
+<div id='a3' class='res'></div>
+
+<p>4. Что обычно происходит со старым primary после failover?</p>
+<button onclick="q('a4','a','a','Верно.')">Он требует pg_rewind или reinit перед возвращением в кластер</button>
+<button onclick="q('a4','b','a','Нет. Его нельзя просто вернуть primary без проверки timeline и WAL.')">Он сразу становится primary снова</button>
+<button onclick="q('a4','c','a','Нет. HAProxy не переписывает данные PostgreSQL.')">HAProxy копирует в него данные</button>
+<div id='a4' class='res'></div>
+</div>
+</section>
+<section id='p4' class='page'><h2>2. MVCC — многоверсионность PostgreSQL</h2>
+<div class='card'>
+<h3>Что такое MVCC</h3>
+<p><b>MVCC</b> (Multiversion Concurrency Control) — многоверсионное управление конкурентным доступом. PostgreSQL поддерживает целостность данных так, что каждый SQL-оператор видит не «текущую физическую таблицу», а <b>снимок данных</b> на определённый момент времени.</p>
+<p>Это защищает запросы от несогласованности, если параллельные транзакции меняют те же строки. Главное преимущество MVCC: <b>чтение не блокирует запись, а запись не блокирует чтение</b>. Благодаря этому PostgreSQL хорошо работает в многопользовательской среде.</p>
+<p>Даже для строгой изоляции PostgreSQL использует подход SSI — Serializable Snapshot Isolation.</p>
+</div>
+
+<div class='card'>
+<h3>Версии строк</h3>
+<p>В PostgreSQL строка может существовать физически в нескольких версиях. При UPDATE старая версия не переписывается на месте: создаётся новая версия, а старая помечается как устаревшая.</p>
+<ul>
+<li><b>INSERT</b> создаёт новую версию строки.</li>
+<li><b>DELETE</b> помечает текущую версию как удалённую.</li>
+<li><b>UPDATE</b> фактически работает как DELETE старой версии + INSERT новой версии.</li>
+</ul>
+<p>Именно поэтому после большого количества UPDATE/DELETE появляются «мёртвые» версии строк, которые затем должен убрать VACUUM.</p>
+</div>
+
+<div class='card'>
+<h3>xmin, xmax и ctid</h3>
+<p>У каждой версии строки есть служебные поля в заголовке:</p>
+<ul>
+<li><b>xmin</b> — номер транзакции, которая создала эту версию строки;</li>
+<li><b>xmax</b> — номер транзакции, которая удалила или заменила эту версию;</li>
+<li><b>ctid</b> — физическая ссылка на версию строки в виде <code>(страница, указатель)</code>;</li>
+<li><b>infomask</b> — набор битов статуса, например была ли транзакция зафиксирована или отменена.</li>
+</ul>
+<pre>SELECT xmin, xmax, ctid, * FROM accounts;</pre>
+<p>Если строка актуальна, обычно <code>xmax = 0</code>. Если строка обновлялась, старая версия получает <code>xmax</code>, а новая версия получает новый <code>xmin</code>.</p>
+<p><b>Важно:</b> заголовок версии строки занимает минимум около 23 байт, поэтому для очень «узких» таблиц служебные накладные расходы могут быть заметными.</p>
+</div>
+
+<div class='card'>
+<h3>Как работает INSERT</h3>
+<p>При вставке строки PostgreSQL создаёт новую версию строки и записывает в <code>xmin</code> номер текущей транзакции. Пока транзакция не завершена, другие транзакции не считают эту версию видимой.</p>
+<pre>BEGIN;
+INSERT INTO t(s) VALUES ('FOO');
+SELECT txid_current();
+COMMIT;</pre>
+<p>После COMMIT статус транзакции записывается в служебные структуры PostgreSQL. Позже при чтении страницы PostgreSQL может выставить так называемые hint bits, чтобы последующие проверки видимости были быстрее.</p>
+</div>
+
+<div class='card'>
+<h3>Как работает DELETE</h3>
+<p>DELETE не стирает строку физически сразу. Он записывает номер удаляющей транзакции в <code>xmax</code> текущей версии строки.</p>
+<pre>BEGIN;
+DELETE FROM t WHERE id = 1;
+ROLLBACK;</pre>
+<p>Если транзакция отменена, версия строки остаётся видимой. Если транзакция зафиксирована, версия становится мёртвой для новых снимков и позже может быть очищена VACUUM.</p>
+<p><b>xmax активной транзакции</b> также работает как признак блокировки строки: другая транзакция, желающая изменить эту же строку, будет ждать завершения первой.</p>
+</div>
+
+<div class='card'>
+<h3>Как работает UPDATE</h3>
+<p>UPDATE создаёт новую версию строки и связывает старую с новой через <code>ctid</code>.</p>
+<pre>BEGIN;
+UPDATE t SET s = 'BAR' WHERE id = 1;
+COMMIT;</pre>
+<p>Физически в странице могут оказаться две версии:</p>
+<pre>ctid   xmin       xmax       t_ctid
+(0,1)  3664 (c)   3666       (0,2)
+(0,2)  3666       0          (0,2)</pre>
+<p>Первая версия стала старой, вторая — новой актуальной версией. Для разных транзакций, в зависимости от их snapshot, видимой может быть разная версия.</p>
+</div>
+
+<div class='card'>
+<h3>Индексы и MVCC</h3>
+<p>В индексах PostgreSQL нет собственных версий строк с <code>xmin/xmax</code>. Индексная запись обычно содержит ключ и ссылку <code>ctid</code> на табличную версию строки.</p>
+<p>После UPDATE индекс может содержать ссылки и на старую, и на новую версии строки. Чтобы понять, какая версия видима текущей транзакции, PostgreSQL должен проверить табличную строку и правила видимости.</p>
+<p>В некоторых случаях visibility map позволяет оптимизировать чтение, например для Index Only Scan.</p>
+</div>
+
+<div class='card'>
+<h3>Снимок данных (Snapshot)</h3>
+<p>Snapshot — это не физическая копия таблиц. Это набор чисел, по которым PostgreSQL определяет, какие версии строк видны транзакции.</p>
+<p>Упрощённо версия строки видима, если:</p>
+<ul>
+<li>транзакция <code>xmin</code>, создавшая версию, уже видима в снимке;</li>
+<li>транзакция <code>xmax</code>, удалившая или заменившая версию, ещё не видима в снимке.</li>
+</ul>
+<p>В snapshot важны:</p>
+<ul>
+<li><b>snapshot.xmin</b> — самая ранняя активная транзакция;</li>
+<li><b>snapshot.xmax</b> — номер следующей ещё не существующей транзакции;</li>
+<li><b>snapshot.xip</b> — список активных транзакций на момент создания снимка.</li>
+</ul>
+<pre>SELECT txid_current_snapshot();</pre>
+<p>Пример вида snapshot:</p>
+<pre>3695:3697:3695</pre>
+<p>Это означает: xmin = 3695, xmax = 3697, активная транзакция в списке — 3695.</p>
+</div>
+
+<div class='card'>
+<h3>Когда создаётся snapshot</h3>
+<ul>
+<li><b>Read Committed</b> — новый snapshot создаётся в начале каждого SQL-оператора.</li>
+<li><b>Repeatable Read</b> — snapshot создаётся один раз в начале первого значимого оператора транзакции.</li>
+<li><b>Serializable</b> — также использует стабильный snapshot, но дополнительно отслеживает опасные зависимости.</li>
+</ul>
+<p>Поэтому в Read Committed два SELECT внутри одной транзакции могут видеть разные данные, а в Repeatable Read — один и тот же снимок.</p>
+</div>
+
+<div class='card'>
+<h3>Виртуальные и настоящие транзакции</h3>
+<p>Если транзакция только читает данные, PostgreSQL сначала может назначить ей только виртуальный transaction id. Настоящий XID выдаётся, когда транзакция начинает менять данные.</p>
+<pre>BEGIN;
+SELECT txid_current_if_assigned(); -- может вернуть NULL
+UPDATE accounts SET amount = amount - 1;
+SELECT txid_current_if_assigned(); -- теперь появится XID
+COMMIT;</pre>
+<p>Это экономит реальные номера транзакций и снижает накладные расходы.</p>
+</div>
+
+<div class='card'>
+<h3>Savepoint и вложенные транзакции</h3>
+<p>Точки сохранения реализуются через вложенные транзакции (subtransactions). У них есть собственные номера и собственный статус, но итоговая судьба зависит от основной транзакции.</p>
+<pre>BEGIN;
+INSERT INTO t VALUES (1);
+SAVEPOINT sp;
+INSERT INTO t VALUES (2);
+ROLLBACK TO sp;
+INSERT INTO t VALUES (3);
+COMMIT;</pre>
+<p>Физически версия строки, добавленная отменённой вложенной транзакцией, может остаться в странице, но будет невидима и позже очищена VACUUM.</p>
+<p><b>Важно:</b> автономных транзакций в обычном PostgreSQL нет. Savepoint — это не независимая транзакция.</p>
+</div>
+
+<div class='card'>
+<h3>Ошибки и атомарность оператора</h3>
+<p>Если внутри транзакции произошла ошибка, транзакция переходит в состояние aborted. Дальнейшие команды запрещены до ROLLBACK.</p>
+<pre>BEGIN;
+UPDATE t SET s = repeat('X', 1/(id-4));
+-- ERROR: division by zero
+SELECT * FROM t;
+-- ERROR: current transaction is aborted
+ROLLBACK;</pre>
+<p>Это нужно, чтобы не нарушить атомарность SQL-оператора. Некоторые изменения могли физически попасть в страницы, но логически они должны считаться отменёнными.</p>
+<p>В psql режим <code>ON_ERROR_ROLLBACK</code> имитирует откат ошибочного оператора через неявные savepoint, но это даёт дополнительные накладные расходы.</p>
+</div>
+
+<div class='card'>
+<h3>Горизонт событий и почему долгие транзакции вредны</h3>
+<p><b>snapshot.xmin</b> определяет «горизонт событий». За этим горизонтом старые версии строк уже точно не нужны ни одной активной транзакции и могут быть очищены.</p>
+<p>Если транзакция долго остаётся открытой, она удерживает горизонт. Из-за этого VACUUM не может удалить старые версии строк, даже если эта транзакция не обращается к тем же таблицам.</p>
+<pre>SELECT backend_xmin
+FROM pg_stat_activity
+WHERE pid = pg_backend_pid();</pre>
+<p><b>Типовой production-инцидент:</b> сессия <code>idle in transaction</code> висит несколько часов, autovacuum не может очистить dead tuples, таблицы и индексы раздуваются, запросы начинают замедляться.</p>
+<p>Полезные настройки:</p>
+<ul>
+<li><code>idle_in_transaction_session_timeout</code> — завершает слишком долгие idle in transaction;</li>
+<li><code>old_snapshot_threshold</code> — ограничивал жизнь старых снимков в старых версиях PostgreSQL, но в современных версиях важно проверять актуальность поддержки параметра.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Экспорт snapshot</h3>
+<p>Иногда нескольким транзакциям нужно видеть одну и ту же картину данных. Например, параллельный <code>pg_dump</code> должен делать согласованную резервную копию.</p>
+<pre>BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT pg_export_snapshot();</pre>
+<p>Другая транзакция может импортировать snapshot до первого запроса:</p>
+<pre>BEGIN ISOLATION LEVEL REPEATABLE READ;
+SET TRANSACTION SNAPSHOT '00000004-00000E7B-1';</pre>
+<p>Время жизни экспортированного snapshot равно времени жизни экспортирующей транзакции.</p>
+</div>
+
+<div class='card'>
+<h3>Что должна понимать поддержка</h3>
+<ul>
+<li>MVCC даёт высокую конкурентность: читатели и писатели обычно не мешают друг другу.</li>
+<li>UPDATE создаёт новые версии строк, поэтому частые UPDATE вызывают bloat.</li>
+<li>VACUUM нужен для удаления старых версий.</li>
+<li>Долгие транзакции и idle in transaction удерживают горизонт очистки.</li>
+<li>Индексы могут ссылаться на старые версии строк до очистки.</li>
+<li>Проблемы MVCC часто проявляются как рост таблиц, рост индексов, медленные запросы и невозможность autovacuum очистить dead tuples.</li>
+</ul>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по MVCC</h3>
+<p>1. Что происходит при UPDATE в PostgreSQL?</p>
+<button onclick="q('mvcc1','a','a','Верно.')">Создаётся новая версия строки, старая помечается устаревшей</button>
+<button onclick="q('mvcc1','b','a','Нет. PostgreSQL обычно не перезаписывает строку на месте из-за MVCC.')">Строка всегда перезаписывается на месте</button>
+<button onclick="q('mvcc1','c','a','Нет. Индекс не заменяет таблицу.')">Изменяется только индекс</button>
+<div id='mvcc1' class='res'></div>
+
+<p>2. Что означает xmin?</p>
+<button onclick="q('mvcc2','b','a','Нет. Удаляющая/заменяющая транзакция записывается в xmax.')">Номер транзакции, удалившей строку</button>
+<button onclick="q('mvcc2','a','a','Верно.')">Номер транзакции, создавшей версию строки</button>
+<button onclick="q('mvcc2','c','a','Нет. Это не размер строки.')">Размер версии строки</button>
+<div id='mvcc2' class='res'></div>
+
+<p>3. Почему долгая транзакция опасна?</p>
+<button onclick="q('mvcc3','b','a','Нет. Долгая транзакция не ускоряет очистку.')">Она ускоряет autovacuum</button>
+<button onclick="q('mvcc3','c','a','Нет. WAL archive напрямую не зависит от длительности SELECT.')">Она отключает WAL archive</button>
+<button onclick="q('mvcc3','a','a','Верно.')">Она удерживает горизонт и мешает VACUUM очищать старые версии</button>
+<div id='mvcc3' class='res'></div>
+
+<p>4. Что такое snapshot?</p>
+<button onclick="q('mvcc4','a','a','Верно.')">Набор параметров, определяющих видимость версий строк</button>
+<button onclick="q('mvcc4','b','a','Нет. Snapshot не является полной физической копией таблиц.')">Физическая копия всей базы</button>
+<button onclick="q('mvcc4','c','a','Нет. Это не backup.')">Архив WAL</button>
+<div id='mvcc4' class='res'></div>
+
+<p>5. Почему после UPDATE индекс может ссылаться на старую версию строки?</p>
+<button onclick="q('mvcc5','a','a','Верно.')">В индексах нет xmin/xmax, видимость проверяется через таблицу</button>
+<button onclick="q('mvcc5','b','a','Нет. Индексные записи не имеют обычных MVCC-версий строк.')">Индекс хранит все xmin/xmax как таблица</button>
+<button onclick="q('mvcc5','c','a','Нет. Это не ошибка HAProxy.')">HAProxy направил запрос не туда</button>
+<div id='mvcc5' class='res'></div>
+</div>
+</section>
+<section id='p5' class='page'><h2>3. Изоляция транзакций в PostgreSQL</h2>
+<div class='card'>
+<h3>Что такое изоляция транзакций</h3>
+<p>Изоляция транзакций определяет, какие изменения, выполняемые параллельными транзакциями, видны текущей транзакции. Чем выше уровень изоляции, тем меньше аномалий возможно, но тем выше вероятность конфликтов, повторов транзакций и накладных расходов.</p>
+<p>Стандарт SQL определяет четыре уровня изоляции:</p>
+<ul>
+<li>Read Uncommitted</li>
+<li>Read Committed</li>
+<li>Repeatable Read</li>
+<li>Serializable</li>
+</ul>
+<p>В PostgreSQL фактически реализованы три разных поведения: <b>Read Uncommitted работает как Read Committed</b>, потому что архитектура MVCC не допускает грязного чтения.</p>
+</div>
+
+<div class='card'>
+<h3>Аномалии параллельных транзакций</h3>
+<ul>
+<li><b>Грязное чтение</b> — транзакция читает данные, записанные другой незавершённой транзакцией.</li>
+<li><b>Неповторяемое чтение</b> — транзакция повторно читает те же данные и видит, что они изменились после фиксации другой транзакции.</li>
+<li><b>Фантомное чтение</b> — повторный запрос по условию возвращает другой набор строк из-за параллельной зафиксированной транзакции.</li>
+<li><b>Аномалия сериализации</b> — результат параллельного выполнения транзакций нельзя объяснить никаким последовательным порядком их выполнения.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Таблица уровней изоляции</h3>
+<pre>Уровень                Грязное чтение   Неповторяемое   Фантомы        Аномалия сериализации
+Read Uncommitted       Нет в PG         Возможно        Возможно       Возможно
+Read Committed         Невозможно       Возможно        Возможно       Возможно
+Repeatable Read        Невозможно       Невозможно      Нет в PG       Возможно
+Serializable           Невозможно       Невозможно      Невозможно     Невозможно</pre>
+<p><b>Важно:</b> PostgreSQL в некоторых местах строже стандарта. Например, Repeatable Read в PostgreSQL не допускает фантомного чтения, хотя стандарт SQL допускает его для этого уровня.</p>
+</div>
+
+<div class='card'>
+<h3>Как выбрать уровень изоляции</h3>
+<pre>BEGIN;
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+
+BEGIN ISOLATION LEVEL SERIALIZABLE;</pre>
+<p>Уровень изоляции задаётся командой <code>SET TRANSACTION</code> или прямо при начале транзакции.</p>
+<p><b>Особенность последовательностей:</b> изменения sequence / serial видны другим транзакциям сразу и не откатываются при ROLLBACK. Это нормальное поведение PostgreSQL.</p>
+</div>
+
+<div class='card'>
+<h3>Read Committed — уровень по умолчанию</h3>
+<p><b>Read Committed</b> — стандартный уровень изоляции в PostgreSQL.</p>
+<p>На этом уровне обычный <code>SELECT</code> видит только данные, зафиксированные до начала конкретного SQL-оператора. Он не видит незавершённых изменений других транзакций.</p>
+<p>Главная особенность: <b>два SELECT внутри одной транзакции могут увидеть разные данные</b>, если между ними другая транзакция успела зафиксировать изменения.</p>
+<pre>BEGIN;
+SELECT balance FROM accounts WHERE id = 1;
+-- другая транзакция обновила balance и сделала COMMIT
+SELECT balance FROM accounts WHERE id = 1;
+COMMIT;</pre>
+<p>Во втором SELECT значение может быть уже другим.</p>
+<h4>UPDATE / DELETE / SELECT FOR UPDATE</h4>
+<p>Команды изменения ищут строки по снимку на начало команды. Но если найденная строка уже изменяется другой транзакцией, PostgreSQL ждёт её завершения. После этого условие WHERE проверяется заново на новой версии строки.</p>
+<p>Это важно: команда может работать с изменённой версией строки, хотя изначально видела другую.</p>
+<h4>ON CONFLICT и MERGE</h4>
+<p>В Read Committed команда <code>INSERT ... ON CONFLICT DO UPDATE</code> гарантирует, что строка будет либо вставлена, либо обновлена, даже если конфликт вызван параллельной транзакцией, результат которой ещё не был видим обычному снимку INSERT.</p>
+<p><code>MERGE</code> ведёт себя сложнее: условия действий могут переоцениваться для обновлённой версии строки. Поэтому при сопровождении важно внимательно анализировать MERGE в конкурентной нагрузке.</p>
+<h4>Когда подходит Read Committed</h4>
+<ul>
+<li>обычные OLTP-операции;</li>
+<li>простые UPDATE по ключу;</li>
+<li>типовые операции приложения;</li>
+<li>сценарии, где не требуется стабильный снимок всей транзакции.</li>
+</ul>
+<h4>Когда может быть опасен</h4>
+<ul>
+<li>сложные условия поиска;</li>
+<li>многошаговая бизнес-логика;</li>
+<li>расчёты, где все SELECT должны видеть один и тот же снимок;</li>
+<li>конкурентные DELETE/UPDATE по изменяемым условиям.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Пример особенности Read Committed</h3>
+<p>Представим таблицу <code>website</code> с двумя строками, где <code>hits</code> равны 9 и 10.</p>
+<pre>-- Транзакция 1
+BEGIN;
+UPDATE website SET hits = hits + 1;
+COMMIT;
+
+-- Параллельно транзакция 2
+DELETE FROM website WHERE hits = 10;</pre>
+<p>DELETE может не удалить ни одной строки: строка с 9 ещё не подходит, а строка с 10 может быть изменена другой транзакцией и после ожидания уже иметь значение 11. Поэтому условие WHERE переоценивается и строка больше не подходит.</p>
+<p><b>Вывод для поддержки:</b> Read Committed быстрый и удобный, но одна команда не всегда видит «идеально согласованную» картину всей базы.</p>
+</div>
+
+<div class='card'>
+<h3>Repeatable Read</h3>
+<p><b>Repeatable Read</b> даёт транзакции стабильный снимок данных. Все SELECT внутри транзакции видят данные, зафиксированные до начала первого значимого оператора транзакции.</p>
+<p>Изменения других транзакций, зафиксированные после начала текущей транзакции, не видны.</p>
+<pre>BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT * FROM orders WHERE status = 'new';
+-- другая транзакция добавила новый order и COMMIT
+SELECT * FROM orders WHERE status = 'new';
+COMMIT;</pre>
+<p>Оба SELECT увидят один и тот же снимок.</p>
+<h4>Конфликты изменения</h4>
+<p>Если транзакция Repeatable Read пытается изменить строку, которую после начала её снимка уже изменила и зафиксировала другая транзакция, текущая транзакция завершится ошибкой:</p>
+<pre>ERROR: could not serialize access due to concurrent update</pre>
+<p>После такой ошибки приложение должно повторить всю транзакцию с начала.</p>
+<h4>Особенности</h4>
+<ul>
+<li>реализуется через Snapshot Isolation;</li>
+<li>SELECT получает стабильную картину данных;</li>
+<li>read-only транзакции не получают конфликтов сериализации;</li>
+<li>изменяющие транзакции должны быть готовы к retry;</li>
+<li>фантомное чтение в PostgreSQL на этом уровне не возникает.</li>
+</ul>
+<h4>Когда использовать</h4>
+<ul>
+<li>отчёты, где нужен стабильный снимок;</li>
+<li>длинные аналитические чтения;</li>
+<li>операции, где повторные SELECT должны видеть одни и те же данные;</li>
+<li>сложные проверки перед изменениями, но с готовностью к повтору транзакции.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Serializable</h3>
+<p><b>Serializable</b> — самый строгий уровень изоляции. Он гарантирует, что результат успешно зафиксированных параллельных транзакций будет таким, как если бы они выполнялись последовательно в некотором порядке.</p>
+<p>По поведению он похож на Repeatable Read, но дополнительно отслеживает зависимости чтения/записи, которые могли бы привести к аномалиям сериализации.</p>
+<h4>Пример аномалии</h4>
+<pre>-- Транзакция A
+SELECT SUM(value) FROM mytab WHERE class = 1;
+INSERT INTO mytab(class, value) VALUES (2, 30);
+
+-- Транзакция B
+SELECT SUM(value) FROM mytab WHERE class = 2;
+INSERT INTO mytab(class, value) VALUES (1, 300);</pre>
+<p>В Repeatable Read обе транзакции могли бы зафиксироваться, хотя общий результат не соответствует никакому последовательному порядку. В Serializable одна из них будет отменена.</p>
+<pre>ERROR: could not serialize access due to read/write dependencies among transactions</pre>
+<p>Типичный SQLSTATE для такой ошибки — <b>40001</b>. Приложение должно повторить транзакцию.</p>
+<h4>Predicate locks / SIReadLock</h4>
+<p>Для Serializable PostgreSQL использует предикатные блокировки. Они не блокируют данные физически и не вызывают deadlock, но помогают обнаружить опасные зависимости между транзакциями.</p>
+<pre>SELECT * FROM pg_locks WHERE mode = 'SIReadLock';</pre>
+<p>Какие SIReadLock появятся, зависит от плана запроса. Например, последовательное сканирование может привести к предикатной блокировке уровня таблицы, что увеличивает вероятность serialization failure.</p>
+<h4>DEFERRABLE READ ONLY</h4>
+<p>Транзакция <code>SERIALIZABLE READ ONLY DEFERRABLE</code> может подождать безопасный снимок и затем читать данные без риска serialization anomaly.</p>
+<pre>BEGIN ISOLATION LEVEL SERIALIZABLE READ ONLY DEFERRABLE;</pre>
+<h4>Рекомендации</h4>
+<ul>
+<li>объявлять транзакции READ ONLY, если они только читают;</li>
+<li>не держать транзакции открытыми дольше необходимого;</li>
+<li>не оставлять сессии idle in transaction;</li>
+<li>использовать пул соединений для контроля числа активных транзакций;</li>
+<li>реализовать retry для SQLSTATE 40001;</li>
+<li>убирать лишние SELECT FOR UPDATE/SHARE, если Serializable уже даёт нужную защиту;</li>
+<li>следить за max_pred_locks_per_transaction, max_pred_locks_per_relation, max_pred_locks_per_page;</li>
+<li>избегать неоправданных Seq Scan в Serializable, если они вызывают много SIReadLock на уровне таблицы.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Сравнение уровней для поддержки</h3>
+<ul>
+<li><b>Read Committed</b> — быстрый и простой, но каждый оператор видит свой снимок.</li>
+<li><b>Repeatable Read</b> — стабильный снимок на всю транзакцию, возможны ошибки при конкурентных изменениях.</li>
+<li><b>Serializable</b> — максимальная согласованность, но обязательно нужен retry при serialization failure.</li>
+</ul>
+<p><b>Практическое правило:</b> если приложение жалуется на ошибки сериализации — это не обязательно авария PostgreSQL. Часто это нормальное поведение строгого уровня изоляции, и приложение должно корректно повторять транзакцию.</p>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по изоляции транзакций</h3>
+<p>1. Какой уровень изоляции используется по умолчанию?</p>
+<button onclick="q('iso1','b','a','Нет. Serializable нужно задавать явно.')">Serializable</button>
+<button onclick="q('iso1','a','a','Верно.')">Read Committed</button>
+<button onclick="q('iso1','c','a','Нет. Repeatable Read не является уровнем по умолчанию.')">Repeatable Read</button>
+<div id='iso1' class='res'></div>
+
+<p>2. Как Read Uncommitted работает в PostgreSQL?</p>
+<button onclick="q('iso2','b','a','Нет. PostgreSQL не допускает грязное чтение из-за MVCC.')">Позволяет грязное чтение</button>
+<button onclick="q('iso2','c','a','Нет. Это не режим Serializable.')">Как Serializable</button>
+<button onclick="q('iso2','a','a','Верно.')">Как Read Committed</button>
+<div id='iso2' class='res'></div>
+
+<p>3. Что означает ошибка SQLSTATE 40001?</p>
+<button onclick="q('iso3','b','a','Нет. Это не ошибка пароля.')">Ошибка аутентификации</button>
+<button onclick="q('iso3','a','a','Верно.')">Транзакцию нужно повторить из-за serialization failure</button>
+<button onclick="q('iso3','c','a','Нет. Deadlock имеет другой код и причину.')">Всегда deadlock</button>
+<div id='iso3' class='res'></div>
+
+<p>4. Что гарантирует Repeatable Read?</p>
+<button onclick="q('iso4','a','a','Верно.')">Стабильный снимок данных внутри транзакции</button>
+<button onclick="q('iso4','b','a','Нет. Serializable строже Repeatable Read.')">Полную сериализуемость всех транзакций</button>
+<button onclick="q('iso4','c','a','Нет. Грязное чтение в PostgreSQL невозможно.')">Грязное чтение незавершённых данных</button>
+<div id='iso4' class='res'></div>
+
+<p>5. Почему Serializable может завершить транзакцию ошибкой?</p>
+<button onclick="q('iso5','a','a','Верно.')">Чтобы предотвратить аномалию сериализации</button>
+<button onclick="q('iso5','b','a','Нет. Это не связано напрямую с нехваткой диска.')">Потому что закончился WAL archive</button>
+<button onclick="q('iso5','c','a','Нет. VACUUM не является причиной serialization failure сам по себе.')">Потому что запущен autovacuum</button>
+<div id='iso5' class='res'></div>
+</div>
+</section>
+<section id='p6' class='page'><h2>4. Блокировки (Locks) — расширенный разбор</h2>
+<div class='card'>
+<p>PostgreSQL использует систему блокировок для управления конкурентным доступом к данным. Несмотря на MVCC, блокировки необходимы для операций изменения структуры данных и защиты от конфликтов при записи.</p>
+
+<h3>Общий принцип</h3>
+<p>Блокировки бывают:</p>
+<ul>
+<li><b>Явные</b> — задаются приложением через LOCK</li>
+<li><b>Неявные</b> — автоматически ставятся SQL-командами</li>
+</ul>
+<p>Большинство команд (SELECT, UPDATE, ALTER, TRUNCATE) автоматически получают блокировки нужного уровня.</p>
+
+<h3>Уровни блокировок таблиц</h3>
+<p>Все блокировки работают на уровне таблицы (даже если содержат "row" в названии).</p>
+<ul>
+<li><b>ACCESS SHARE</b> — обычный SELECT</li>
+<li><b>ROW EXCLUSIVE</b> — INSERT / UPDATE / DELETE</li>
+<li><b>SHARE UPDATE EXCLUSIVE</b> — VACUUM, ANALYZE</li>
+<li><b>SHARE</b> — CREATE INDEX</li>
+<li><b>EXCLUSIVE</b> — REFRESH MATERIALIZED VIEW</li>
+<li><b>ACCESS EXCLUSIVE</b> — DROP, TRUNCATE, VACUUM FULL</li>
+</ul>
+
+<p><b>Важно:</b> ACCESS EXCLUSIVE блокирует ВСЕ операции, включая SELECT.</p>
+</div>
+<div class="card">
+<h3>Как работает конфликт блокировок</h3>
+<p>Разные режимы блокировок конфликтуют друг с другом. Две транзакции не могут одновременно владеть несовместимыми блокировками одной таблицы.</p>
+
+<h3>Блокировки строк (Row-level locks)</h3>
+<p>Используются для точечных изменений строк:</p>
+<ul>
+<li>FOR UPDATE — блокирует строку для изменения</li>
+<li>FOR NO KEY UPDATE — слабее FOR UPDATE</li>
+<li>FOR SHARE — блокировка для чтения с защитой</li>
+<li>FOR KEY SHARE — минимальная блокировка ключей</li>
+</ul>
+<p>Важно: блокировки строк не влияют на SELECT без FOR UPDATE.</p>
+
+<h3>pg_locks</h3>
+<p>Текущее состояние блокировок можно анализировать через системное представление:</p>
+<pre>SELECT * FROM pg_locks;</pre>
+
+<h3>Deadlocks (взаимоблокировки)</h3>
+<p>Возникают, когда транзакции блокируют друг друга по кругу. PostgreSQL автоматически обнаруживает deadlock и завершает одну из транзакций.</p>
+
+<p><b>Причина:</b> разный порядок обновления ресурсов.</p>
+
+<h3>Рекомендательные блокировки (Advisory Locks)</h3>
+<p>Используются приложением вручную для управления логикой блокировок.</p>
+<ul>
+<li>могут быть session-level или transaction-level</li>
+<li>не привязаны к таблицам</li>
+<li>удерживаются приложением</li>
+</ul>
+
+<p><b>Опасность:</b> использование с LIMIT / ORDER BY может привести к неожиданным блокировкам.</p>
+
+<pre>SELECT pg_advisory_lock(id) FROM foo WHERE id = 123;</pre>
+</div>
+<div class="card">
+<h3>Практические рекомендации поддержки</h3>
+<ul>
+<li>проверять pg_locks при зависаниях</li>
+<li>искать блокирующие транзакции в pg_stat_activity</li>
+<li>избегать долгих транзакций</li>
+<li>следить за порядком обновления таблиц</li>
+</ul>
+</div>
+</section>
+<section id='p7' class='page'><h2>5. VACUUM и autovacuum (расширенный разбор)</h2><div class='card'>
+<p><b>VACUUM</b> — операция обслуживания PostgreSQL, предназначенная для очистки «мёртвых» кортежей (строк), оставшихся после UPDATE/DELETE, а также для возможного анализа статистики.</p>
+
+<h3>Синтаксис</h3>
+<pre>VACUUM [ ( параметры [, ...] ) ] [ таблица ]
+VACUUM [ FULL ] [ FREEZE ] [ VERBOSE ] [ ANALYZE ] [ таблица ]</pre>
+
+<p>Поддерживаемые параметры включают:</p>
+<ul>
+<li>FULL — полная переразметка таблицы</li>
+<li>FREEZE — агрессивная заморозка транзакций</li>
+<li>VERBOSE — подробный вывод</li>
+<li>ANALYZE — обновление статистики планировщика</li>
+<li>INDEX_CLEANUP (AUTO/ON/OFF)</li>
+<li>TRUNCATE — обрезка пустых страниц</li>
+<li>PARALLEL — параллельная очистка</li>
+<li>SKIP_LOCKED — пропуск заблокированных таблиц</li>
+<li>PROCESS_MAIN / PROCESS_TOAST</li>
+<li>BUFFER_USAGE_LIMIT — лимит буфера стратегии</li>
+</ul>
+</div>
+<div class="card">
+<h3>Как работает VACUUM</h3>
+<p>PostgreSQL не удаляет строки физически сразу после UPDATE/DELETE. Вместо этого остаются «мёртвые версии строк». VACUUM освобождает это пространство и делает его доступным для повторного использования.</p>
+
+<p>Важно: обычный VACUUM не возвращает место операционной системе, а только переиспользует его внутри таблицы.</p>
+
+<h3>VACUUM vs VACUUM FULL</h3>
+<ul>
+<li><b>VACUUM</b> — безопасен, не блокирует таблицу, работает параллельно</li>
+<li><b>VACUUM FULL</b> — переписывает таблицу заново, освобождает место на диске, но блокирует ACCESS EXCLUSIVE</li>
+</ul>
+
+<h3>Почему VACUUM важен</h3>
+<ul>
+<li>предотвращает разрастание таблиц (bloat)</li>
+<li>обновляет статистику для планировщика</li>
+<li>предотвращает wraparound транзакций</li>
+<li>улучшает производительность SELECT</li>
+</ul>
+</div>
+<div class="card">
+<h3>Autovacuum — автоматическая очистка</h3>
+<p><b>Autovacuum</b> — механизм PostgreSQL, который автоматически запускает <code>VACUUM</code> и <code>ANALYZE</code> в зависимости от активности изменений в таблицах.</p>
+<p>Обычный VACUUM хорошо справляется со своей задачей, если никто надолго не удерживает горизонт транзакций. Главный вопрос — как часто его запускать:</p>
+<ul>
+<li>если чистить таблицу слишком редко — она раздувается, растёт bloat, а следующая очистка может потребовать несколько проходов по индексам;</li>
+<li>если чистить слишком часто — сервер будет тратить ресурсы на обслуживание вместо полезной работы;</li>
+<li>очистка «по расписанию» не всегда подходит, потому что нагрузка меняется: если таблицу стали обновлять активнее, чистить её тоже нужно чаще.</li>
+</ul>
+<p>Autovacuum решает эту задачу: он запускает очистку не просто по времени, а по статистике изменений в таблицах.</p>
+
+<h4>Процессы autovacuum</h4>
+<ul>
+<li><b>autovacuum launcher</b> — постоянно присутствует в системе и планирует работу;</li>
+<li><b>autovacuum worker</b> — рабочий процесс, который подключается к базе и выполняет VACUUM/ANALYZE;</li>
+<li><b>postmaster</b> — запускает worker-процессы по запросу launcher.</li>
+</ul>
+<pre>autovacuum launcher
+        |
+        v
+autovacuum worker -> database -> tables/materialized views/toast</pre>
+<p>Launcher составляет список баз данных, где есть активность. Активность определяется по статистике, поэтому критически важно:</p>
+<pre>autovacuum = on
+track_counts = on</pre>
+<p><b>Никогда не выключайте autovacuum и track_counts без очень веской причины.</b> Если <code>track_counts</code> выключен, автоочистка не сможет принимать решения по статистике.</p>
+
+<h4>Как часто запускаются worker-процессы</h4>
+<p>Раз в <code>autovacuum_naptime</code> launcher запускает worker для каждой активной базы данных. Если активных баз несколько, worker-процессы могут запускаться чаще, но общее число одновременно работающих worker ограничено:</p>
+<pre>autovacuum_naptime
+autovacuum_max_workers</pre>
+<p>Если worker не успевает обработать всё за один интервал, launcher может отправить в ту же БД ещё один worker. Они будут работать параллельно, но <b>разные worker обрабатывают разные таблицы</b>. На уровне одной таблицы autovacuum не параллелится: если один worker уже занимается таблицей, другой её пропустит.</p>
+
+<h4>Какие объекты выбирает worker</h4>
+<p>После подключения к базе worker строит список объектов:</p>
+<ul>
+<li>таблицы, материализованные представления и TOAST-таблицы, требующие VACUUM;</li>
+<li>таблицы и материализованные представления, требующие ANALYZE;</li>
+<li>TOAST-таблицы не анализируются, потому что доступ к ним обычно идёт через индекс.</li>
+</ul>
+
+<h4>Когда таблице нужен VACUUM</h4>
+<p>Очистка нужна, если число мёртвых версий строк превысило порог:</p>
+<pre>pg_stat_all_tables.n_dead_tup >=
+  autovacuum_vacuum_threshold
+  + autovacuum_vacuum_scale_factor * pg_class.reltuples</pre>
+<p>Параметры по умолчанию:</p>
+<pre>autovacuum_vacuum_threshold = 50
+autovacuum_vacuum_scale_factor = 0.2</pre>
+<p><b>Практический вывод:</b> значение <code>0.2</code> означает 20% таблицы. Для больших активно изменяемых таблиц это часто слишком много, поэтому scale factor обычно уменьшают, например до <code>0.01–0.05</code>.</p>
+<p>Порог можно задавать глобально или на уровне конкретной таблицы:</p>
+<pre>ALTER TABLE orders SET (
+  autovacuum_vacuum_threshold = 1000,
+  autovacuum_vacuum_scale_factor = 0.02
+);</pre>
+<p>Для TOAST-таблиц есть отдельные параметры хранения:</p>
+<pre>toast.autovacuum_vacuum_threshold
+toast.autovacuum_vacuum_scale_factor</pre>
+<p>Отключение autovacuum на уровне таблицы возможно, но почти всегда опасно:</p>
+<pre>ALTER TABLE orders SET (autovacuum_enabled = off);</pre>
+
+<h4>Представление для поиска таблиц, которым нужен VACUUM</h4>
+<p>Для обучения и диагностики можно создать вспомогательную функцию, которая учитывает переопределения параметров на уровне таблицы:</p>
+<pre>CREATE FUNCTION get_value(param text, reloptions text[], relkind "char")
+RETURNS float
+AS $$
+  SELECT coalesce(
+    (SELECT option_value
+     FROM pg_options_to_table(reloptions)
+     WHERE option_name = CASE
+       WHEN relkind = 't' THEN 'toast.' ELSE ''
+     END || param),
+    current_setting(param)
+  )::float;
+$$ LANGUAGE sql;</pre>
+<p>Представление для оценки необходимости VACUUM:</p>
+<pre>CREATE VIEW need_vacuum AS
+SELECT st.schemaname || '.' || st.relname AS tablename,
+       st.n_dead_tup AS dead_tup,
+       get_value('autovacuum_vacuum_threshold', c.reloptions, c.relkind) +
+       get_value('autovacuum_vacuum_scale_factor', c.reloptions, c.relkind) * c.reltuples
+       AS max_dead_tup,
+       st.last_autovacuum
+FROM pg_stat_all_tables st
+JOIN pg_class c ON c.oid = st.relid
+WHERE c.relkind IN ('r','m','t');</pre>
+<pre>SELECT * FROM need_vacuum ORDER BY dead_tup DESC;</pre>
+
+<h4>Когда таблице нужен ANALYZE</h4>
+<p>Автоанализ запускается по похожей формуле, но использует количество изменённых строк с момента прошлого анализа:</p>
+<pre>pg_stat_all_tables.n_mod_since_analyze >=
+  autovacuum_analyze_threshold
+  + autovacuum_analyze_scale_factor * pg_class.reltuples</pre>
+<p>Параметры по умолчанию:</p>
+<pre>autovacuum_analyze_threshold = 50
+autovacuum_analyze_scale_factor = 0.1</pre>
+<p>Их тоже можно задавать на уровне таблицы:</p>
+<pre>ALTER TABLE orders SET (
+  autovacuum_analyze_threshold = 1000,
+  autovacuum_analyze_scale_factor = 0.02
+);</pre>
+<p>TOAST-таблицы не анализируются, поэтому отдельных toast-параметров для analyze нет.</p>
+<p>Представление для поиска таблиц, которым нужен ANALYZE:</p>
+<pre>CREATE VIEW need_analyze AS
+SELECT st.schemaname || '.' || st.relname AS tablename,
+       st.n_mod_since_analyze AS mod_tup,
+       get_value('autovacuum_analyze_threshold', c.reloptions, c.relkind) +
+       get_value('autovacuum_analyze_scale_factor', c.reloptions, c.relkind) * c.reltuples
+       AS max_mod_tup,
+       st.last_autoanalyze
+FROM pg_stat_all_tables st
+JOIN pg_class c ON c.oid = st.relid
+WHERE c.relkind IN ('r','m');</pre>
+<pre>SELECT * FROM need_analyze ORDER BY mod_tup DESC;</pre>
+
+<h4>Пример логики срабатывания</h4>
+<p>Если настроить пороги так:</p>
+<pre>ALTER SYSTEM SET autovacuum_naptime = '1s';
+ALTER SYSTEM SET autovacuum_vacuum_scale_factor = 0.03;
+ALTER SYSTEM SET autovacuum_vacuum_threshold = 0;
+ALTER SYSTEM SET autovacuum_analyze_scale_factor = 0.02;
+ALTER SYSTEM SET autovacuum_analyze_threshold = 0;
+SELECT pg_reload_conf();</pre>
+<p>Для таблицы на 1000 строк порог VACUUM будет примерно 30 мёртвых строк, а порог ANALYZE — примерно 20 изменённых строк.</p>
+<pre>CREATE TABLE autovac(
+  id serial,
+  s char(100)
+) WITH (autovacuum_enabled = off);
+
+INSERT INTO autovac SELECT g.id, 'A'
+FROM generate_series(1,1000) g(id);</pre>
+<p>После INSERT в таблице ещё нет мёртвых строк, поэтому VACUUM не нужен. Но изменённых строк много, поэтому нужен ANALYZE. После анализа PostgreSQL обновит <code>pg_class.reltuples</code>, и пороги начнут рассчитываться корректнее.</p>
+<pre>SELECT reltuples, relpages
+FROM pg_class
+WHERE relname = 'autovac';</pre>
+<p>Если затем обновить 31 строку при пороге 30, условие autovacuum выполнится:</p>
+<pre>UPDATE autovac SET s = 'B' WHERE id <= 31;
+SELECT * FROM need_vacuum WHERE tablename = 'public.autovac';</pre>
+<p><b>Важная тонкость:</b> append-only таблицы, куда только вставляют строки и не делают UPDATE/DELETE, могут долго не очищаться, потому что <code>n_dead_tup = 0</code>. В результате может не обновляться visibility map, а это мешает эффективному Index Only Scan. Иногда для таких таблиц нужен ручной VACUUM.</p>
+
+<h4>Регулирование нагрузки</h4>
+<p>VACUUM не блокирует обычную работу таблицы, но создаёт I/O-нагрузку. Поэтому он может чередовать работу и ожидание.</p>
+<p>Для ручного VACUUM используются:</p>
+<pre>vacuum_cost_limit
+vacuum_cost_delay</pre>
+<p>По умолчанию:</p>
+<pre>vacuum_cost_limit = 200
+vacuum_cost_delay = 0</pre>
+<p>Для autovacuum есть собственные параметры:</p>
+<pre>autovacuum_vacuum_cost_limit
+autovacuum_vacuum_cost_delay</pre>
+<p>Если они равны <code>-1</code>, используются обычные <code>vacuum_cost_limit</code> и <code>vacuum_cost_delay</code>.</p>
+<p>На многих системах значение <code>autovacuum_vacuum_cost_delay = 20ms</code> может быть слишком медленным. Часто начинают с <code>2–10ms</code>, но итог зависит от нагрузки и дисковой подсистемы.</p>
+<p><b>Важно:</b> cost limit распределяется между worker-процессами. Если увеличивать <code>autovacuum_max_workers</code>, но не увеличивать <code>autovacuum_vacuum_cost_limit</code>, общая производительность autovacuum может почти не вырасти.</p>
+
+<h4>Память autovacuum</h4>
+<p>VACUUM использует память для хранения идентификаторов версий строк, которые нужно удалить из индексов.</p>
+<pre>maintenance_work_mem
+autovacuum_work_mem</pre>
+<p><code>autovacuum_work_mem</code> задаёт отдельный лимит памяти на worker. По умолчанию <code>-1</code>, то есть используется <code>maintenance_work_mem</code>.</p>
+<p>Если памяти мало, VACUUM может несколько раз проходить по индексам. Это увеличивает время очистки и нагрузку на I/O. Обычно лучше подобрать минимальное значение <code>autovacuum_work_mem</code>, при котором повторные проходы по индексам не возникают.</p>
+
+<h4>Мониторинг autovacuum</h4>
+<p>Для текущего прогресса:</p>
+<pre>SELECT * FROM pg_stat_progress_vacuum;</pre>
+<p>Для истории и регулярного анализа лучше включить логирование autovacuum:</p>
+<pre>ALTER SYSTEM SET log_autovacuum_min_duration = 0;
+SELECT pg_reload_conf();</pre>
+<p>Значение <code>0</code> логирует все запуски autovacuum. В production часто ставят порог, например 1s, 5s или 10s, чтобы не засорять лог.</p>
+<p>Пример полезной информации в логе:</p>
+<pre>automatic vacuum of table "public.autovac": index scans: 0
+pages: 0 removed, 18 remain, 0 skipped due to pins, 0 skipped frozen
+tuples: 31 removed, 1000 remain, 0 are dead but not yet removable, oldest xmin: 4040
+buffer usage: 78 hits, 0 misses, 0 dirtied
+avg read rate: 0.000 MB/s, avg write rate: 0.000 MB/s
+system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s</pre>
+<p>Что смотреть поддержке:</p>
+<ul>
+<li><code>tuples removed</code> — сколько dead tuples удалено;</li>
+<li><code>dead but not yet removable</code> — старые версии есть, но их удерживает горизонт транзакций;</li>
+<li><code>oldest xmin</code> — кто удерживает очистку;</li>
+<li><code>index scans</code> — сколько проходов по индексам было нужно;</li>
+<li><code>buffer usage</code> — нагрузка на буферы;</li>
+<li><code>elapsed</code> — фактическое время выполнения.</li>
+</ul>
+
+<h4>Практические выводы для поддержки</h4>
+<ul>
+<li>Не отключать autovacuum глобально и не выключать <code>track_counts</code>.</li>
+<li>Для больших таблиц снижать <code>autovacuum_vacuum_scale_factor</code>.</li>
+<li>Для особо активных таблиц задавать параметры на уровне таблицы.</li>
+<li>Следить за <code>n_dead_tup</code>, <code>n_mod_since_analyze</code>, <code>last_autovacuum</code>, <code>last_autoanalyze</code>.</li>
+<li>Если растёт список таблиц, требующих очистки, autovacuum не успевает.</li>
+<li>Часто лучше снизить порог срабатывания, чем просто увеличивать память.</li>
+<li>Долгие транзакции и <code>idle in transaction</code> могут мешать очистке сильнее любых настроек autovacuum.</li>
+</ul>
+
+<h3>Пример</h3>
+<pre>VACUUM (VERBOSE, ANALYZE) users;</pre>
+
+<p><b>Рекомендация для поддержки:</b> всегда проверять:</p>
+<ul>
+<li>pg_stat_user_tables</li>
+<li>n_dead_tup</li>
+<li>autovacuum activity</li>
+</ul>
+</div></section>
+<section id='p8' class='page'><h2>6. WAL archive — архивирование журнала предзаписи</h2>
+<div class='card'>
+<h3>Что такое WAL</h3>
+<p><b>WAL</b> — Write-Ahead Log, журнал предзаписи PostgreSQL. Он находится в каталоге <code>pg_wal/</code> внутри каталога данных кластера.</p>
+<p>В WAL записываются изменения, которые PostgreSQL вносит в файлы данных. Сначала изменение фиксируется в WAL, и только потом соответствующие страницы данных могут быть записаны на диск.</p>
+<p>WAL нужен для:</p>
+<ul>
+<li>восстановления после аварийного завершения сервера;</li>
+<li>физической репликации;</li>
+<li>создания базовых резервных копий;</li>
+<li>Point-in-Time Recovery — восстановления на момент времени;</li>
+<li>построения standby-серверов и тёплого резерва.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Зачем нужен WAL archive</h3>
+<p>Обычный PostgreSQL может перерабатывать старые WAL-сегменты после checkpoint, если они больше не нужны для crash recovery или репликации. Но для надёжного восстановления этого недостаточно.</p>
+<p><b>WAL archive</b> сохраняет каждый завершённый WAL-сегмент во внешнее хранилище до того, как PostgreSQL сможет его переработать.</p>
+<p>Это даёт несколько преимуществ:</p>
+<ul>
+<li>можно восстановить кластер из файловой базовой копии и WAL;</li>
+<li>копия файловой системы не обязана быть полностью согласованной — WAL replay исправит несогласованность;</li>
+<li>можно хранить непрерывную цепочку изменений после базовой копии;</li>
+<li>можно остановить восстановление в нужной точке времени;</li>
+<li>можно поддерживать тёплый резерв, передавая WAL на другой сервер.</li>
+</ul>
+<p><b>Важно:</b> <code>pg_dump</code> и <code>pg_dumpall</code> не являются частью WAL-архивирования. Это логические копии, они не содержат информации для WAL replay.</p>
+</div>
+
+<div class='card'>
+<h3>WAL-сегменты</h3>
+<p>PostgreSQL физически делит поток WAL на файлы-сегменты. Обычно размер сегмента — 16 MiB, если другой размер не был задан при <code>initdb</code>.</p>
+<p>Имя WAL-сегмента отражает его позицию в WAL-последовательности и timeline.</p>
+<pre>0000000100001234000055CD</pre>
+<p>Если архивирование не включено, PostgreSQL может перерабатывать старые сегменты, переименовывая и используя их повторно. При архивировании каждый заполненный сегмент нужно сохранить до переработки.</p>
+</div>
+
+<div class='card'>
+<h3>Настройка архивирования WAL</h3>
+<p>Для включения WAL archive нужны параметры:</p>
+<pre>wal_level = replica
+archive_mode = on
+archive_command = 'test ! -f /mnt/server/archivedir/%f && cp %p /mnt/server/archivedir/%f'</pre>
+<p>В <code>archive_command</code> используются подстановки:</p>
+<ul>
+<li><code>%p</code> — путь к WAL-файлу, который нужно заархивировать;</li>
+<li><code>%f</code> — только имя WAL-файла;</li>
+<li><code>%%</code> — символ процента.</li>
+</ul>
+<p>Пример фактической команды после подстановки:</p>
+<pre>test ! -f /mnt/server/archivedir/00000001000000A900000065 && \
+cp pg_wal/00000001000000A900000065 /mnt/server/archivedir/00000001000000A900000065</pre>
+<p><b>Важно:</b> команда архивирования выполняется от имени пользователя, под которым работает PostgreSQL. Архив WAL содержит все изменения данных, поэтому архивное хранилище должно быть защищено правами доступа.</p>
+</div>
+
+<div class='card'>
+<h3>Правила для archive_command</h3>
+<ul>
+<li>Команда должна возвращать <b>0</b> только если архивирование действительно успешно.</li>
+<li>Если команда вернула ненулевой код, PostgreSQL будет повторять попытки.</li>
+<li>Команда не должна перезаписывать существующий архивный файл с другим содержимым.</li>
+<li>Если файл уже есть и полностью совпадает, команда может вернуть успех.</li>
+<li>Если архивирование сломалось, <code>pg_wal/</code> будет расти.</li>
+</ul>
+<p><b>Критический риск:</b> если архивирование постоянно падает, WAL-сегменты будут накапливаться в <code>pg_wal/</code>. При заполнении диска PostgreSQL может аварийно остановиться.</p>
+<p>Для сложной логики лучше использовать скрипт:</p>
+<pre>archive_command = 'local_backup_script.sh "%p" "%f"'</pre>
+<p>Скрипт может копировать WAL во внешнее хранилище, сжимать, логировать ошибки, взаимодействовать с backup-системой и мониторингом.</p>
+</div>
+
+<div class='card'>
+<h3>archive_timeout и ручное переключение WAL</h3>
+<p><code>archive_command</code> вызывается, когда WAL-сегмент заполнен. Если нагрузка маленькая, между commit и попаданием WAL в архив может пройти много времени.</p>
+<p>Чтобы ограничить задержку, можно использовать:</p>
+<pre>archive_timeout = '1min'</pre>
+<p>Но слишком маленькое значение приведёт к большому количеству неполных WAL-сегментов в архиве, каждый из которых всё равно будет иметь полный размер сегмента.</p>
+<p>Для ручного переключения WAL:</p>
+<pre>SELECT pg_switch_wal();</pre>
+<p>Это полезно, если нужно быстрее отправить только что завершённые изменения в архив.</p>
+</div>
+
+<div class='card'>
+<h3>Мониторинг WAL archive</h3>
+<p>Основное представление:</p>
+<pre>SELECT * FROM pg_stat_archiver;</pre>
+<p>Что смотреть:</p>
+<ul>
+<li><code>archived_count</code> — сколько файлов успешно заархивировано;</li>
+<li><code>last_archived_wal</code> — последний архивированный WAL;</li>
+<li><code>last_archived_time</code> — время последнего успеха;</li>
+<li><code>failed_count</code> — количество ошибок;</li>
+<li><code>last_failed_wal</code> — последний WAL с ошибкой;</li>
+<li><code>last_failed_time</code> — время последней ошибки.</li>
+</ul>
+<p>Типовой запрос поддержки:</p>
+<pre>SELECT archived_count,
+       last_archived_wal,
+       last_archived_time,
+       failed_count,
+       last_failed_wal,
+       last_failed_time
+FROM pg_stat_archiver;</pre>
+<p>Также нужно мониторить размер <code>pg_wal/</code> и свободное место на диске.</p>
+</div>
+
+<div class='card'>
+<h3>Базовая резервная копия и WAL</h3>
+<p>Для восстановления через WAL archive нужна базовая резервная копия и непрерывная последовательность WAL-сегментов, начиная не позже момента старта этой копии.</p>
+<p>Проще всего создать базовую копию через <code>pg_basebackup</code>:</p>
+<pre>pg_basebackup -h primary -D /backup/base -X stream -P</pre>
+<p>Во время создания backup PostgreSQL формирует backup history file. По нему можно понять, какие WAL-сегменты нужны для восстановления.</p>
+<p><b>Практика:</b> интервал между базовыми копиями выбирают по двум ограничениям:</p>
+<ul>
+<li>сколько места можно выделить под WAL archive;</li>
+<li>сколько времени допустимо тратить на восстановление и replay WAL.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Низкоуровневый API резервного копирования</h3>
+<p>Если <code>pg_basebackup</code> не подходит, можно использовать низкоуровневый API:</p>
+<pre>SELECT pg_backup_start(label => 'daily_backup', fast => false);
+-- копирование файлов tar/rsync/cpio
+SELECT * FROM pg_backup_stop(wait_for_archive => true);</pre>
+<p>Важные правила:</p>
+<ul>
+<li>архивирование WAL должно быть включено и протестировано до начала;</li>
+<li>соединение с <code>pg_backup_start</code> должно жить до <code>pg_backup_stop</code>;</li>
+<li><code>pg_backup_stop</code> может ждать архивации последнего нужного WAL-сегмента;</li>
+<li>результаты <code>pg_backup_stop</code> важны для файлов <code>backup_label</code> и <code>tablespace_map</code>.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Что исключать из файловой копии</h3>
+<p>При файловом backup активного кластера важно понимать, что часть каталогов не нужно копировать полностью.</p>
+<ul>
+<li><code>pg_wal/</code> обычно исключают из базовой файловой копии, так как WAL берётся из архива;</li>
+<li><code>postmaster.pid</code> и <code>postmaster.opts</code> исключают, чтобы не вводить <code>pg_ctl</code> в заблуждение;</li>
+<li><code>pg_replslot/</code> часто исключают, чтобы не перенести неактуальные replication slots;</li>
+<li>содержимое <code>pg_dynshmem/</code>, <code>pg_notify/</code>, <code>pg_serial/</code>, <code>pg_snapshots/</code>, <code>pg_stat_tmp/</code>, <code>pg_subtrans/</code> можно исключать, но сами каталоги должны существовать;</li>
+<li>временные файлы <code>pgsql_tmp*</code> можно исключать;</li>
+<li><code>pg_internal.init</code> можно исключать, он будет перестроен.</li>
+</ul>
+<p>Если используются tablespaces, нужно корректно сохранить и восстановить символические ссылки в <code>pg_tblspc/</code>.</p>
+</div>
+
+<div class='card'>
+<h3>Восстановление из WAL archive</h3>
+<p>Общий порядок восстановления:</p>
+<ol>
+<li>Остановить PostgreSQL.</li>
+<li>По возможности сохранить текущий каталог данных и табличные пространства.</li>
+<li>Очистить целевой каталог данных.</li>
+<li>Восстановить файлы из базовой резервной копии.</li>
+<li>Очистить <code>pg_wal/</code> от старых файлов из backup.</li>
+<li>Вернуть последние неархивированные WAL, если они были сохранены.</li>
+<li>Настроить восстановление через <code>restore_command</code>.</li>
+<li>Создать <code>recovery.signal</code>.</li>
+<li>Запустить сервер и дождаться replay WAL.</li>
+<li>Проверить состояние базы и открыть доступ пользователям.</li>
+</ol>
+<p>Минимальная настройка восстановления:</p>
+<pre>restore_command = 'cp /mnt/server/archivedir/%f %p'</pre>
+<p>Подстановки такие же:</p>
+<ul>
+<li><code>%f</code> — имя нужного WAL-файла;</li>
+<li><code>%p</code> — путь, куда PostgreSQL ожидает получить файл.</li>
+</ul>
+<p>Команда должна возвращать ненулевой код, если файла нет в архиве. Это нормальная ситуация в конце восстановления.</p>
+</div>
+
+<div class='card'>
+<h3>PITR — восстановление на момент времени</h3>
+<p>WAL archive позволяет восстановиться не только «до конца», но и до нужного момента времени.</p>
+<pre>recovery_target_time = '2026-04-25 12:30:00+02'</pre>
+<p>Точку восстановления можно задавать по:</p>
+<ul>
+<li>времени;</li>
+<li>именованной точке восстановления;</li>
+<li>transaction id, если точно известно, что нужно.</li>
+</ul>
+<p><b>Важно:</b> точка восстановления должна быть позже окончания базовой копии. Нельзя восстановиться из базовой копии на момент, когда она ещё создавалась.</p>
+</div>
+
+<div class='card'>
+<h3>Timeline — линии времени</h3>
+<p>После завершения восстановления PostgreSQL создаёт новую <b>линию времени</b>. Это нужно, чтобы новая история WAL не перезаписала старую.</p>
+<p>В имени WAL-файла первые 8 символов — идентификатор timeline:</p>
+<pre>00000001 00001234 000055CD</pre>
+<p>При каждом ответвлении создаётся файл истории timeline. Его нужно архивировать так же, как WAL-сегменты.</p>
+<p>Timeline полезны, когда нужно несколько раз пробовать восстановление на разные моменты времени и при этом сохранять возможность вернуться к старым веткам истории.</p>
+<pre>recovery_target_timeline = 'latest'</pre>
+</div>
+
+<div class='card'>
+<h3>Сжатие и скрипты архивирования</h3>
+<p>Если архив занимает много места, WAL можно сжимать:</p>
+<pre>archive_command = 'gzip &lt; %p &gt; /mnt/server/archivedir/%f.gz'</pre>
+<p>Для восстановления:</p>
+<pre>restore_command = 'gunzip &lt; /mnt/server/archivedir/%f.gz &gt; %p'</pre>
+<p>Для production лучше использовать скрипты, потому что они позволяют:</p>
+<ul>
+<li>копировать WAL во внешнее безопасное хранилище;</li>
+<li>делать повторные попытки;</li>
+<li>писать понятные логи;</li>
+<li>отправлять ошибки в мониторинг;</li>
+<li>работать с S3/NFS/backup-системой.</li>
+</ul>
+<p>Если <code>archive_command</code> вызывает скрипт, полезно включить <code>logging_collector</code>, чтобы stderr скрипта попадал в журнал PostgreSQL.</p>
+</div>
+
+<div class='card'>
+<h3>Ограничения и важные замечания</h3>
+<ul>
+<li>WAL archive восстанавливает весь кластер целиком, а не отдельную таблицу.</li>
+<li>Конфигурационные файлы <code>postgresql.conf</code>, <code>pg_hba.conf</code>, <code>pg_ident.conf</code> не попадают в WAL, их нужно сохранять отдельно.</li>
+<li>Создание/удаление tablespace требует особой осторожности: пути tablespace записываются в WAL как абсолютные.</li>
+<li>После операций с tablespace лучше сделать новую базовую копию.</li>
+<li>Если WAL повреждён, восстановление остановится на повреждённом месте.</li>
+<li>Если архив временно недоступен, восстановление можно перезапустить после устранения причины.</li>
+<li><code>full_page_writes</code> увеличивает объём WAL, но защищает от частичной записи страниц.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Практический чек-лист поддержки</h3>
+<ol>
+<li>Проверить <code>archive_mode</code>, <code>archive_command</code>, <code>wal_level</code>.</li>
+<li>Проверить <code>pg_stat_archiver</code> на ошибки и задержки.</li>
+<li>Проверить свободное место в <code>pg_wal/</code> и архивном хранилище.</li>
+<li>Проверить, не копит ли PostgreSQL WAL из-за неработающего archive_command.</li>
+<li>Проверить, есть ли базовая копия и непрерывная цепочка WAL после неё.</li>
+<li>Проверить, архивируются ли timeline history files.</li>
+<li>Для восстановления подготовить <code>restore_command</code> и <code>recovery.signal</code>.</li>
+<li>После восстановления проверить данные до открытия доступа пользователям.</li>
+</ol>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по WAL archive</h3>
+<p>1. Для чего нужен WAL archive?</p>
+<button onclick="q('wal1','b','a','Нет. Логический дамп не использует WAL replay.')">Для ускорения pg_dump</button>
+<button onclick="q('wal1','a','a','Верно.')">Для сохранения WAL и восстановления/PITR</button>
+<button onclick="q('wal1','c','a','Нет. pg_hba.conf не архивируется через WAL.')">Для резервного копирования pg_hba.conf</button>
+<div id='wal1' class='res'></div>
+
+<p>2. Что произойдёт, если archive_command постоянно завершается ошибкой?</p>
+<button onclick="q('wal2','b','a','Нет. WAL не перестанет генерироваться.')">PostgreSQL перестанет создавать WAL</button>
+<button onclick="q('wal2','c','a','Нет. Это не удаляет автоматически базу.')">База будет автоматически удалена</button>
+<button onclick="q('wal2','a','a','Верно.')">WAL будет накапливаться в pg_wal и может заполнить диск</button>
+<div id='wal2' class='res'></div>
+
+<p>3. Что означает %f в archive_command?</p>
+<button onclick="q('wal3','c','a','Нет. Полный путь — это %p.')">Полный путь к WAL-файлу</button>
+<button onclick="q('wal3','a','a','Верно.')">Имя WAL-файла</button>
+<button onclick="q('wal3','b','a','Нет. Это не имя базы данных.')">Имя базы данных</button>
+<div id='wal3' class='res'></div>
+
+<p>4. Что нужно для PITR?</p>
+<button onclick="q('wal4','b','a','Нет. Один pg_dump не подходит для WAL replay.')">Только pg_dump</button>
+<button onclick="q('wal4','c','a','Нет. Одних конфигов недостаточно.')">Только postgresql.conf</button>
+<button onclick="q('wal4','a','a','Верно.')">Базовая копия и непрерывная цепочка WAL</button>
+<div id='wal4' class='res'></div>
+</div>
+</section>
+<section id='p10' class='page'><h2>7. Репликация PostgreSQL: физическая и логическая</h2>
+
+<div class='card'>
+<h3>Зачем нужна репликация</h3>
+<p>Взаимодействие нескольких PostgreSQL-серверов можно организовать по-разному. На практике репликация нужна для:</p>
+<ul>
+<li>повышения доступности — если основной сервер недоступен, можно перейти на реплику;</li>
+<li>распределения нагрузки на чтение;</li>
+<li>создания резервного сервера;</li>
+<li>миграции и обновления major-версии PostgreSQL;</li>
+<li>консолидации данных из нескольких источников;</li>
+<li>построения специальных схем, например отложенной реплики.</li>
+</ul>
+<p>В PostgreSQL есть два базовых подхода: <b>физическая</b> и <b>логическая</b> репликация.</p>
+</div>
+
+<div class='card'>
+<h3>Ключевая идея: физическая vs логическая</h3>
+<table style='width:100%;border-collapse:collapse'>
+<tr><th style='border:1px solid #334155;padding:8px'>Критерий</th><th style='border:1px solid #334155;padding:8px'>Физическая репликация</th><th style='border:1px solid #334155;padding:8px'>Логическая репликация</th></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Что передаётся</td><td style='border:1px solid #334155;padding:8px'>WAL-записи низкого уровня</td><td style='border:1px solid #334155;padding:8px'>Изменения строк таблиц</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Объём</td><td style='border:1px solid #334155;padding:8px'>Весь кластер целиком</td><td style='border:1px solid #334155;padding:8px'>Отдельные таблицы/публикации</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Совместимость</td><td style='border:1px solid #334155;padding:8px'>Нужна двоичная совместимость: версия, ОС, платформа</td><td style='border:1px solid #334155;padding:8px'>Достаточно совместимости протокола и структуры таблиц</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Роли</td><td style='border:1px solid #334155;padding:8px'>Primary / Replica</td><td style='border:1px solid #334155;padding:8px'>Publisher / Subscriber</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Направление</td><td style='border:1px solid #334155;padding:8px'>Обычно однонаправленная</td><td style='border:1px solid #334155;padding:8px'>Может использоваться для разных направлений</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>DDL</td><td style='border:1px solid #334155;padding:8px'>Передаётся как часть WAL</td><td style='border:1px solid #334155;padding:8px'>Обычно не реплицируется, схемы готовят вручную</td></tr>
+<tr><td style='border:1px solid #334155;padding:8px'>Основные сценарии</td><td style='border:1px solid #334155;padding:8px'>HA, read scaling, standby</td><td style='border:1px solid #334155;padding:8px'>Миграции, консолидация, частичная репликация</td></tr>
+</table>
+</div>
+
+<div class='card'>
+<h3>Физическая репликация: принцип работы</h3>
+<p>При физической репликации серверы имеют роли: <b>мастер/primary</b> и <b>реплика/standby</b>. Primary передаёт на реплику журнальные записи WAL — как поток или как файлы. Реплика применяет эти записи к своим файлам данных.</p>
+<p>Применение происходит механически, без понимания смысла SQL-команд. Поэтому важна двоичная совместимость между серверами: одинаковая основная версия PostgreSQL, совместимая платформа и окружение.</p>
+<pre>                WAL stream / WAL archive
+Primary ------------------------------------> Replica
+ INSERT/UPDATE/DELETE                         continuous recovery
+ data files + pg_wal                          data files replay WAL</pre>
+<p>Поскольку WAL общий для всего кластера, физическая репликация реплицирует <b>весь кластер целиком</b>, а не отдельные таблицы.</p>
+</div>
+
+<div class='card'>
+<h3>Физическая репликация похожа на постоянно восстанавливаемый backup</h3>
+<p>Настройка физической репликации похожа на физическое резервное копирование:</p>
+<ul>
+<li>создаётся базовая резервная копия через <code>pg_basebackup</code>;</li>
+<li>реплика запускается в режиме непрерывного восстановления;</li>
+<li>сервер восстанавливает согласованность и продолжает применять новые WAL;</li>
+<li>WAL доставляется потоком по протоколу репликации или через архив WAL.</li>
+</ul>
+<pre>pg_basebackup  ->  старт реплики  ->  replay WAL  ->  постоянное восстановление</pre>
+<p>В отличие от обычной резервной копии, реплика поднимается сразу и постоянно догоняет primary. В случае сбоя она уже почти готова принять нагрузку.</p>
+<p><b>Важно:</b> репликация сама по себе не заменяет PITR. Реплика обычно содержит почти текущее состояние, поэтому ошибка пользователя, например случайный DELETE, тоже будет применена на реплике. Для восстановления на произвольный момент нужен backup + WAL archive или отложенная реплика.</p>
+</div>
+
+<div class='card'>
+<h3>Тёплый и горячий резерв</h3>
+<ul>
+<li><b>Тёплый резерв</b> — реплика применяет WAL, но не принимает пользовательские подключения.</li>
+<li><b>Горячий резерв</b> — реплика допускает подключения на чтение после восстановления согласованности.</li>
+</ul>
+<pre>Warm standby:
+Primary -> Replica, подключений нет
+
+Hot standby:
+Primary -> Replica, SELECT разрешён</pre>
+<p>Горячая реплика позволяет разгрузить primary по чтению, но важно учитывать replication lag: данные на реплике могут быть не самыми свежими.</p>
+</div>
+
+<div class='card'>
+<h3>Что можно выполнять на физической реплике</h3>
+<p><b>Разрешено:</b></p>
+<ul>
+<li><code>SELECT</code>, <code>COPY TO</code>, курсоры;</li>
+<li><code>SET</code>, <code>RESET</code>;</li>
+<li><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code> для читающих транзакций;</li>
+<li><code>pg_basebackup</code> с реплики.</li>
+</ul>
+<p><b>Не допускается:</b></p>
+<ul>
+<li><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>TRUNCATE</code>;</li>
+<li><code>nextval()</code>, потому что sequence меняет состояние;</li>
+<li><code>SELECT FOR UPDATE</code> и другие блокировки, предполагающие изменение;</li>
+<li>DDL: <code>CREATE</code>, <code>DROP</code>, включая временные таблицы;</li>
+<li><code>VACUUM</code>, <code>ANALYZE</code>, <code>REINDEX</code>;</li>
+<li><code>GRANT</code>, <code>REVOKE</code>;</li>
+<li>триггеры и пользовательские advisory locks.</li>
+</ul>
+<p>Реплика в hot standby — это сервер для чтения, а не самостоятельный сервер записи.</p>
+</div>
+
+<div class='card'>
+<h3>Потоковая репликация</h3>
+<p>Основной практический способ доставки WAL — <b>streaming replication</b>. Реплика подключается к primary по протоколу репликации и читает поток WAL-записей почти в реальном времени.</p>
+<pre>Application
+  | SELECT/INSERT/UPDATE/DELETE
+  v
+Primary PostgreSQL
+  | wal sender
+  |================ WAL stream ================
+  |                                      wal receiver
+  v                                           v
+pg_wal                                  Replica PostgreSQL
+                                       continuous recovery</pre>
+<p>Процессы:</p>
+<ul>
+<li><code>wal sender</code> — на primary, отправляет WAL;</li>
+<li><code>wal receiver</code> — на replica, принимает WAL;</li>
+<li>startup/recovery process — применяет WAL на реплике.</li>
+</ul>
+<p>При потоковой репликации задержка обычно минимальна, а в синхронном режиме может быть близка к нулю по подтверждённым транзакциям.</p>
+</div>
+
+<div class='card'>
+<h3>Конфликт VACUUM и запросов на реплике</h3>
+<p>Тонкий момент физической репликации: на primary VACUUM может удалить версии строк, которые ещё нужны долгому snapshot-запросу на реплике. В таком случае PostgreSQL может отменить запрос на реплике.</p>
+<p>Для потоковой репликации существует обратная связь:</p>
+<pre>hot_standby_feedback = on</pre>
+<p>Реплика сообщает primary, какой xmin нужен её запросам. Primary откладывает очистку старых версий.</p>
+<p><b>Компромисс:</b> запросы на реплике меньше отменяются, но на primary может расти bloat, потому что VACUUM не может удалить старые версии строк.</p>
+</div>
+
+<div class='card'>
+<h3>Репликация через архив WAL</h3>
+<p>Второй способ доставки WAL — через архив. Primary архивирует завершённые WAL-сегменты через <code>archive_command</code>, а реплика читает их через <code>restore_command</code>.</p>
+<pre>Primary
+  | archive_command
+  v
+WAL archive -------------- restore_command --------------> Replica
+                                                        replay WAL</pre>
+<p>Если streaming replication не может получить нужный WAL, реплика может попробовать взять его из архива.</p>
+<p>На практике часто используют схему:</p>
+<pre>streaming replication + WAL archive</pre>
+<p>Почему это важно:</p>
+<ul>
+<li>если primary удалит WAL до передачи реплике, реплика сможет взять его из архива;</li>
+<li>архив WAL всё равно нужен для backup/PITR;</li>
+<li>это повышает устойчивость репликации.</li>
+</ul>
+<p>Репликация может работать только через архив, без streaming, но тогда реплика будет отставать минимум на время заполнения WAL-сегмента. Кроме того, primary не знает о такой реплике, и VACUUM-конфликты сложнее контролировать.</p>
+</div>
+
+<div class='card'>
+<h3>Replication slots</h3>
+<p>При streaming replication есть риск: primary может удалить WAL-сегмент, который реплика ещё не получила. Один из способов защиты — replication slot.</p>
+<pre>SELECT * FROM pg_replication_slots;</pre>
+<p>Slot сообщает primary, какие WAL ещё нужны потребителю. Пока реплика не получит WAL, primary не удалит эти сегменты.</p>
+<p><b>Опасность:</b> если реплика умерла, а slot остался активным, <code>pg_wal/</code> может бесконечно расти. Поэтому slots обязательно мониторят.</p>
+</div>
+
+<div class='card'>
+<h3>Переключение на реплику: switchover и failover</h3>
+<p>Причины перехода на реплику бывают разные:</p>
+<ul>
+<li><b>Switchover</b> — плановое переключение для технических работ;</li>
+<li><b>Failover</b> — аварийное переключение при сбое primary.</li>
+</ul>
+<p>В PostgreSQL нет встроенного полноценного cluster manager, который сам принимает решение о failover. Для автоматизации используют Patroni, repmgr, Pacemaker или другие внешние средства.</p>
+<pre>До переключения:
+Primary  --WAL-->  Replica
+ write             read only
+
+После promote:
+Former Primary     New Primary
+ disconnected      write/read</pre>
+<p>При promote реплика прекращает режим восстановления и становится самостоятельным primary. После этого приложения нужно перенаправить на новый сервер внешними средствами: HAProxy, VIP, DNS, service discovery.</p>
+</div>
+
+<div class='card'>
+<h3>Возврат бывшего primary</h3>
+<p>После failover бывший primary нельзя просто подключить к новому primary как реплику. Причина: на старом primary могли остаться WAL-записи, которые не успели попасть на бывшую реплику. Если поверх них начать применять WAL с нового primary, можно повредить данные.</p>
+<p>Есть варианты:</p>
+<ul>
+<li><b>создать новую реплику с нуля</b> через <code>pg_basebackup</code> — надёжно, но долго;</li>
+<li><b>rsync</b> — может ускорить пересоздание;</li>
+<li><b>pg_rewind</b> — быстро вернуть бывший primary как replica, если условия позволяют.</li>
+</ul>
+<p><code>pg_rewind</code> находит изменения, которые разошлись после общей точки истории, и заменяет затронутые страницы страницами с нового primary. После этого запускается обычное восстановление.</p>
+<pre>Old Primary --pg_rewind--> Replica of New Primary</pre>
+<p>Для поддержки важно: после failover всегда проверять timeline, WAL availability и возможность pg_rewind/reinit.</p>
+</div>
+
+<div class='card'>
+<h3>Несколько реплик: HA и распределение чтения</h3>
+<p>Одна из типовых схем:</p>
+<pre>                  Primary
+                /    |    \
+               /     |     \
+          Replica A Replica B Replica C
+          read only read only read only</pre>
+<p>Задачи:</p>
+<ul>
+<li>высокая доступность;</li>
+<li>распределение SELECT-нагрузки;</li>
+<li>резервный сервер для аварийного перехода;</li>
+<li>backup с реплики.</li>
+</ul>
+<p>Нужно учитывать: каждой реплике соответствует отдельный <code>wal sender</code> на primary и, при использовании slots, отдельный replication slot. Балансировка чтения между репликами решается внешними средствами.</p>
+</div>
+
+<div class='card'>
+<h3>Синхронная и асинхронная физическая репликация</h3>
+<p><b>Асинхронная репликация</b>: primary подтверждает commit, не ожидая реплику. Это быстрее, но при аварии можно потерять последние транзакции.</p>
+<p><b>Синхронная репликация</b>: commit на primary не завершается, пока не получит подтверждение от синхронной реплики.</p>
+<pre>Transaction commit on Primary:
+1. write WAL locally
+2. wait for synchronous replica confirmation
+3. mark transaction committed</pre>
+<p>Синхронность повышает надёжность, но увеличивает latency. Ей можно управлять на уровне конфигурации и иногда на уровне транзакций.</p>
+<p><b>Особенность:</b> синхронная реплика может увидеть изменения раньше, чем параллельный запрос на primary, потому что порядок видимости и подтверждения не всегда интуитивен.</p>
+</div>
+
+<div class='card'>
+<h3>Каскадная репликация</h3>
+<p>Каскадная репликация позволяет не нагружать primary большим количеством реплик. Одна реплика передаёт WAL следующей.</p>
+<pre>Primary
+  |
+  v
+Replica A
+  |
+  v
+Replica B
+  |
+  v
+Replica C</pre>
+<p>Плюсы:</p>
+<ul>
+<li>меньше wal sender-процессов на primary;</li>
+<li>можно строить географически распределённые схемы;</li>
+<li>удобно при большом числе реплик.</li>
+</ul>
+<p>Минусы:</p>
+<ul>
+<li>чем дальше реплика от primary, тем больше lag;</li>
+<li>сложнее мониторинг;</li>
+<li>при failover лучше выбирать ближайшую к primary и наименее отстающую реплику.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Отложенная репликация</h3>
+<p>Отложенная реплика применяет WAL не сразу, а с заданной задержкой. Это полезно как «машина времени».</p>
+<pre>Primary --WAL--> Delayed Replica
+              replay delay: 30 minutes</pre>
+<p>Сценарии:</p>
+<ul>
+<li>посмотреть данные до ошибочного DELETE/UPDATE;</li>
+<li>быстрее восстановиться на момент времени без полного PITR;</li>
+<li>иметь резервную копию состояния «немного в прошлом».</li>
+</ul>
+<p>Для корректной работы нужна синхронизация часов между серверами.</p>
+<p><b>Риск:</b> если включён feedback, большая задержка может вызвать bloat на primary, потому что VACUUM будет вынужден сохранять старые версии строк для реплики.</p>
+</div>
+
+<div class='card'>
+<h3>Логическая репликация: принцип работы</h3>
+<p>Логическая репликация передаёт изменения на уровне строк таблиц. Для этого WAL должен содержать информацию более высокого уровня:</p>
+<pre>wal_level = logical</pre>
+<p>Встроенная логическая репликация доступна начиная с PostgreSQL 10. В более ранних версиях использовали <code>pg_logical</code> или триггерные схемы репликации.</p>
+<p>Модель работы:</p>
+<pre>Publisher database
+  publication: table_a, table_b
+        |
+        | logical changes via replication protocol
+        v
+Subscriber database
+  logical replication worker applies rows</pre>
+<p>В логической репликации нет жёсткой роли «мастер/реплика» на уровне всего сервера. Один сервер может публиковать одни таблицы и подписываться на другие.</p>
+</div>
+
+<div class='card'>
+<h3>Publication / Subscription</h3>
+<p>На публикующем сервере создаётся публикация. Она включает таблицы одной базы данных. Подписчик создаёт subscription и получает изменения.</p>
+<pre>CREATE PUBLICATION app_pub FOR TABLE orders, customers;
+
+CREATE SUBSCRIPTION app_sub
+CONNECTION 'host=publisher dbname=app user=repl password=secret'
+PUBLICATION app_pub;</pre>
+<p>Реплицируются не SQL-команды, а изменения строк:</p>
+<ul>
+<li>INSERT;</li>
+<li>UPDATE;</li>
+<li>DELETE;</li>
+<li>в современных версиях PostgreSQL также возможны дополнительные режимы, но базовая идея — передача изменений данных.</li>
+</ul>
+<p>DDL не передаётся автоматически. Таблицы на подписчике нужно подготовить заранее или синхронизировать отдельно. При создании подписки возможна начальная синхронизация данных.</p>
+</div>
+
+<div class='card'>
+<h3>Процессы логической репликации</h3>
+<pre>Publisher
+  WAL + logical decoding
+  wal sender
+      |
+      v
+Subscriber
+  logical replication worker
+  apply changes</pre>
+<p>На publisher изменения декодируются из WAL и отправляются по протоколу репликации. На subscriber фоновый процесс <b>logical replication worker</b> принимает изменения и применяет их.</p>
+<p>Для надёжности используется <b>logical replication slot</b>, чтобы не терять и не дублировать изменения.</p>
+<p><b>Важно:</b> если подписчик долго недоступен, publisher будет сохранять WAL для logical slot, и это может привести к росту <code>pg_wal/</code>.</p>
+</div>
+
+<div class='card'>
+<h3>Replica identity и конфликты</h3>
+<p>Для INSERT всё просто: добавляется новая строка. Но для UPDATE и DELETE подписчик должен понять, какую старую строку нужно изменить или удалить.</p>
+<p>Для этого используется <b>replica identity</b>:</p>
+<ul>
+<li>первичный ключ — по умолчанию;</li>
+<li>уникальный индекс с NOT NULL;</li>
+<li>все столбцы;</li>
+<li>без идентификации — для таблиц, где UPDATE/DELETE не должны реплицироваться.</li>
+</ul>
+<pre>ALTER TABLE orders REPLICA IDENTITY USING INDEX orders_uidx;
+ALTER TABLE orders REPLICA IDENTITY FULL;</pre>
+<p>Конфликты возникают, если на подписчике локальные данные нарушают ограничения при применении изменений. Например, приходит INSERT, а такая строка уже есть.</p>
+<p>При конфликте логическая репликация обычно приостанавливается до ручного вмешательства:</p>
+<ul>
+<li>исправить данные на subscriber;</li>
+<li>пропустить конфликтующую транзакцию, если это допустимо;</li>
+<li>пересинхронизировать таблицу.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Сценарий 1: консолидация данных</h3>
+<p>Несколько региональных серверов публикуют данные, а центральный сервер подписывается на них.</p>
+<pre>Region A Publisher ----\
+                       +--> Central Subscriber
+Region B Publisher ----/
+
+Central receives selected tables from branches</pre>
+<p>Так можно собирать данные филиалов в центральную систему. Обратная схема подходит для распространения справочников из центра в регионы.</p>
+<p>Нужно учитывать постоянное соединение: если subscriber недоступен, publisher сохраняет WAL для slot.</p>
+</div>
+
+<div class='card'>
+<h3>Сценарий 2: обновление major-версии без долгого простоя</h3>
+<p>Физическая репликация не подходит для разных major-версий PostgreSQL, потому что нет двоичной совместимости. Логическая репликация может помочь.</p>
+<pre>Old PostgreSQL 10  --logical replication-->  New PostgreSQL 11+
+       writes                              initial sync + apply changes</pre>
+<p>Общий подход:</p>
+<ol>
+<li>создать новый сервер нужной версии;</li>
+<li>создать схемы и объекты;</li>
+<li>настроить публикации и подписки;</li>
+<li>дождаться начальной синхронизации;</li>
+<li>переключить клиентов на новый сервер внешними средствами;</li>
+<li>выключить старый сервер после проверки.</li>
+</ol>
+<p>На практике такой upgrade сложен: нужно учитывать sequences, DDL, расширения, права, jobs, функции, типы и поведение приложения.</p>
+</div>
+
+<div class='card'>
+<h3>Сценарий 3: master-master и двунаправленные схемы</h3>
+<p>Логическая репликация теоретически позволяет строить схемы, где несколько серверов принимают запись и обмениваются изменениями.</p>
+<pre>Server A publication  <---->  subscription Server B
+Server A subscription <---->  publication  Server B</pre>
+<p>Но это не «магический multi-master». Приложение должно предотвращать конфликты: например, разные серверы работают с разными диапазонами ключей или разными наборами данных.</p>
+<p>Ограничения:</p>
+<ul>
+<li>нет глобальных распределённых транзакций;</li>
+<li>нет автоматического разрешения бизнес-конфликтов;</li>
+<li>автоматизация отказов и добавления узлов решается внешними средствами;</li>
+<li>согласованность между серверами требует отдельного проектирования.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Что выбирать на практике</h3>
+<ul>
+<li><b>Нужен HA и read-only реплики?</b> Физическая репликация.</li>
+<li><b>Нужно обновить major-версию с малым простоем?</b> Логическая репликация.</li>
+<li><b>Нужно реплицировать часть таблиц?</b> Логическая репликация.</li>
+<li><b>Нужен точный standby всего кластера?</b> Физическая репликация.</li>
+<li><b>Нужна защита от случайного DELETE?</b> Backup + PITR или delayed replica, а не обычная реплика.</li>
+<li><b>Нужно масштабировать чтение?</b> Физические hot standby-реплики.</li>
+<li><b>Нужно собирать данные филиалов?</b> Логическая репликация или пакетная интеграция.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Мониторинг репликации</h3>
+<p>Для физической репликации на primary:</p>
+<pre>SELECT application_name,
+       client_addr,
+       state,
+       sync_state,
+       sent_lsn,
+       write_lsn,
+       flush_lsn,
+       replay_lsn,
+       pg_wal_lsn_diff(sent_lsn, replay_lsn) AS lag_bytes
+FROM pg_stat_replication;</pre>
+<p>Для replication slots:</p>
+<pre>SELECT slot_name,
+       slot_type,
+       active,
+       restart_lsn,
+       confirmed_flush_lsn
+FROM pg_replication_slots;</pre>
+<p>Для logical subscriptions на подписчике:</p>
+<pre>SELECT * FROM pg_stat_subscription;</pre>
+<p>Что смотрит поддержка:</p>
+<ul>
+<li>растёт ли replication lag;</li>
+<li>не завис ли wal receiver;</li>
+<li>не удерживает ли slot старые WAL;</li>
+<li>есть ли ошибки apply worker;</li>
+<li>не отличается ли timeline после failover;</li>
+<li>не растёт ли <code>pg_wal/</code>.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Главные выводы</h3>
+<ul>
+<li>Физическая репликация передаёт WAL и создаёт точную копию всего кластера.</li>
+<li>Физическая репликация однонаправленная и требует двоичной совместимости.</li>
+<li>Логическая репликация передаёт изменения строк отдельных таблиц.</li>
+<li>Логическая репликация гибче, но требует проектирования схемы, ключей, DDL и обработки конфликтов.</li>
+<li>Репликация не заменяет backup: ошибка пользователя может быстро попасть на реплики.</li>
+<li>Для production обычно нужны вместе: репликация, WAL archive, backup, мониторинг и процедура восстановления.</li>
+</ul>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по репликации</h3>
+<p>1. Что реплицирует физическая репликация?</p>
+<button onclick="q('rep1','b','a','Нет. Отдельные таблицы — это область логической репликации.')">Только выбранные таблицы</button>
+<button onclick="q('rep1','a','a','Верно.')">Весь кластер через WAL</button>
+<button onclick="q('rep1','c','a','Нет. pg_dump не является механизмом физической репликации.')">Только логические дампы</button>
+<div id='rep1' class='res'></div>
+
+<p>2. Почему физической репликации нужна двоичная совместимость?</p>
+<button onclick="q('rep2','c','a','Нет. HAProxy не влияет на формат WAL.')">Из-за HAProxy</button>
+<button onclick="q('rep2','a','a','Верно.')">Реплика применяет низкоуровневые WAL-записи к файлам данных</button>
+<button onclick="q('rep2','b','a','Нет. Пользователь приложения не определяет бинарный формат данных.')">Из-за имени пользователя</button>
+<div id='rep2' class='res'></div>
+
+<p>3. Что делает wal receiver?</p>
+<button onclick="q('rep3','b','a','Нет. VACUUM выполняет очистку, а не приём WAL.')">Очищает dead tuples</button>
+<button onclick="q('rep3','c','a','Нет. План запросов строит planner.')">Строит план SQL-запроса</button>
+<button onclick="q('rep3','a','a','Верно.')">Принимает WAL-поток на реплике</button>
+<div id='rep3' class='res'></div>
+
+<p>4. Что произойдёт, если logical replication slot есть, а subscriber долго недоступен?</p>
+<button onclick="q('rep4','a','a','Верно.')">Publisher будет удерживать WAL, возможен рост pg_wal</button>
+<button onclick="q('rep4','b','a','Нет. PostgreSQL не удаляет slot автоматически просто из-за простоя.')">Slot автоматически удалится</button>
+<button onclick="q('rep4','c','a','Нет. VACUUM FULL не запускается автоматически из-за slot.')">Запустится VACUUM FULL</button>
+<div id='rep4' class='res'></div>
+
+<p>5. Что не передаётся автоматически в базовой логической репликации?</p>
+<button onclick="q('rep5','b','a','Нет. INSERT обычно реплицируется.')">INSERT</button>
+<button onclick="q('rep5','a','a','Верно.')">DDL-изменения схемы</button>
+<button onclick="q('rep5','c','a','Нет. UPDATE может реплицироваться при корректной replica identity.')">UPDATE</button>
+<div id='rep5' class='res'></div>
+</div>
+</section>
+<section id='p12' class='page'><h2>8. EXPLAIN ANALYZE — подробный разбор планов запросов</h2>
+<div class='card'>
+<h3>Зачем нужен EXPLAIN</h3>
+<p>При выполнении любого SQL-запроса PostgreSQL сначала строит <b>план выполнения</b>. Планировщик решает, как читать таблицы, какие индексы использовать, каким способом соединять таблицы, когда сортировать данные и где можно остановить выполнение раньше, например из-за LIMIT.</p>
+<p>Правильный план критически важен для производительности. Один и тот же запрос может выполняться миллисекунды или минуты в зависимости от выбранного плана.</p>
+<pre>EXPLAIN SELECT * FROM orders WHERE id = 100;
+EXPLAIN ANALYZE SELECT * FROM orders WHERE id = 100;</pre>
+<p><b>EXPLAIN</b> показывает ожидаемый план без выполнения запроса. <b>EXPLAIN ANALYZE</b> выполняет запрос реально и показывает фактические метрики.</p>
+<p><b>Для автоматической обработки</b> можно использовать форматы JSON, YAML или XML:</p>
+<pre>EXPLAIN (FORMAT JSON) SELECT * FROM orders;
+EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) SELECT * FROM orders;</pre>
+</div>
+
+<div class='card'>
+<h3>План запроса как дерево узлов</h3>
+<p>План запроса — это дерево. Нижние узлы обычно читают данные: таблицы, индексы, результаты функций или VALUES. Верхние узлы выполняют операции над полученными строками: сортировку, агрегацию, соединение, фильтрацию, ограничение количества строк.</p>
+<pre>Seq Scan on tenk1  (cost=0.00..445.00 rows=10000 width=244)</pre>
+<p>В этом примере выбран <b>Seq Scan</b> — последовательное сканирование всей таблицы. Такой план нормален, если нужно прочитать большую часть таблицы или если таблица маленькая.</p>
+<p>Отступы в выводе EXPLAIN показывают вложенность: дочерние узлы передают строки родительским узлам.</p>
+</div>
+
+<div class='card'>
+<h3>cost, rows, width</h3>
+<p>В скобках EXPLAIN показывает оценки планировщика:</p>
+<ul>
+<li><b>startup cost</b> — стоимость до начала выдачи первых строк;</li>
+<li><b>total cost</b> — стоимость выполнения узла до конца;</li>
+<li><b>rows</b> — сколько строк узел должен вернуть наружу;</li>
+<li><b>width</b> — средний размер возвращаемой строки в байтах.</li>
+</ul>
+<pre>Seq Scan on tenk1  (cost=0.00..470.00 rows=7000 width=244)
+  Filter: (unique1 &lt; 7000)</pre>
+<p><b>Важно:</b> rows — это не количество прочитанных строк, а количество строк после фильтрации. Узел может прочитать 10000 строк, но вернуть 7000.</p>
+<p>Стоимость измеряется не в миллисекундах, а в условных единицах планировщика. Обычно за базу берётся стоимость чтения страницы с диска. Верхний узел включает стоимость дочерних узлов.</p>
+</div>
+
+<div class='card'>
+<h3>Seq Scan, Index Scan и Bitmap Scan</h3>
+<p><b>Seq Scan</b> читает таблицу целиком. Это не всегда плохо: если таблица маленькая или нужно много строк, последовательное чтение может быть быстрее индекса.</p>
+<pre>EXPLAIN SELECT * FROM tenk1 WHERE unique1 &lt; 7000;</pre>
+<p><b>Index Scan</b> эффективен, когда нужно мало строк или когда порядок индекса помогает выполнить ORDER BY.</p>
+<pre>Index Scan using tenk1_unique1 on tenk1
+  Index Cond: (unique1 = 42)</pre>
+<p><b>Bitmap Index Scan + Bitmap Heap Scan</b> часто используется, когда строк больше, чем для обычного Index Scan, но меньше, чем для полного сканирования таблицы.</p>
+<pre>Bitmap Heap Scan on tenk1
+  Recheck Cond: (unique1 &lt; 100)
+  -&gt; Bitmap Index Scan on tenk1_unique1
+       Index Cond: (unique1 &lt; 100)</pre>
+<p>Bitmap-план сначала находит адреса строк в индексе, затем читает страницы таблицы более упорядоченно.</p>
+</div>
+
+<div class='card'>
+<h3>Index Cond, Filter, Recheck Cond</h3>
+<pre>Bitmap Heap Scan on tenk1
+  Recheck Cond: (unique1 &lt; 100)
+  Filter: (stringu1 = 'xxx')
+  -&gt; Bitmap Index Scan on tenk1_unique1
+       Index Cond: (unique1 &lt; 100)</pre>
+<ul>
+<li><b>Index Cond</b> — условие реально используется индексом;</li>
+<li><b>Filter</b> — условие проверяется после получения строк;</li>
+<li><b>Recheck Cond</b> — повторная проверка условия после bitmap/index этапа.</li>
+</ul>
+<p>Если важный предикат оказался в Filter, а не в Index Cond, возможно, нужен другой индекс или составной индекс.</p>
+</div>
+
+<div class='card'>
+<h3>ORDER BY, Sort и Incremental Sort</h3>
+<p>ORDER BY может выполняться несколькими способами:</p>
+<ul>
+<li>через порядок уже существующего индекса;</li>
+<li>через отдельный узел Sort;</li>
+<li>через Incremental Sort, если часть порядка уже обеспечена нижним узлом.</li>
+</ul>
+<pre>Sort  (cost=1109.39..1134.39 rows=10000 width=244)
+  Sort Key: unique1
+  -&gt; Seq Scan on tenk1</pre>
+<pre>Limit
+  -&gt; Incremental Sort
+       Sort Key: hundred, ten
+       Presorted Key: hundred
+       -&gt; Index Scan using tenk1_hundred on tenk1</pre>
+<p><b>Incremental Sort</b> может начать выдавать строки раньше полной сортировки и часто полезен вместе с LIMIT. Но он тоже имеет накладные расходы.</p>
+</div>
+
+<div class='card'>
+<h3>Комбинирование индексов: BitmapAnd и BitmapOr</h3>
+<p>Если условия используют разные индексы, планировщик может объединить результаты через BitmapAnd или BitmapOr.</p>
+<pre>Bitmap Heap Scan on tenk1
+  Recheck Cond: ((unique1 &lt; 100) AND (unique2 &gt; 9000))
+  -&gt; BitmapAnd
+       -&gt; Bitmap Index Scan on tenk1_unique1
+       -&gt; Bitmap Index Scan on tenk1_unique2</pre>
+<p>Это не всегда выгоднее одного индекса плюс Filter: нужно обойти несколько индексов, и стоимость может оказаться выше.</p>
+</div>
+
+<div class='card'>
+<h3>LIMIT и ранняя остановка</h3>
+<p>LIMIT может полностью изменить план. Планировщик может выбрать путь, который быстро найдёт первые строки, даже если полное выполнение этого пути было бы дороже.</p>
+<pre>Limit
+  -&gt; Index Scan using tenk1_unique2 on tenk1
+       Index Cond: (unique2 &gt; 9000)
+       Filter: (unique1 &lt; 100)</pre>
+<p>Оценки дочернего узла могут быть рассчитаны как будто он выполнится до конца, но фактически Limit остановит чтение раньше. Это не ошибка планировщика.</p>
+</div>
+
+<div class='card'>
+<h3>Типы соединений: Nested Loop, Hash Join, Merge Join</h3>
+<p><b>Nested Loop</b> выполняет внутренний узел для каждой строки внешнего узла. Хорош, если внешних строк мало, а внутренний поиск идёт по индексу.</p>
+<pre>Nested Loop
+  -&gt; Bitmap Heap Scan on tenk1
+  -&gt; Index Scan using tenk2_unique2 on tenk2</pre>
+<p><b>Hash Join</b> строит хеш-таблицу по одной стороне соединения и затем проверяет строки другой стороны.</p>
+<pre>Hash Join
+  Hash Cond: (t2.unique2 = t1.unique2)
+  -&gt; Seq Scan on tenk2 t2
+  -&gt; Hash
+       -&gt; Bitmap Heap Scan on tenk1 t1</pre>
+<p><b>Merge Join</b> требует отсортированных входных потоков. Он эффективен, если данные уже идут в нужном порядке из индексов или если сортировка стоит недорого.</p>
+<pre>Merge Join
+  Merge Cond: (t1.unique2 = t2.unique2)
+  -&gt; Index Scan using tenk1_unique2 on tenk1 t1
+  -&gt; Index Scan using onek_unique2 on onek t2</pre>
+<p><b>Join Filter</b> применяется в узле соединения, если условие зависит от обеих таблиц. Во внешних соединениях Join Filter и обычный Filter ведут себя по-разному: Join Filter может оставить строку с NULL-расширением, а обычный Filter полностью исключает строку.</p>
+</div>
+
+<div class='card'>
+<h3>Materialize</h3>
+<p>Узел <b>Materialize</b> сохраняет промежуточный результат в памяти, чтобы не перечитывать его заново много раз.</p>
+<pre>Nested Loop
+  -&gt; Bitmap Heap Scan on tenk1
+  -&gt; Materialize
+       -&gt; Index Scan using tenk2_unique2 on tenk2</pre>
+<p>Это часто появляется, когда внутренний результат во вложенном цикле нужно использовать несколько раз.</p>
+</div>
+
+<div class='card'>
+<h3>SubPlan, hashed SubPlan и InitPlan</h3>
+<p>Подзапросы могут превращаться в отдельные подпланы.</p>
+<ul>
+<li><b>SubPlan</b> может выполняться для каждой строки внешнего запроса;</li>
+<li><b>hashed SubPlan</b> выполняется один раз и сохраняет результат в хеш-таблице;</li>
+<li><b>InitPlan</b> выполняется один раз до основного плана, если подзапрос не зависит от внешних строк и возвращает одно значение.</li>
+</ul>
+<pre>Filter: (NOT (ANY (unique1 = (hashed SubPlan 1).col1)))</pre>
+<p>Для поддержки важно замечать SubPlan, который выполняется много раз: он может быть причиной медленного запроса.</p>
+</div>
+
+<div class='card'>
+<h3>EXPLAIN ANALYZE: actual time, rows, loops</h3>
+<p>EXPLAIN ANALYZE добавляет фактические данные выполнения.</p>
+<pre>Index Scan using tenk2_unique2 on tenk2
+  (cost=0.29..7.90 rows=1 width=244)
+  (actual time=0.003..0.003 rows=1 loops=10)</pre>
+<ul>
+<li><b>actual time</b> — фактическое время в миллисекундах;</li>
+<li><b>actual rows</b> — фактическое число строк на выходе узла;</li>
+<li><b>loops</b> — сколько раз узел был выполнен.</li>
+</ul>
+<p>Если loops больше 1, actual time и rows обычно показываются как среднее за один цикл. Чтобы грубо оценить суммарное время узла, нужно умножить время на loops.</p>
+<p><b>Главный сигнал проблемы:</b> estimated rows сильно отличаются от actual rows. Например, планировщик ожидал 10 строк, а получил 500000.</p>
+</div>
+
+<div class='card'>
+<h3>BUFFERS и ввод-вывод</h3>
+<p>Параметр BUFFERS показывает, как запрос работал с буферами.</p>
+<pre>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM orders WHERE id = 10;</pre>
+<ul>
+<li><b>shared hit</b> — страницы найдены в shared buffers;</li>
+<li><b>shared read</b> — страницы прочитаны с диска;</li>
+<li><b>dirtied</b> — страницы стали грязными;</li>
+<li><b>written</b> — страницы записаны.</li>
+</ul>
+<p>Много shared read может означать холодный кеш или нагрузку на диск. Много dirtied/written важно для UPDATE/DELETE/INSERT.</p>
+<p>Если вывод BUFFERS не нужен:</p>
+<pre>EXPLAIN (ANALYZE, BUFFERS OFF) SELECT * FROM orders;</pre>
+</div>
+
+<div class='card'>
+<h3>Sort Method, Hash Batches, Index Searches</h3>
+<p>Для некоторых узлов EXPLAIN ANALYZE показывает расширенную статистику.</p>
+<pre>Sort Method: quicksort  Memory: 74kB
+Buckets: 1024  Batches: 1  Memory Usage: 35kB
+Index Searches: 4</pre>
+<ul>
+<li><b>Sort Method</b> показывает метод сортировки и память; если сортировка ушла на диск, стоит проверить work_mem;</li>
+<li><b>Hash Batches</b> больше 1 может означать, что хеш-таблица не поместилась в память;</li>
+<li><b>Index Searches</b> показывает количество поисков по индексу, полезно для IN, skip scan и повторных проходов.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Rows Removed by Filter / Index Recheck</h3>
+<pre>Seq Scan on tenk1
+  Filter: (ten &lt; 7)
+  Rows Removed by Filter: 3000</pre>
+<p><b>Rows Removed by Filter</b> показывает, сколько строк было отброшено фильтром после чтения. Большое значение часто означает, что запрос читает слишком много лишнего.</p>
+<pre>Rows Removed by Index Recheck: 1</pre>
+<p><b>Rows Removed by Index Recheck</b> часто встречается у неточных индексов, например GiST: индекс возвращает кандидатов, а точная проверка отбрасывает лишние строки.</p>
+</div>
+
+<div class='card'>
+<h3>Безопасный анализ UPDATE / DELETE / INSERT / MERGE</h3>
+<p>EXPLAIN ANALYZE действительно выполняет запрос. Поэтому для изменяющих команд используйте транзакцию и ROLLBACK.</p>
+<pre>BEGIN;
+EXPLAIN ANALYZE UPDATE tenk1 SET hundred = hundred + 1 WHERE unique1 &lt; 100;
+ROLLBACK;</pre>
+<p>В планах UPDATE/DELETE/MERGE верхний узел обычно отвечает за изменение данных, а дочерние узлы ищут строки. Время самого изменения может быть значительным, но не всегда отражается в cost так же, как чтение.</p>
+</div>
+
+<div class='card'>
+<h3>Planning Time и Execution Time</h3>
+<ul>
+<li><b>Planning Time</b> — время построения и оптимизации плана;</li>
+<li><b>Execution Time</b> — время выполнения плана, включая запуск/остановку исполнителя и триггеры, но не включая разбор SQL и переписывание запроса.</li>
+</ul>
+<p>Время верхнего узла не включает отправку данных клиенту. Поэтому реальное время в приложении может быть больше, особенно если результат большой или сеть медленная.</p>
+</div>
+
+<div class='card'>
+<h3>Ограничения EXPLAIN ANALYZE</h3>
+<ul>
+<li>EXPLAIN ANALYZE добавляет собственные накладные расходы на измерения;</li>
+<li>данные не отправляются клиенту, поэтому сетевые задержки обычно не учитываются;</li>
+<li>на маленькой тестовой таблице план может быть совсем другим, чем на production;</li>
+<li>LIMIT может остановить дочерний узел раньше, чем предполагает его оценка;</li>
+<li>Merge Join может не читать один из входов до конца;</li>
+<li>BitmapAnd и BitmapOr могут показывать actual rows = 0 из-за особенностей реализации;</li>
+<li>для секционированных таблиц часть подпланов может быть удалена во время выполнения: Subplans Removed.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Практический чек-лист поддержки</h3>
+<ol>
+<li>Получить точный SQL и параметры, с которыми он выполнялся.</li>
+<li>Проверить, можно ли безопасно запускать EXPLAIN ANALYZE.</li>
+<li>Для SELECT использовать <code>EXPLAIN (ANALYZE, BUFFERS)</code>.</li>
+<li>Для UPDATE/DELETE/INSERT запускать внутри <code>BEGIN</code> и завершать <code>ROLLBACK</code>.</li>
+<li>Сравнить estimated rows и actual rows.</li>
+<li>Найти узлы с большим временем и большим loops.</li>
+<li>Проверить, не попали ли важные условия в Filter вместо Index Cond.</li>
+<li>Проверить Sort Method, Hash Batches, temp files и work_mem.</li>
+<li>Проверить shared read, если есть подозрение на дисковую проблему.</li>
+<li>Если статистика устарела — предложить ANALYZE.</li>
+<li>Если нужен индекс или переписывание SQL — передать DBA/разработчикам SQL и полный план.</li>
+</ol>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по EXPLAIN ANALYZE</h3>
+<p>1. Что делает EXPLAIN ANALYZE?</p>
+<button onclick="q('ex1','b','a','Нет. Обычный EXPLAIN показывает план без выполнения.')">Только показывает план без выполнения</button>
+<button onclick="q('ex1','c','a','Нет. Он не создаёт индексы автоматически.')">Создаёт недостающие индексы</button>
+<button onclick="q('ex1','a','a','Верно.')">Реально выполняет запрос и показывает фактические метрики</button>
+<div id='ex1' class='res'></div>
+
+<p>2. Что означает rows в обычном EXPLAIN?</p>
+<button onclick="q('ex2','b','a','Нет. Узел может просканировать больше строк, чем вернуть.')">Количество всех просканированных строк</button>
+<button onclick="q('ex2','a','a','Верно.')">Ожидаемое число строк, возвращённых узлом</button>
+<button onclick="q('ex2','c','a','Нет. Время показывается в actual time при ANALYZE.')">Время выполнения в миллисекундах</button>
+<div id='ex2' class='res'></div>
+
+<p>3. Какой признак часто указывает на плохую статистику?</p>
+<button onclick="q('ex3','a','a','Верно.')">estimated rows сильно отличаются от actual rows</button>
+<button onclick="q('ex3','b','a','Нет. pg_hba.conf отвечает за доступ, а не за план запроса.')">Ошибка в pg_hba.conf</button>
+<button onclick="q('ex3','c','a','Нет. WAL archive не формирует оценки планировщика.')">Заполненный WAL archive</button>
+<div id='ex3' class='res'></div>
+
+<p>4. Почему UPDATE лучше анализировать через BEGIN / ROLLBACK?</p>
+<button onclick="q('ex4','a','a','Верно.')">EXPLAIN ANALYZE реально изменит данные</button>
+<button onclick="q('ex4','b','a','Нет. EXPLAIN ANALYZE выполняет запрос.')">Потому что UPDATE не выполняется</button>
+<button onclick="q('ex4','c','a','Нет. VACUUM FULL тут не запускается.')">Потому что иначе запустится VACUUM FULL</button>
+<div id='ex4' class='res'></div>
+
+<p>5. Что означает большой loops у внутреннего Index Scan в Nested Loop?</p>
+<button onclick="q('ex5','a','a','Верно.')">Внутренний узел выполнялся много раз, возможно для каждой внешней строки</button>
+<button onclick="q('ex5','b','a','Нет. loops не означает количество индексов.')">В таблице много индексов</button>
+<button onclick="q('ex5','c','a','Нет. Это не связано напрямую с WAL.')">WAL записал много сегментов</button>
+<div id='ex5' class='res'></div>
+</div>
+</section>
+
+<section id='p13' class='page'><h2>9. Мониторинг сервера и экземпляра</h2>
+<div class='card'>
+<h3>Что нужно мониторить</h3>
+<p>Мониторинг PostgreSQL должен охватывать не только сам экземпляр БД, но и операционную систему, диск, репликацию, autovacuum, WAL archive и пользовательские сессии.</p>
+<p><b>Главная цель поддержки:</b> быстро понять, проблема в SQL, блокировках, диске, памяти, репликации, WAL archive или инфраструктуре.</p>
+</div>
+
+<div class='card'>
+<h3>Мониторинг ОС</h3>
+<ul>
+<li><b>CPU</b>: load average, steal time, saturation;</li>
+<li><b>RAM</b>: свободная память, page cache, swap;</li>
+<li><b>Disk</b>: IOPS, latency, queue, utilisation;</li>
+<li><b>Filesystem</b>: свободное место, inode, рост каталогов <code>pg_wal/</code>, backup и archive;</li>
+<li><b>Network</b>: потери, задержки, пропускная способность между primary/replica и backup-хранилищем.</li>
+</ul>
+<pre>top
+vmstat 1
+iostat -xz 1
+df -h
+du -sh $PGDATA/pg_wal</pre>
+</div>
+
+<div class='card'>
+<h3>Мониторинг сессий и запросов</h3>
+<p>Хотя отдельный раздел <code>pg_stat_activity</code> удалён, само представление остаётся ключевым инструментом диагностики.</p>
+<pre>SELECT pid,
+       usename,
+       application_name,
+       client_addr,
+       state,
+       wait_event_type,
+       wait_event,
+       now() - xact_start AS xact_age,
+       now() - query_start AS query_age,
+       query
+FROM pg_stat_activity
+WHERE state <> 'idle'
+ORDER BY query_start;</pre>
+<p>Что искать:</p>
+<ul>
+<li><code>idle in transaction</code> — удерживает снимок, мешает VACUUM;</li>
+<li>долгие активные запросы;</li>
+<li>ожидания по <code>Lock</code>, <code>IO</code>, <code>Client</code>;</li>
+<li>много подключений от одного приложения;</li>
+<li>транзакции с большим <code>xact_age</code>.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Мониторинг WAL archive</h3>
+<p>WAL archive критичен для PITR, восстановления из базовой копии и непрерывной цепочки изменений. Если архивирование ломается, каталог <code>pg_wal/</code> начинает расти и может заполнить диск.</p>
+<pre>SELECT archived_count,
+       last_archived_wal,
+       last_archived_time,
+       failed_count,
+       last_failed_wal,
+       last_failed_time
+FROM pg_stat_archiver;</pre>
+<p>Контролировать нужно:</p>
+<ul>
+<li><code>archive_command</code> — успешно ли выполняется;</li>
+<li><code>failed_count</code> — растёт ли число ошибок;</li>
+<li><code>last_archived_time</code> — не устарело ли время последней успешной архивации;</li>
+<li>размер <code>pg_wal/</code>;</li>
+<li>свободное место в архивном хранилище;</li>
+<li>наличие непрерывной WAL-цепочки после последней базовой копии;</li>
+<li>архивируются ли timeline history files.</li>
+</ul>
+<pre>SHOW archive_mode;
+SHOW archive_command;
+SHOW archive_timeout;
+SELECT pg_switch_wal();</pre>
+<p><b>Аварийный признак:</b> <code>failed_count</code> растёт, <code>last_archived_time</code> старое, а <code>pg_wal/</code> увеличивается. Это означает, что WAL не уходит в архив и есть риск заполнения диска.</p>
+</div>
+
+<div class='card'>
+<h3>Мониторинг backup / restore / PITR</h3>
+<p>Для восстановления через WAL archive недостаточно просто иметь WAL. Нужны:</p>
+<ul>
+<li>актуальная базовая резервная копия;</li>
+<li>непрерывная цепочка WAL после неё;</li>
+<li>рабочий <code>restore_command</code>;</li>
+<li>понятная точка восстановления;</li>
+<li>проверенный restore drill.</li>
+</ul>
+<p>Что проверять поддержке:</p>
+<ul>
+<li>когда была последняя базовая копия;</li>
+<li>есть ли WAL с момента старта/окончания этой копии;</li>
+<li>сколько времени займёт replay WAL;</li>
+<li>достаточно ли места для восстановления;</li>
+<li>проводился ли тестовый restore.</li>
+</ul>
+<pre>restore_command = 'cp /mnt/server/archivedir/%f %p'
+recovery_target_time = '2026-04-25 12:30:00+02'
+recovery_target_timeline = 'latest'</pre>
+</div>
+
+<div class='card'>
+<h3>Мониторинг репликации</h3>
+<pre>SELECT application_name,
+       client_addr,
+       state,
+       sync_state,
+       sent_lsn,
+       write_lsn,
+       flush_lsn,
+       replay_lsn,
+       pg_wal_lsn_diff(sent_lsn, replay_lsn) AS lag_bytes
+FROM pg_stat_replication;</pre>
+<p>Что важно:</p>
+<ul>
+<li>реплика отстаёт или нет;</li>
+<li>растёт ли lag;</li>
+<li>есть ли проблемы сети между primary и replica;</li>
+<li>не удерживает ли replication slot старые WAL;</li>
+<li>совпадает ли timeline после failover.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Мониторинг autovacuum и bloat</h3>
+<pre>SELECT schemaname,
+       relname,
+       n_live_tup,
+       n_dead_tup,
+       last_vacuum,
+       last_autovacuum,
+       last_analyze,
+       last_autoanalyze
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC;</pre>
+<p>Что искать:</p>
+<ul>
+<li>большой <code>n_dead_tup</code>;</li>
+<li>давно не было <code>last_autovacuum</code>;</li>
+<li>долгие транзакции удерживают <code>backend_xmin</code>;</li>
+<li>autovacuum не успевает обрабатывать таблицы;</li>
+<li>таблицы растут быстрее, чем очищаются.</li>
+</ul>
+<pre>SELECT * FROM pg_stat_progress_vacuum;</pre>
+</div>
+
+<div class='card'>
+<h3>Мониторинг блокировок</h3>
+<pre>SELECT blocked.pid AS blocked_pid,
+       blocked.query AS blocked_query,
+       blocking.pid AS blocking_pid,
+       blocking.query AS blocking_query
+FROM pg_stat_activity blocked
+JOIN pg_locks blocked_locks ON blocked_locks.pid = blocked.pid
+JOIN pg_locks blocking_locks
+  ON blocking_locks.locktype = blocked_locks.locktype
+ AND blocking_locks.database IS NOT DISTINCT FROM blocked_locks.database
+ AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation
+ AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page
+ AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple
+ AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid
+ AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid
+ AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid
+ AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid
+ AND blocking_locks.pid <> blocked_locks.pid
+JOIN pg_stat_activity blocking ON blocking.pid = blocking_locks.pid
+WHERE NOT blocked_locks.granted;</pre>
+<p>Особое внимание:</p>
+<ul>
+<li>кто блокирует production-запросы;</li>
+<li>есть ли долгий DDL;</li>
+<li>нет ли <code>ACCESS EXCLUSIVE</code>;</li>
+<li>нет ли цепочки блокировок.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Типовые аварии и первые действия</h3>
+<ul>
+<li><b>Диск почти заполнен</b> → проверить <code>pg_wal/</code>, архив WAL, temp files, backup.</li>
+<li><b>База тормозит</b> → проверить CPU, IO latency, долгие запросы, блокировки, autovacuum.</li>
+<li><b>Растёт WAL</b> → проверить <code>pg_stat_archiver</code>, replication slots, replica lag.</li>
+<li><b>Реплика отстаёт</b> → проверить сеть, IO на replica, long-running query на replica, slots.</li>
+<li><b>VACUUM не чистит</b> → проверить <code>backend_xmin</code>, <code>idle in transaction</code>, long transactions.</li>
+<li><b>Ошибки PITR/restore</b> → проверить <code>restore_command</code>, непрерывность WAL, timeline, recovery target.</li>
+</ul>
+</div>
+
+<div class='card'>
+<h3>Минимальный dashboard поддержки</h3>
+<pre>-- Активные запросы
+SELECT count(*) FROM pg_stat_activity WHERE state <> 'idle';
+
+-- Idle in transaction
+SELECT pid, now() - xact_start AS age, query
+FROM pg_stat_activity
+WHERE state = 'idle in transaction';
+
+-- Ошибки архивации WAL
+SELECT failed_count, last_failed_wal, last_failed_time
+FROM pg_stat_archiver;
+
+-- Репликация
+SELECT application_name, state, sync_state,
+       pg_wal_lsn_diff(sent_lsn, replay_lsn) AS lag_bytes
+FROM pg_stat_replication;
+
+-- Dead tuples
+SELECT relname, n_dead_tup, last_autovacuum
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC
+LIMIT 20;</pre>
+</div>
+
+<div class='card quiz'>
+<h3>Квиз по мониторингу</h3>
+<p>1. Что проверять, если быстро растёт pg_wal?</p>
+<button onclick="q('mon1','b','a','Нет. pg_dump не управляет очисткой pg_wal.')">Запустить pg_dump</button>
+<button onclick="q('mon1','a','a','Верно.')">archive_command, pg_stat_archiver, replication slots и lag реплик</button>
+<button onclick="q('mon1','c','a','Нет. Индекс сам по себе не объясняет рост pg_wal.')">Создать индекс</button>
+<div id='mon1' class='res'></div>
+
+<p>2. Что показывает pg_stat_archiver?</p>
+<button onclick="q('mon2','c','a','Нет. Активные запросы показывает pg_stat_activity.')">Активные пользовательские запросы</button>
+<button onclick="q('mon2','b','a','Нет. Dead tuples смотрят в pg_stat_user_tables.')">Мёртвые строки в таблицах</button>
+<button onclick="q('mon2','a','a','Верно.')">Статистику успешной и ошибочной архивации WAL</button>
+<div id='mon2' class='res'></div>
+
+<p>3. Почему idle in transaction опасен?</p>
+<button onclick="q('mon3','b','a','Нет. Такая сессия не ускоряет VACUUM.')">Ускоряет VACUUM</button>
+<button onclick="q('mon3','a','a','Верно.')">Может удерживать snapshot и мешать очистке старых версий</button>
+<button onclick="q('mon3','c','a','Нет. HAProxy не зависит напрямую от idle in transaction.')">Отключает HAProxy</button>
+<div id='mon3' class='res'></div>
+</div>
+</section>
+
+<section id="p14" class="page">
+  <h2>10. Практические инциденты</h2>
+
+  <div class="card">
+    <p><span class="badge">Production troubleshooting</span></p>
+    <p>Практический тренажёр для сотрудников поддержки и сопровождения. Каждый сценарий построен по схеме: <b>инцидент → симптомы → гипотезы → команды диагностики → правильное действие → что нельзя делать → итоговый разбор</b>.</p>
+    <div class="callout"><b>Правило drill-mode:</b> сначала собираем факты, затем выбираем минимально рискованное действие. Не удаляем файлы, не перезапускаем сервис и не завершаем сессии без понимания причины.</div>
+  </div>
+
+  <div class="card">
+    <h3>1. Инцидент: pg_wal заполняет диск</h3>
+    <p><b>Симптомы:</b> файловая система с <code>PGDATA</code> или <code>pg_wal</code> занята на 90–100%, приложение получает ошибки записи, WAL-сегменты быстро появляются и не удаляются.</p>
+    <p><b>Гипотезы:</b> сломан <code>archive_command</code>, отстаёт реплика, replication slot удерживает WAL, резко вырос объём записи, archiver не успевает.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>df -h
+du -sh $PGDATA/pg_wal
+
+SELECT archived_count, last_archived_wal, last_archived_time,
+       failed_count, last_failed_wal, last_failed_time
+FROM pg_stat_archiver;
+
+SELECT slot_name, active, restart_lsn,
+       pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained
+FROM pg_replication_slots;</pre>
+    <p><b>Правильное действие:</b> восстановить archiving, проверить лаг реплик и слоты, удалить только подтверждённо неиспользуемый слот, временно расширить диск при риске остановки сервера.</p>
+    <p><b>Что нельзя делать:</b> вручную удалять файлы из <code>pg_wal</code>, удалять все replication slots подряд, считать <code>max_wal_size</code> решением проблемы удержания WAL.</p>
+    <div class="callout"><b>Итоговый разбор:</b> PostgreSQL не удаляет WAL, пока он нужен для архивации, репликации или слота. Важно устранить причину удержания, а не просто освободить место.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>1. pg_wal растёт, archive_command успешен, но есть inactive slot с retained 120 GB. Что делать?</p>
+      <button onclick="q('drill_wal_1','b','a','Нет. Удаление всех слотов может сломать рабочую репликацию или подписки.')">Удалить все replication slots</button>
+      <button onclick="q('drill_wal_1','a','a','Верно. Сначала подтверждаем, что slot не используется, затем удаляем только его.')">Подтвердить владельца slot и удалить только неиспользуемый</button>
+      <button onclick="q('drill_wal_1','c','a','Нет. VACUUM не освобождает pg_wal.')">Запустить VACUUM FULL</button>
+      <div id="drill_wal_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2. Инцидент: реплика отстаёт на 2 часа</h3>
+    <p><b>Симптомы:</b> read-only запросы на реплике показывают старые данные, monitoring показывает большой replay/write/flush lag, на primary растёт WAL.</p>
+    <p><b>Гипотезы:</b> медленный диск на реплике, сеть, долгие запросы на replica конфликтуют с recovery, высокая генерация WAL на primary, недостаточные ресурсы replay.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT application_name, client_addr, state, sync_state,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) AS replay_lag_bytes,
+       write_lag, flush_lag, replay_lag
+FROM pg_stat_replication;
+
+-- На реплике:
+SELECT now() - pg_last_xact_replay_timestamp() AS replica_delay;
+SELECT * FROM pg_stat_wal_receiver;</pre>
+    <p><b>Правильное действие:</b> разделить network lag и replay lag, проверить IOPS на реплике, конфликтующие запросы, slots и архив, при необходимости временно снять read-нагрузку с реплики.</p>
+    <p><b>Что нельзя делать:</b> blindly promote отстающую реплику, игнорировать lag при read-scaling, удалять WAL на primary.</p>
+    <div class="callout"><b>Итоговый разбор:</b> лаг может быть на передаче, записи, flush или replay. Лечение зависит от стадии, где копится задержка.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>2. Реплика получает WAL, но replay_lag растёт. На что смотреть в первую очередь?</p>
+      <button onclick="q('drill_rep_1','a','a','Верно. Если WAL получен, но не применяется, ищем проблему replay: диск, нагрузка, конфликты.')">Диск, replay и конфликты запросов на реплике</button>
+      <button onclick="q('drill_rep_1','b','a','Нет. Если WAL уже приходит, DNS не первая гипотеза.')">DNS primary</button>
+      <button onclick="q('drill_rep_1','c','a','Нет. ANALYZE на primary не решает replay lag.')">ANALYZE на primary</button>
+      <div id="drill_rep_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3. Инцидент: всё зависло из-за блокировки</h3>
+    <p><b>Симптомы:</b> множество UPDATE/INSERT/ALTER ожидают, приложение зависает, CPU может быть низким, но запросы не завершаются.</p>
+    <p><b>Гипотезы:</b> одна транзакция держит lock, DDL ждёт/держит ACCESS EXCLUSIVE, idle in transaction удерживает row/table lock.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT a.pid, a.usename, a.state, a.wait_event_type, a.wait_event,
+       now() - a.xact_start AS xact_age,
+       pg_blocking_pids(a.pid) AS blocking_pids,
+       a.query
+FROM pg_stat_activity a
+WHERE cardinality(pg_blocking_pids(a.pid)) > 0
+   OR a.wait_event_type = 'Lock'
+ORDER BY xact_age DESC NULLS LAST;</pre>
+    <p><b>Правильное действие:</b> найти blocker, оценить бизнес-риск, связаться с владельцем, завершить точечно <code>pg_cancel_backend</code> или <code>pg_terminate_backend</code>.</p>
+    <p><b>Что нельзя делать:</b> убивать все сессии подряд, запускать новые DDL, перезапускать кластер без анализа.</p>
+    <div class="callout"><b>Итоговый разбор:</b> при блокировках важен не самый долгий blocked-запрос, а корневой blocker.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>3. Много сессий ждут Lock, один blocker — idle in transaction 90 минут. Что безопаснее?</p>
+      <button onclick="q('drill_lock_1','c','a','Нет. Это может привести к массовым ошибкам и потере диагностики.')">Завершить все подключения</button>
+      <button onclick="q('drill_lock_1','a','a','Верно. Сначала подтверждаем владельца, затем завершаем именно blocker.')">Точечно завершить blocker после проверки владельца</button>
+      <button onclick="q('drill_lock_1','b','a','Нет. VACUUM не снимет транзакционную блокировку blocker-сессии.')">Запустить VACUUM</button>
+      <div id="drill_lock_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4. Инцидент: CPU 100% из-за плохого плана</h3>
+    <p><b>Симптомы:</b> CPU на PostgreSQL стабильно 90–100%, активны однотипные SELECT, latency выросла после релиза или изменения данных.</p>
+    <p><b>Гипотезы:</b> seq scan вместо index scan, устаревшая статистика, изменилось распределение данных, не хватает индекса, неверный join order.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT pid, now()-query_start AS age, wait_event_type, query
+FROM pg_stat_activity
+WHERE state = 'active'
+ORDER BY query_start;
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT ...;
+
+SELECT relname, last_analyze, last_autoanalyze, n_mod_since_analyze
+FROM pg_stat_user_tables
+ORDER BY n_mod_since_analyze DESC;</pre>
+    <p><b>Правильное действие:</b> обновить статистику, проверить план, добавить индекс CONCURRENTLY при необходимости, временно ограничить проблемный запрос.</p>
+    <p><b>Что нельзя делать:</b> сразу увеличивать CPU как единственное решение, делать CREATE INDEX без CONCURRENTLY на большой production-таблице, запускать EXPLAIN ANALYZE для тяжёлого UPDATE без транзакции.</p>
+    <div class="callout"><b>Итоговый разбор:</b> высокая CPU часто является следствием плохого плана или массового выполнения дорогого запроса.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>4. После релиза SELECT стал грузить CPU. Что проверять первым?</p>
+      <button onclick="q('drill_cpu_1','a','a','Верно. Нужно увидеть реальный план, строки, buffers и отличия оценок.')">EXPLAIN (ANALYZE, BUFFERS) проблемного запроса</button>
+      <button onclick="q('drill_cpu_1','b','a','Нет. Перезапуск может временно скрыть проблему, но не исправит план.')">Перезапустить PostgreSQL</button>
+      <button onclick="q('drill_cpu_1','c','a','Нет. VACUUM FULL может создать блокировки и не обязан исправить план.')">VACUUM FULL всех таблиц</button>
+      <div id="drill_cpu_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>5. Инцидент: autovacuum не успевает</h3>
+    <p><b>Симптомы:</b> таблицы растут, <code>n_dead_tup</code> высокий, запросы замедляются, autovacuum часто появляется в логах или давно не запускался.</p>
+    <p><b>Гипотезы:</b> scale_factor слишком большой для крупной таблицы, workers заняты, cost delay слишком высокий, long transactions удерживают xmin, autovacuum отключён на таблице.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT relname, n_live_tup, n_dead_tup, last_autovacuum, autovacuum_count
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC
+LIMIT 20;
+
+SELECT * FROM pg_stat_progress_vacuum;
+
+SELECT relname, reloptions
+FROM pg_class
+WHERE reloptions::text ILIKE '%autovacuum%';</pre>
+    <p><b>Правильное действие:</b> настроить per-table autovacuum, уменьшить scale_factor, проверить long transactions, увеличить ресурсы autovacuum осознанно.</p>
+    <p><b>Что нельзя делать:</b> отключать autovacuum глобально, лечить всё только VACUUM FULL, игнорировать <code>idle in transaction</code>.</p>
+    <div class="callout"><b>Итоговый разбор:</b> для больших таблиц дефолтные 20% могут быть слишком большим порогом; autovacuum должен стартовать раньше.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>5. Большая таблица 800 GB, dead tuples много, autovacuum стартует слишком поздно. Лучшее действие?</p>
+      <button onclick="q('drill_vac_1','b','a','Нет. Отключение autovacuum ухудшит ситуацию.')">Отключить autovacuum на таблице</button>
+      <button onclick="q('drill_vac_1','a','a','Верно. Для больших таблиц обычно настраивают меньшие per-table thresholds.')">Настроить autovacuum_vacuum_scale_factor/threshold на уровне таблицы</button>
+      <button onclick="q('drill_vac_1','c','a','Нет. Только рестарт не изменит пороги очистки.')">Перезапустить сервер</button>
+      <div id="drill_vac_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>6. Инцидент: wraparound warning</h3>
+    <p><b>Симптомы:</b> в логах предупреждения про transaction ID wraparound, база может начать запрещать изменения.</p>
+    <p><b>Гипотезы:</b> autovacuum не смог заморозить старые XID, долгие транзакции, отключенный autovacuum, слишком старый <code>datfrozenxid</code>.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT datname, age(datfrozenxid) AS xid_age
+FROM pg_database
+ORDER BY xid_age DESC;
+
+SELECT relname, age(relfrozenxid) AS xid_age
+FROM pg_class
+WHERE relkind IN ('r','m','t')
+ORDER BY xid_age DESC
+LIMIT 30;</pre>
+    <p><b>Правильное действие:</b> срочно устранить блокирующие long transactions и выполнить VACUUM/FREEZE для старых объектов, контролируя нагрузку.</p>
+    <p><b>Что нельзя делать:</b> игнорировать warning, отключать autovacuum, ждать планового окна без оценки возраста XID.</p>
+    <div class="callout"><b>Итоговый разбор:</b> wraparound — критический риск доступности. PostgreSQL защищается, вплоть до запрета операций записи.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>6. Что проверяется первым при wraparound warning?</p>
+      <button onclick="q('drill_wrap_1','a','a','Верно. Нужно найти самые старые datfrozenxid/relfrozenxid.')">age(datfrozenxid) и age(relfrozenxid)</button>
+      <button onclick="q('drill_wrap_1','b','a','Нет. pg_stat_archiver важен для WAL archive, но не первый для wraparound.')">pg_stat_archiver</button>
+      <button onclick="q('drill_wrap_1','c','a','Нет. Количество пользователей не показывает XID age.')">Количество пользователей</button>
+      <div id="drill_wrap_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>7. Инцидент: too many connections</h3>
+    <p><b>Симптомы:</b> новые подключения получают <code>FATAL: too many connections</code>, приложение нестабильно, много idle-сессий.</p>
+    <p><b>Гипотезы:</b> нет pooler, утечка соединений, слишком большой пул в приложении, много idle in transaction, не хватает reserved connections для админов.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT state, count(*)
+FROM pg_stat_activity
+GROUP BY state
+ORDER BY count(*) DESC;
+
+SELECT usename, application_name, client_addr, state, count(*)
+FROM pg_stat_activity
+GROUP BY usename, application_name, client_addr, state
+ORDER BY count(*) DESC;</pre>
+    <p><b>Правильное действие:</b> найти источник соединений, настроить PgBouncer/пулы приложения, точечно завершить idle/idle in transaction при согласовании.</p>
+    <p><b>Что нельзя делать:</b> просто бесконечно увеличивать <code>max_connections</code>, убивать системные процессы, не оставлять админский доступ.</p>
+    <div class="callout"><b>Итоговый разбор:</b> каждое соединение потребляет память и процесс. В production чаще нужен pooling, а не огромный max_connections.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>7. При too many connections самое долгосрочно правильное решение?</p>
+      <button onclick="q('drill_conn_1','c','a','Нет. Это может временно помочь, но увеличивает нагрузку и память.')">Увеличивать max_connections каждый раз</button>
+      <button onclick="q('drill_conn_1','a','a','Верно. Pooling и настройка приложения решают причину.')">Внедрить/настроить connection pooling и лимиты приложения</button>
+      <button onclick="q('drill_conn_1','b','a','Нет. VACUUM не связан с количеством подключений.')">Запустить VACUUM</button>
+      <div id="drill_conn_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>8. Инцидент: deadlock detected</h3>
+    <p><b>Симптомы:</b> приложение получает <code>ERROR: deadlock detected</code>, одна из транзакций прерывается PostgreSQL.</p>
+    <p><b>Гипотезы:</b> транзакции берут одни и те же ресурсы в разном порядке, смешаны UPDATE/SELECT FOR UPDATE, долгие транзакции расширяют окно конфликта.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>-- Смотреть PostgreSQL log: deadlock report содержит процессы и SQL.
+SHOW deadlock_timeout;
+
+SELECT pid, xact_start, query
+FROM pg_stat_activity
+WHERE state <> 'idle'
+ORDER BY xact_start;</pre>
+    <p><b>Правильное действие:</b> добавить retry на SQLSTATE 40P01, унифицировать порядок обновления строк/таблиц, сократить транзакции.</p>
+    <p><b>Что нельзя делать:</b> считать deadlock проблемой только БД, отключать проверки, бесконечно увеличивать timeout.</p>
+    <div class="callout"><b>Итоговый разбор:</b> deadlock — это цикл ожидания. PostgreSQL сам разрывает цикл, но приложение должно корректно повторить транзакцию.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>8. Главное отличие deadlock от обычного ожидания lock?</p>
+      <button onclick="q('drill_dead_1','b','a','Нет. Обычное ожидание может завершиться после commit blocker-а.')">Обычный lock всегда опаснее</button>
+      <button onclick="q('drill_dead_1','a','a','Верно. Deadlock — цикл, который сам не разрешится без прерывания одной транзакции.')">Есть циклическое ожидание транзакций</button>
+      <button onclick="q('drill_dead_1','c','a','Нет. Deadlock не означает нехватку RAM.')">Всегда не хватает памяти</button>
+      <div id="drill_dead_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>9. Инцидент: checkpoint storm / IOPS spike</h3>
+    <p><b>Симптомы:</b> резкие пики записи на диск, latency растёт волнами, в логах частые checkpoints или checkpoint happens too often.</p>
+    <p><b>Гипотезы:</b> слишком маленький <code>max_wal_size</code>, частые checkpoint, большой объём dirty pages, медленный storage.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT checkpoints_timed, checkpoints_req,
+       checkpoint_write_time, checkpoint_sync_time,
+       buffers_checkpoint
+FROM pg_stat_bgwriter;
+
+SHOW checkpoint_timeout;
+SHOW checkpoint_completion_target;
+SHOW max_wal_size;</pre>
+    <p><b>Правильное действие:</b> увеличить <code>max_wal_size</code> осознанно, настроить checkpoint_timeout/completion_target, оценить storage и профиль записи.</p>
+    <p><b>Что нельзя делать:</b> отключать fsync, игнорировать storage latency, менять параметры без мониторинга WAL и восстановления.</p>
+    <div class="callout"><b>Итоговый разбор:</b> checkpoint storm часто проявляется как регулярные I/O пики. Цель — распределить запись плавнее и дать WAL достаточно пространства.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>9. В логах checkpoint happens too often. Что наиболее вероятно поможет?</p>
+      <button onclick="q('drill_chk_1','a','a','Верно. Частые requested checkpoints часто указывают на маленький max_wal_size.')">Оценить и увеличить max_wal_size</button>
+      <button onclick="q('drill_chk_1','b','a','Нет. Отключение fsync опасно для надёжности данных.')">Отключить fsync</button>
+      <button onclick="q('drill_chk_1','c','a','Нет. pg_dump не решает checkpoint storm.')">Сделать pg_dump</button>
+      <div id="drill_chk_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>10. Инцидент: долгий idle in transaction держит xmin</h3>
+    <p><b>Симптомы:</b> VACUUM не освобождает dead tuples, таблицы растут, <code>backend_xmin</code> старый, есть сессии <code>idle in transaction</code>.</p>
+    <p><b>Гипотезы:</b> приложение открыло транзакцию и не завершило её, пользовательская сессия psql оставила BEGIN, транзакция держит snapshot.</p>
+    <p><b>Команды диагностики:</b></p>
+    <pre>SELECT pid, usename, application_name, client_addr,
+       state, backend_xmin,
+       now() - xact_start AS xact_age,
+       query
+FROM pg_stat_activity
+WHERE state = 'idle in transaction'
+ORDER BY xact_start;
+
+SELECT backend_xmin FROM pg_stat_activity WHERE backend_xmin IS NOT NULL ORDER BY backend_xmin LIMIT 10;</pre>
+    <p><b>Правильное действие:</b> найти источник, завершить транзакцию или сессию, настроить <code>idle_in_transaction_session_timeout</code>, исправить приложение.</p>
+    <p><b>Что нельзя делать:</b> бесконечно запускать VACUUM FULL, игнорировать старый snapshot, завершать сессии без оценки бизнес-операции.</p>
+    <div class="callout"><b>Итоговый разбор:</b> idle in transaction может ничего не делать, но удерживать горизонт видимости, из-за чего старые версии строк нельзя удалить.</div>
+    <div class="card quiz">
+      <h3>Drill-вопрос</h3>
+      <p>10. Почему idle in transaction опасен для VACUUM?</p>
+      <button onclick="q('drill_idle_1','c','a','Нет. Он не удаляет WAL напрямую.')">Он удаляет WAL</button>
+      <button onclick="q('drill_idle_1','a','a','Верно. Старый snapshot удерживает xmin и мешает удалению dead tuples.')">Он может удерживать xmin и старые версии строк</button>
+      <button onclick="q('drill_idle_1','b','a','Нет. Он не ускоряет autovacuum.')">Он ускоряет autovacuum</button>
+      <div id="drill_idle_1" class="res"></div>
+    </div>
+  </div>
+
+  <div class="card quiz">
+    <h3>Финальный incident drill</h3>
+    <p>11. Production: диск почти заполнен, pg_wal растёт, archive_command падает. Первое безопасное действие?</p>
+    <button onclick="q('drill_final_1','b','a','Нет. Удалять WAL вручную опасно.')">Удалить старые WAL из pg_wal</button>
+    <button onclick="q('drill_final_1','a','a','Верно. Нужно восстановить archiving и при необходимости временно расширить место.')">Починить archive_command и обеспечить свободное место</button>
+    <button onclick="q('drill_final_1','c','a','Нет. VACUUM FULL не чинит archive_command.')">Запустить VACUUM FULL</button>
+    <div id="drill_final_1" class="res"></div>
+
+    <p>12. Production: запросы висят, CPU низкий, wait_event_type = Lock. Что искать?</p>
+    <button onclick="q('drill_final_2','a','a','Верно. Нужно найти корневую блокирующую сессию.')">Blocking session через pg_blocking_pids</button>
+    <button onclick="q('drill_final_2','b','a','Нет. Низкий CPU и Lock указывают не на плохой план в первую очередь.')">Только EXPLAIN ANALYZE</button>
+    <button onclick="q('drill_final_2','c','a','Нет. Checkpoint не является первой гипотезой при Lock wait.')">checkpoint_timeout</button>
+    <div id="drill_final_2" class="res"></div>
+  </div>
+</section>
+
+<section id="selfcheck" class="page">
+  <h2>11. Диагностика и самопроверка</h2>
+
+  <div class="card">
+    <p><span class="badge">DBA readiness checklist</span></p>
+    <p>Этот раздел нужен для самостоятельной проверки реального PostgreSQL-кластера. Ответы лучше фиксировать как mini-runbook: что проверено, какой результат, где настроен мониторинг и кто владелец действия.</p>
+    <div class="callout"><b>Правило:</b> не ограничивайтесь ответом «да/нет». Для каждого пункта укажите SQL-команду, текущие значения, пороги мониторинга и ожидаемую реакцию поддержки.</div>
+  </div>
+
+  <div class="card">
+    <h3>1. Autovacuum</h3>
+    <p>Проверь свой PostgreSQL-кластер: включён ли <code>autovacuum</code> и какие у него параметры.</p>
+    <pre>SHOW autovacuum;
+SHOW track_counts;
+SHOW autovacuum_naptime;
+SHOW autovacuum_max_workers;
+SHOW autovacuum_vacuum_threshold;
+SHOW autovacuum_vacuum_scale_factor;
+SHOW autovacuum_analyze_threshold;
+SHOW autovacuum_analyze_scale_factor;
+SHOW autovacuum_vacuum_cost_limit;
+SHOW autovacuum_vacuum_cost_delay;</pre>
+    <p><b>Что зафиксировать:</b> включён ли autovacuum, не отключён ли он на отдельных таблицах, какие таблицы имеют высокий <code>n_dead_tup</code>, когда был последний autovacuum.</p>
+  </div>
+
+  <div class="card">
+    <h3>2. Replication slots</h3>
+    <p>Проверь, какие слоты есть в кластере и мониторится ли их распухание.</p>
+    <pre>SELECT slot_name, slot_type, active, restart_lsn, confirmed_flush_lsn,
+       pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained_wal
+FROM pg_replication_slots
+ORDER BY slot_name;</pre>
+    <p><b>Что зафиксировать:</b> владелец каждого слота, активность, допустимый retained WAL, алерт по росту, процедура удаления неиспользуемого слота.</p>
+  </div>
+
+  <div class="card">
+    <h3>3. Уровень изоляции</h3>
+    <p>Проверь, какой уровень изоляции используется в кластерах и почему выбран именно он.</p>
+    <pre>SHOW default_transaction_isolation;
+
+SELECT datname, usename, application_name, state,
+       backend_xid, backend_xmin, query
+FROM pg_stat_activity
+WHERE state &lt;&gt; 'idle';</pre>
+    <p><b>Что зафиксировать:</b> дефолтный уровень, есть ли приложения с <code>REPEATABLE READ</code> или <code>SERIALIZABLE</code>, реализован ли retry для serialization failure.</p>
+  </div>
+
+  <div class="card">
+    <h3>4. Блокировки и долгие транзакции</h3>
+    <p>Проверь, настроено ли оповещение по блокировкам транзакций и как в твоём кластере проверяются долгие транзакции.</p>
+    <pre>SELECT pid, usename, application_name, client_addr, state,
+       wait_event_type, wait_event,
+       now() - xact_start AS xact_age,
+       pg_blocking_pids(pid) AS blocking_pids,
+       query
+FROM pg_stat_activity
+WHERE xact_start IS NOT NULL
+ORDER BY xact_start;
+
+SELECT pid, pg_blocking_pids(pid), query
+FROM pg_stat_activity
+WHERE cardinality(pg_blocking_pids(pid)) &gt; 0;</pre>
+    <p><b>Что зафиксировать:</b> пороги алертов по lock wait и idle in transaction, кто получает уведомление, когда допустимо применять <code>pg_cancel_backend</code> или <code>pg_terminate_backend</code>.</p>
+  </div>
+
+  <div class="card">
+    <h3>5. Базы данных и логические лимиты</h3>
+    <p>Проверь, сколько баз данных в кластере и как распределены логические лимиты.</p>
+    <pre>SELECT datname, datallowconn, datconnlimit
+FROM pg_database
+ORDER BY datname;
+
+SHOW max_connections;
+
+SELECT datname, count(*) AS connections
+FROM pg_stat_activity
+GROUP BY datname
+ORDER BY connections DESC;</pre>
+    <p><b>Что зафиксировать:</b> лимиты подключений по БД и ролям, наличие pooler, reserved connections для администрирования, распределение нагрузки по приложениям.</p>
+  </div>
+
+  <div class="card quiz">
+    <h3>Самопроверка</h3>
+    <p>1. Что опаснее всего при inactive replication slot с большим retained WAL?</p>
+    <button onclick="q('selfcheck_q1','b','a','Нет. VACUUM не освобождает WAL, удерживаемый слотом.')">Запустить VACUUM</button>
+    <button onclick="q('selfcheck_q1','a','a','Верно. Такой слот может удерживать WAL и заполнить диск.')">Слот может удерживать WAL и заполнить диск</button>
+    <button onclick="q('selfcheck_q1','c','a','Нет. ANALYZE не решает проблему удержания WAL.')">Запустить ANALYZE</button>
+    <div id="selfcheck_q1" class="res"></div>
+
+    <p>2. Какой источник первым смотреть при долгих транзакциях?</p>
+    <button onclick="q('selfcheck_q2','a','a','Верно. pg_stat_activity показывает xact_start, state, wait_event и запрос.')">pg_stat_activity</button>
+    <button onclick="q('selfcheck_q2','b','a','Нет. pg_class не показывает активные транзакции.')">pg_class</button>
+    <button onclick="q('selfcheck_q2','c','a','Нет. pg_settings покажет параметры, но не текущие долгие транзакции.')">pg_settings</button>
+    <div id="selfcheck_q2" class="res"></div>
+  </div>
+</section>
+
+</main></div><script>
+(function addMissingQuizzes(){
+  const quizzes = {
+    p1: {
+      title: 'Квиз по архитектуре PostgreSQL HA',
+      questions: [
+        ['arch_auto_1','Какой компонент хранит leader lock в HA-кластере?', [
+          ['b','HAProxy','Нет. HAProxy направляет подключения, но не хранит leader lock.'],
+          ['a','etcd / DCS','Верно.'],
+          ['c','WAL archive','Нет. WAL archive хранит журнальные сегменты, а не состояние лидерства.']
+        ], 'a'],
+        ['arch_auto_2','Зачем нужен Patroni?', [
+          ['a','Управлять ролями PostgreSQL и failover','Верно.'],
+          ['b','Хранить таблицы пользователей','Нет. Данные хранятся в PostgreSQL.'],
+          ['c','Строить планы SQL-запросов','Нет. Планы строит planner PostgreSQL.']
+        ], 'a']
+      ]
+    },
+    p4: {
+      title: 'Квиз по MVCC',
+      questions: [
+        ['mvcc_auto_1','Что позволяет MVCC?', [
+          ['c','Отключить транзакции','Нет. MVCC работает внутри транзакционной модели.'],
+          ['a','Читать согласованный снимок данных','Верно.'],
+          ['b','Не использовать WAL','Нет. WAL всё равно используется.']
+        ], 'a'],
+        ['mvcc_auto_2','Что обычно происходит при UPDATE?', [
+          ['b','Строка всегда перезаписывается на месте','Нет. Создаётся новая версия строки.'],
+          ['c','Удаляется вся таблица','Нет. Обновляется конкретная строка.'],
+          ['a','Создаётся новая версия строки','Верно.']
+        ], 'a']
+      ]
+    },
+    p5: {
+      title: 'Квиз по уровням изоляции',
+      questions: [
+        ['iso_auto_1','Какой уровень изоляции используется по умолчанию?', [
+          ['b','Serializable','Нет. Serializable нужно задавать явно.'],
+          ['a','Read Committed','Верно.'],
+          ['c','Repeatable Read','Нет. Это не уровень по умолчанию.']
+        ], 'a'],
+        ['iso_auto_2','Что означает SQLSTATE 40001?', [
+          ['a','Транзакцию нужно повторить','Верно.'],
+          ['b','Ошибка пароля','Нет. Это не ошибка аутентификации.'],
+          ['c','Ошибка синтаксиса SQL','Нет. Это ошибка сериализации.']
+        ], 'a']
+      ]
+    },
+    p6: {
+      title: 'Квиз по блокировкам',
+      questions: [
+        ['lock_auto_1','Какая блокировка блокирует обычный SELECT?', [
+          ['b','ACCESS SHARE','Нет. Обычный SELECT сам берёт ACCESS SHARE.'],
+          ['a','ACCESS EXCLUSIVE','Верно.'],
+          ['c','ROW EXCLUSIVE','Нет. ROW EXCLUSIVE обычно не блокирует простой SELECT.']
+        ], 'a'],
+        ['lock_auto_2','Где посмотреть текущие блокировки?', [
+          ['c','pg_stat_archiver','Нет. Это представление про WAL archive.'],
+          ['a','pg_locks','Верно.'],
+          ['b','pg_class','Нет. pg_class не показывает текущие ожидания блокировок.']
+        ], 'a']
+      ]
+    },
+    p7: {
+      title: 'Квиз по VACUUM и autovacuum',
+      questions: [
+        ['vac_auto_1','Что делает обычный VACUUM без FULL?', [
+          ['b','Всегда возвращает место операционной системе','Нет. Обычно место остаётся внутри таблицы для повторного использования.'],
+          ['a','Очищает мёртвые версии строк','Верно.'],
+          ['c','Создаёт резервную копию','Нет. Backup выполняется другими инструментами.']
+        ], 'a'],
+        ['vac_auto_2','Почему долгие транзакции мешают VACUUM?', [
+          ['a','Они могут удерживать горизонт транзакций','Верно.'],
+          ['b','Они отключают autovacuum','Нет. Они не отключают autovacuum напрямую.'],
+          ['c','Они удаляют pg_wal','Нет. Это не связано с удалением pg_wal.']
+        ], 'a'],
+        ['vac_auto_3','Когда запускается autovacuum для таблицы?', [
+          ['b','Строго по расписанию времени','Нет. Autovacuum не запускается строго по времени.'],
+          ['a','Когда количество dead tuples превышает порог threshold + scale_factor','Верно.'],
+          ['c','Когда WAL достигает лимита','Нет. Размер WAL не является прямым триггером запуска autovacuum.']
+        ], 'a'],
+        ['vac_auto_4','Что произойдет, если отключить autovacuum?', [
+          ['c','Система станет быстрее без побочных эффектов','Нет. Это опасное заблуждение.'],
+          ['a','Таблицы будут раздуваться и возможен transaction ID wraparound','Верно.'],
+          ['b','VACUUM будет выполняться автоматически другим процессом','Нет. PostgreSQL не заменяет autovacuum другим автоматическим механизмом.']
+        ], 'a']
+      ]
+    },
+    p8: {
+      title: 'Квиз по WAL archive',
+      questions: [
+        ['wal_auto_1','Что произойдёт, если archive_command постоянно завершается ошибкой?', [
+          ['b','PostgreSQL перестанет создавать WAL','Нет. WAL продолжит генерироваться.'],
+          ['a','pg_wal может заполнить диск','Верно.'],
+          ['c','Автоматически удалится база','Нет. PostgreSQL не удаляет базу автоматически.']
+        ], 'a'],
+        ['wal_auto_2','Что нужно для PITR?', [
+          ['c','Только pg_dump','Нет. pg_dump не подходит для WAL replay.'],
+          ['a','Базовая копия и непрерывная цепочка WAL','Верно.'],
+          ['b','Только postgresql.conf','Нет. Одного конфига недостаточно.']
+        ], 'a']
+      ]
+    },
+    p10: {
+      title: 'Квиз по репликации',
+      questions: [
+        ['rep_auto_1','Что реплицирует физическая репликация?', [
+          ['b','Только выбранные таблицы','Нет. Это сценарий логической репликации.'],
+          ['a','Весь кластер через WAL','Верно.'],
+          ['c','Только pg_dump-файлы','Нет. pg_dump не является физической репликацией.']
+        ], 'a'],
+        ['rep_auto_2','Что обычно не передаётся автоматически логической репликацией?', [
+          ['a','DDL-изменения схемы','Верно.'],
+          ['b','INSERT','Нет. INSERT обычно реплицируется.'],
+          ['c','UPDATE','Нет. UPDATE может реплицироваться при корректной replica identity.']
+        ], 'a']
+      ]
+    },
+    p12: {
+      title: 'Квиз по EXPLAIN ANALYZE',
+      questions: [
+        ['ex_auto_1','Что делает EXPLAIN ANALYZE?', [
+          ['b','Только показывает план без выполнения','Нет. Это обычный EXPLAIN.'],
+          ['c','Создаёт недостающие индексы','Нет. Индексы автоматически не создаются.'],
+          ['a','Реально выполняет запрос и показывает фактические метрики','Верно.']
+        ], 'a'],
+        ['ex_auto_2','Почему UPDATE лучше анализировать внутри транзакции с ROLLBACK?', [
+          ['a','EXPLAIN ANALYZE действительно выполняет изменение','Верно.'],
+          ['b','UPDATE не выполняется','Нет. С ANALYZE запрос выполняется.'],
+          ['c','Запускается VACUUM FULL','Нет. EXPLAIN ANALYZE не запускает VACUUM FULL.']
+        ], 'a']
+      ]
+    },
+    p13: {
+      title: 'Квиз по мониторингу',
+      questions: [
+        ['mon_auto_1','Что проверять, если быстро растёт pg_wal?', [
+          ['a','archive_command, pg_stat_archiver, replication slots и lag реплик','Верно.'],
+          ['b','Только pg_dump','Нет. pg_dump не управляет pg_wal.'],
+          ['c','Только количество пользователей','Нет. Рост pg_wal чаще связан с WAL archive, slots или репликацией.']
+        ], 'a'],
+        ['mon_auto_2','Что показывает pg_stat_archiver?', [
+          ['c','Активные пользовательские запросы','Нет. Активные запросы показывает pg_stat_activity.'],
+          ['b','Мёртвые строки в таблицах','Нет. Dead tuples смотрят в pg_stat_user_tables.'],
+          ['a','Статистику успешной и ошибочной архивации WAL','Верно.']
+        ], 'a']
+      ]
+    }
+  };
+
+  function renderQuiz(config){
+    const card = document.createElement('div');
+    card.className = 'card quiz';
+    let html = '<h3>' + config.title + '</h3>';
+    config.questions.forEach(function(question, index){
+      const id = question[0];
+      const text = question[1];
+      const answers = question[2];
+      const correct = question[3];
+      html += '<p>' + (index + 1) + '. ' + text + '</p>';
+      answers.forEach(function(answer){
+        html += '<button onclick="q(\'' + id + '\',\'' + answer[0] + '\',\'' + correct + '\',\'' + answer[2].replace(/'/g, '&apos;') + '\')">' + answer[1] + '</button>';
+      });
+      html += '<div id="' + id + '" class="res"></div>';
+    });
+    card.innerHTML = html;
+    return card;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    Object.keys(quizzes).forEach(function(sectionId){
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      if (section.querySelector('.card.quiz')) return;
+      section.appendChild(renderQuiz(quizzes[sectionId]));
+    });
+  });
+})();
+</script>
+  <script src="course-shell.js" defer></script>
+</body></html>

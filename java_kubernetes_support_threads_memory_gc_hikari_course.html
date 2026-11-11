@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>УСиЭСКБ. Java микросервисы в Kubernetes</title>
+<style>
+:root{
+  --bg:#070b16;--panel:#0f172a;--panel2:#111827;--text:#e5e7eb;--muted:#94a3b8;
+  --blue:#60a5fa;--cyan:#22d3ee;--green:#86efac;--red:#fca5a5;--yellow:#fde68a;
+  --accent:linear-gradient(135deg,#2563eb,#06b6d4 55%,#14b8a6);
+  --shadow:0 18px 50px rgba(0,0,0,.35);--radius:22px
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(37,99,235,.22),transparent 34%),radial-gradient(circle at top right,rgba(20,184,166,.16),transparent 32%),var(--bg);color:var(--text);line-height:1.65}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 80%)}
+header{background:rgba(15,23,42,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);padding:18px 26px;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+header h1{margin:0;font-size:24px;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:850}.version{font-size:12px;color:#bbf7d0;border:1px solid rgba(34,197,94,.4);background:rgba(20,83,45,.28);padding:5px 10px;border-radius:999px}
+.searchBox{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:280px;max-width:620px;flex:1 1 420px;justify-content:flex-end}.searchBox input{width:min(460px,100%);padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.88);color:var(--text);outline:none}.searchBox button,.mobile-toggle{padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.24);background:rgba(30,41,59,.82);color:#fff;cursor:pointer}.search-count{font-size:13px;color:#93c5fd;white-space:nowrap;min-width:88px}.mobile-toggle{display:none;width:100%;margin-top:12px;text-align:left;font-size:16px}
+.layout{display:flex;min-height:100vh}aside{width:370px;background:rgba(15,23,42,.74);backdrop-filter:blur(16px);padding:18px;border-right:1px solid rgba(148,163,184,.16);position:sticky;top:78px;height:calc(100vh - 78px);overflow:auto;flex-shrink:0}main{flex:1;padding:32px;min-width:0;max-width:1200px;margin:0 auto}.page{display:none}.page.active{display:block}.menu{display:flex;align-items:center;gap:9px;color:#cbd5e1;text-decoration:none;padding:11px 13px;border-radius:14px;margin:6px 0;font-size:15px;border:1px solid transparent;transition:.18s}.menu:hover{background:rgba(30,41,59,.75);color:#fff;border-color:rgba(148,163,184,.18);transform:translateX(2px)}.menu.active,.menu.search-match{background:linear-gradient(135deg,rgba(37,99,235,.26),rgba(6,182,212,.16));color:#fff;border-color:rgba(96,165,250,.38);box-shadow:0 10px 26px rgba(37,99,235,.12)}.menu.search-hidden{display:none!important}
+.card{background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(15,23,42,.92));border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);padding:22px;margin:18px 0;overflow:hidden;box-shadow:var(--shadow);position:relative}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(96,165,250,.65),transparent)}.card.quiz{border-color:rgba(34,211,238,.28);background:linear-gradient(180deg,rgba(8,47,73,.42),rgba(15,23,42,.94))}.quiz button{padding:11px 14px;border:1px solid rgba(96,165,250,.32);border-radius:13px;background:rgba(37,99,235,.22);color:#fff;cursor:pointer;margin:6px;min-height:42px}.quiz button:hover{background:rgba(37,99,235,.34)}.res{margin-top:9px;font-weight:800}.ok{color:var(--green)}.bad{color:var(--red)}
+h2{color:#bfdbfe;font-size:30px;margin:0 0 18px;line-height:1.2}h2:after{content:"";display:block;width:72px;height:4px;margin-top:12px;border-radius:999px;background:var(--accent)}h3{color:#dbeafe;margin-top:12px;font-size:20px}p{margin:10px 0}ul,ol{padding-left:23px}li{margin:5px 0}.badge{display:inline-flex;padding:4px 9px;border-radius:999px;background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.26);color:#bfdbfe;font-size:13px}.callout{border-left:4px solid var(--cyan);padding:12px 14px;background:rgba(8,47,73,.28);border-radius:14px;margin:14px 0;color:#dbeafe}.warn{border-left-color:#fbbf24;background:rgba(113,63,18,.25);color:#fde68a}.success{border-left-color:#22c55e;background:rgba(20,83,45,.25);color:#bbf7d0}.danger{border-left-color:#ef4444;background:rgba(127,29,29,.22);color:#fecaca}
+pre{background:#020617;color:#a7f3d0;padding:15px;border-radius:16px;overflow-x:auto;white-space:pre;max-width:100%;font-size:14px;border:1px solid rgba(148,163,184,.16)}code{background:#020617;color:#a7f3d0;padding:3px 7px;border-radius:8px;border:1px solid rgba(148,163,184,.14)}table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(148,163,184,.2);margin:12px 0}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;vertical-align:top}th{background:rgba(37,99,235,.18);color:#dbeafe}tr:last-child td{border-bottom:0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tile{padding:16px;border-radius:18px;background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.16);transition:.22s;position:relative;overflow:hidden}.tile:hover{transform:translateY(-4px);border-color:rgba(96,165,250,.48);box-shadow:0 16px 34px rgba(37,99,235,.18)}.flow{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#020617;border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:16px;color:#a7f3d0;overflow:auto;white-space:pre-line}.playbook{display:flex;flex-direction:column;gap:14px;margin:14px 0}.step{background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:14px;transition:.2s}.step-title{font-weight:800;color:#bfdbfe;margin-bottom:8px;display:flex;align-items:center;gap:8px}.step-title:before{content:"▶";font-size:11px;color:#22d3ee}.small{color:var(--muted);font-size:14px}mark.search-hit{background:#facc15;color:#111827;border-radius:5px;padding:0 3px}.search-empty{display:none;margin:18px 0;padding:16px;border-radius:16px;background:rgba(127,29,29,.22);border:1px solid rgba(252,165,165,.25);color:#fecaca}.search-empty.active{display:block}
+@media(max-width:980px){header h1{font-size:20px}.mobile-toggle{display:block}.searchBox{order:3;width:100%;max-width:none;min-width:0}.searchBox input{width:100%;flex:1}.layout{display:block}aside{display:none;position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid rgba(148,163,184,.16);padding:10px 14px;background:rgba(15,23,42,.96)}body.menu-open aside{display:block}main{padding:17px}.grid,.grid2{grid-template-columns:1fr}.card{padding:16px}.quiz button{display:block;width:100%;margin:8px 0;text-align:left}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+<script>
+function safeId(id){return String(id||'').replace(/[^a-zA-Z0-9_-]/g,'')}
+function getMenuTargetId(item){const m=(item.getAttribute('onclick')||'').match(/show\(['"]([^'"]+)['"]\)/);return m?safeId(m[1]):''}
+function show(id){const t=document.getElementById(safeId(id));if(!t)return false;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.menu').forEach(i=>i.classList.toggle('active',getMenuTargetId(i)===t.id));document.body.classList.remove('menu-open');window.scrollTo(0,0);return false}
+function q(id,a,c,msg){const r=document.getElementById(safeId(id));if(!r)return;const ok=a===c;r.className='res '+(ok?'ok':'bad');r.textContent=ok?'Верно ✅':'Неверно ❌ '+(msg||'Попробуйте ещё раз.')}
+function clearMarks(root){root.querySelectorAll('mark.search-hit').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));root.normalize()}
+function highlight(root,term){let count=0;const skip=new Set(['SCRIPT','STYLE','INPUT','BUTTON','MARK']);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){const p=n.parentElement;if(!p||skip.has(p.tagName)||!n.nodeValue.trim())return NodeFilter.FILTER_REJECT;return n.nodeValue.toLowerCase().includes(term)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});const nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(n=>{const text=n.nodeValue,lower=text.toLowerCase(),frag=document.createDocumentFragment();let pos=0,idx=lower.indexOf(term);while(idx!==-1){frag.appendChild(document.createTextNode(text.slice(pos,idx)));const mark=document.createElement('mark');mark.className='search-hit';mark.textContent=text.slice(idx,idx+term.length);frag.appendChild(mark);count++;pos=idx+term.length;idx=lower.indexOf(term,pos)}frag.appendChild(document.createTextNode(text.slice(pos)));n.parentNode.replaceChild(frag,n)});return count}
+function searchCourse(){const input=document.getElementById('courseSearch'),counter=document.getElementById('searchCount'),empty=document.getElementById('searchEmpty'),term=(input.value||'').trim().toLowerCase();let total=0,sections=0,first='';document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'));empty.classList.remove('active');if(!term){counter.textContent='';return}document.querySelectorAll('.page').forEach(p=>{if(p.textContent.toLowerCase().includes(term)){p.dataset.searchMatch='1';sections++;total+=highlight(p,term);if(!first)first=p.id}});document.querySelectorAll('.menu').forEach(i=>{const target=document.getElementById(getMenuTargetId(i));const match=target&&target.dataset.searchMatch==='1';i.classList.toggle('search-hidden',!match);i.classList.toggle('search-match',!!match)});counter.textContent=total?`Найдено: ${total} / разделов: ${sections}`:'Ничего не найдено';if(!total)empty.classList.add('active');if(first)show(first)}
+function clearCourseSearch(){document.getElementById('courseSearch').value='';document.getElementById('searchCount').textContent='';document.getElementById('searchEmpty').classList.remove('active');document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'))}
+document.addEventListener('DOMContentLoaded',()=>show('home'));
+</script>
+  <link rel="stylesheet" href="course-shell.css">
+</head>
+<body>
+<header>
+<h1>УСиЭСКБ. Java микросервисы в Kubernetes</h1>
+
+<div class="searchBox">
+<input id="courseSearch" type="search" placeholder="🔍 Поиск: thread dump, JFR, heap, GC, Hikari, PostgreSQL..." oninput="searchCourse()" />
+<button onclick="clearCourseSearch()">Сброс</button><span id="searchCount" class="search-count"></span>
+</div>
+<button class="mobile-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню курса</button>
+</header>
+<div class="layout">
+<aside>
+<a class="menu" href="javascript:void(0)" onclick="return show('home')">🏠 Главная</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('k8s')">☸️ 1. Java в Kubernetes</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('threads')">🧵 2. Потоки Java</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('thread-monitoring')">📈 2.1 Мониторинг потоков</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('thread-dump')">📄 2.2 Thread dump</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('jfr')">🎥 2.3 JFR профилировщик</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('memory')">🧠 3. Heap и Non-Heap</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('heap-dump')">🧳 3.1 Heap dump</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('leaks')">🚰 3.2 Утечки и OOMKilled</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('gc')">♻️ 4. Garbage Collector</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('hikari')">🏊 5. HikariCP</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('postgres')">🐘 5.1 PostgreSQL</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('runbooks')">🚨 6. Runbooks</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('quiz')">✅ Квиз</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('call-to-action')">🚀 Призыв к действию</a>
+</aside>
+<main>
+<div id="searchEmpty" class="search-empty">Ничего не найдено. Попробуйте другой запрос.</div>
+
+<section id="home" class="page"><h2>Курс: Java микросервисы в Kubernetes</h2><div class="card"><p>Сайт помогает сотрудникам поддержки быстро диагностировать Java-сервисы в Kubernetes: потоки, зависания, thread dump, JFR, heap/non-heap, heap dump, утечки памяти, GC, HikariCP и PostgreSQL.</p><div class="grid"><div class="tile"><span class="badge">Threads</span><h3>🧵 Потоки</h3><p>Состояния потоков, blocking, waiting, deadlock, starvation.</p></div><div class="tile"><span class="badge">JFR / dumps</span><h3>🎥 Артефакты</h3><p>Как запускать JFR, thread dump и heap dump в Kubernetes.</p></div><div class="tile"><span class="badge">Memory / GC</span><h3>♻️ Память</h3><p>Heap, non-heap, Metaspace, direct memory, GC pauses.</p></div><div class="tile"><span class="badge">Hikari</span><h3>🏊 Пул БД</h3><p>Active, idle, pending, connection timeout, PostgreSQL locks.</p></div><div class="tile"><span class="badge">Runbook</span><h3>🚨 Инциденты</h3><p>Что делать при OOMKilled, latency, GC pause, пул соединений исчерпан.</p></div><div class="tile"><span class="badge">Grafana</span><h3>🖥️ Метрики</h3><p>PromQL-примеры и структура дашборда Java-сервиса.</p></div></div><div class="callout success"><b>Главная идея:</b> поддержка не переписывает код, но должна точно локализовать симптом, собрать факты и не потерять диагностические данные.</div></div></section>
+
+<section id="k8s" class="page"><h2>1. Java в Kubernetes</h2><div class="card"><h3>Как устроен Java-процесс в pod</h3><div class="flow">Kubernetes Node
+  └─ Pod
+     └─ Container
+        └─ java -jar app.jar
+           ├─ Heap
+           ├─ Non-Heap: Metaspace, Code Cache
+           ├─ Direct / native memory
+           ├─ Java threads и native stacks
+           ├─ GC threads
+           └─ Hikari pool → PostgreSQL</div></div><div class="card"><h3>Что смотреть первым</h3><pre>kubectl get pod -n &lt;namespace&gt; -o wide
+kubectl describe pod -n &lt;namespace&gt; &lt;pod&gt;
+kubectl logs -n &lt;namespace&gt; &lt;pod&gt; --tail=300
+kubectl logs -n &lt;namespace&gt; &lt;pod&gt; --previous --tail=300
+kubectl top pod -n &lt;namespace&gt; &lt;pod&gt; --containers</pre><table><tr><th>Признак</th><th>Значение</th><th>Действие</th></tr><tr><td>OOMKilled</td><td>Контейнер превысил memory limit.</td><td>Проверить heap/non-heap, GC, dumps.</td></tr><tr><td>CrashLoopBackOff</td><td>Контейнер постоянно падает.</td><td>Смотреть previous logs и events.</td></tr><tr><td>Liveness failed</td><td>Kubernetes перезапускает контейнер.</td><td>Искать freeze, full GC, deadlock, starvation.</td></tr></table></div></section>
+
+<section id="threads" class="page">
+<h2>2. Потоки Java</h2>
+
+<div class="card">
+<h3>Что такое Thread в Java</h3>
+<p><b>Thread</b>, или поток, — это дискретная единица многопоточности, управляемая <b>Java Virtual Machine</b>. Поток выполняет участок кода независимо от других потоков внутри одного Java-процесса.</p>
+<p>В большинстве production JVM поток Java соответствует потоку операционной системы — <b>native thread</b>. То есть JVM управляет Java-потоками на своём уровне, но фактическое выполнение кода обеспечивается потоками ОС.</p>
+<div class="flow">Java application
+  ↓ создаёт Thread / Executor task
+JVM Thread
+  ↓ отображается на
+OS native thread
+  ↓ выполняется на
+CPU core / scheduler OS</div>
+<div class="callout"><b>Для поддержки:</b> если потоков слишком много, это влияет не только на JVM, но и на операционную систему: растёт расход памяти на стеки, переключение контекста и нагрузка на scheduler.</div>
+</div>
+
+<div class="card">
+<h3>Идентификатор, имя и тип потока</h3>
+<p>У каждого потока есть уникальный идентификатор и имя. Имя потока особенно важно при анализе <b>thread dump</b>: по нему можно понять, к какой подсистеме относится поток — HTTP worker, scheduler, Kafka consumer, Hikari housekeeper, GC thread или custom executor.</p>
+<table>
+<tr><th>Свойство</th><th>Что означает</th><th>Зачем поддержке</th></tr>
+<tr><td><b>Thread id</b></td><td>Уникальный идентификатор потока внутри JVM.</td><td>Помогает сопоставлять поток между дампами.</td></tr>
+<tr><td><b>Thread name</b></td><td>Человекочитаемое имя потока.</td><td>Помогает быстро понять источник: Tomcat, Netty, Kafka, Hikari, scheduler.</td></tr>
+<tr><td><b>Daemon</b></td><td>Фоновый служебный поток.</td><td>Не удерживает JVM от завершения.</td></tr>
+<tr><td><b>Non-daemon</b></td><td>Обычный рабочий поток приложения.</td><td>JVM ждёт завершения таких потоков.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Daemon и non-daemon потоки</h3>
+<p>Потоки в Java могут быть <b>daemon</b> и <b>non-daemon</b>.</p>
+<ul>
+<li><b>Non-daemon</b> — обычные рабочие потоки. Пока хотя бы один non-daemon поток продолжает работу, JVM не завершает процесс штатно.</li>
+<li><b>Daemon</b> — фоновые служебные потоки. Их работа не удерживает JVM от завершения.</li>
+</ul>
+<p>Программа завершает работу, когда завершены все non-daemon потоки или когда явно вызывается завершение процесса, например через <code>Runtime.exit</code> / <code>System.exit</code>. Работающие daemon-потоки не мешают завершению JVM.</p>
+<div class="callout warn"><b>Практическая формулировка:</b> JVM ждёт завершения non-daemon потоков, но не ждёт daemon-потоки. Поэтому ошибка в жизненном цикле non-daemon executor может мешать корректному shutdown приложения.</div>
+</div>
+
+<div class="card">
+<h3>Где потоки встречаются в Java-микросервисе</h3>
+<table>
+<tr><th>Группа потоков</th><th>Назначение</th><th>Типичная проблема</th></tr>
+<tr><td>HTTP worker threads</td><td>Обработка входящих REST/HTTP-запросов.</td><td>Все заняты ожиданием БД или внешнего сервиса → растёт latency.</td></tr>
+<tr><td>Async executor</td><td>Фоновые задачи, <code>@Async</code>, <code>CompletableFuture</code>.</td><td>Очередь задач растёт, новые задачи ждут выполнения.</td></tr>
+<tr><td>Scheduler</td><td>Периодические jobs, cron-задачи.</td><td>Job выполняется дольше периода и начинает накладываться.</td></tr>
+<tr><td>Kafka/Rabbit consumers</td><td>Обработка сообщений из брокера.</td><td>Потоки ждут БД/HTTP, consumer lag растёт.</td></tr>
+<tr><td>GC threads</td><td>Работа Garbage Collector.</td><td>Длинные GC-паузы, рост CPU.</td></tr>
+<tr><td>Hikari housekeeper</td><td>Фоновое обслуживание connection pool.</td><td>Предупреждения о starvation или clock leap.</td></tr>
+<tr><td>Monitoring / agents</td><td>Метрики, tracing, APM, exporters.</td><td>Дополнительная нагрузка и память на thread stacks.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Состояния потоков: что видно в thread dump</h3>
+<p>Поток может находиться в одном из нескольких состояний. Для поддержки важно не просто увидеть состояние, а понять, нормально ли оно для конкретного типа потока.</p>
+<table>
+<tr><th>Состояние</th><th>Объяснение</th><th>Что значит для поддержки</th></tr>
+<tr><td><code>RUNNABLE</code><br><span class="small">живой / выполняющийся</span></td><td>Поток выполняет работу или готов выполняться на CPU.</td><td>Много RUNNABLE + высокий CPU может означать CPU-bound нагрузку, бесконечный цикл, активный GC или тяжёлые вычисления.</td></tr>
+<tr><td><code>BLOCKED</code><br><span class="small">заблокированный</span></td><td>Поток попытался войти в <code>synchronized</code>-секцию, но монитор уже занят другим потоком.</td><td>Много BLOCKED на одном объекте — признак lock contention или deadlock.</td></tr>
+<tr><td><code>WAITING</code><br><span class="small">ожидающий</span></td><td>Поток ждёт события без заданного таймаута: <code>wait()</code>, <code>join()</code>, <code>LockSupport.park()</code>.</td><td>Может быть нормой для idle worker, но плохо, если все рабочие потоки ждут один ресурс.</td></tr>
+<tr><td><code>TIMED_WAITING</code></td><td>Поток ждёт с таймаутом: <code>sleep()</code>, <code>wait(timeout)</code>, socket read timeout, parkNanos.</td><td>Часто видно при ожидании БД, HTTP-вызова, очереди или scheduled delay.</td></tr>
+<tr><td><code>NEW</code></td><td>Поток создан, но ещё не запущен.</td><td>Редко важно для production-инцидентов.</td></tr>
+<tr><td><code>TERMINATED</code></td><td>Поток завершил выполнение.</td><td>Обычно не является проблемой.</td></tr>
+</table>
+<div class="callout warn"><b>Уточнение:</b> если поток вызвал <code>wait</code> с таймаутом и таймаут истёк, он больше не считается ожидающим по этой причине — он продолжит борьбу за выполнение или перейдёт в другое состояние.</div>
+</div>
+
+<div class="card">
+<h3>Sleeping thread</h3>
+<p><b>Sleeping thread</b>, или «спящий» поток, — это поток, который временно не выполняется, потому что вызвал <code>Thread.sleep(...)</code> на заданную длительность.</p>
+<p>В thread dump такой поток обычно будет в состоянии <code>TIMED_WAITING</code>. Сам по себе sleeping не является ошибкой: это нормальный механизм паузы для scheduler, retry, polling или backoff-логики.</p>
+<div class="callout"><b>Когда подозрительно:</b> если большое число рабочих HTTP-потоков находится в sleep, это может означать неправильную retry-логику внутри обработки пользовательского запроса.</div>
+</div>
+
+<div class="card">
+<h3>Monitor и synchronized</h3>
+<p><b>Monitor</b> — механизм JVM для синхронизации доступа нескольких потоков к одному объекту. В Java он используется через ключевое слово <code>synchronized</code>.</p>
+<p>Каждый объект в Java имеет связанный с ним monitor. Когда поток входит в блок <code>synchronized</code>, он захватывает monitor объекта. Пока поток владеет monitor, другой поток не может войти в synchronized-блок, защищённый тем же объектом.</p>
+<pre>private final Object lock = new Object();
+
+public void updateState() {
+    synchronized (lock) {
+        // Только один поток одновременно может выполнять этот блок
+        // Остальные будут BLOCKED на monitor объекта lock
+    }
+}</pre>
+<div class="flow">Поток A вошёл в synchronized(lock)
+  ↓
+Поток A владеет monitor объекта lock
+  ↓
+Поток B пытается войти в synchronized(lock)
+  ↓
+Поток B переходит в BLOCKED
+  ↓
+Поток A выходит из synchronized
+  ↓
+Monitor освобождается, один из ожидающих потоков продолжает работу</div>
+<div class="callout"><b>Для поддержки:</b> если в thread dump много потоков <code>BLOCKED</code> на одном monitor, нужно найти поток-владелец блокировки и его stack trace.</div>
+</div>
+
+<div class="card">
+<h3>wait, notify и notifyAll</h3>
+<p>Методы <code>wait</code>, <code>notify</code> и <code>notifyAll</code> используются для координации потоков через monitor объекта.</p>
+<ul>
+<li><code>wait()</code> — поток освобождает monitor и ждёт уведомления.</li>
+<li><code>wait(timeout)</code> — поток ждёт уведомления или истечения таймаута.</li>
+<li><code>notify()</code> — будит один ожидающий поток.</li>
+<li><code>notifyAll()</code> — будит все потоки, ожидающие на этом объекте.</li>
+</ul>
+<div class="callout warn"><b>Важно:</b> поток в <code>WAITING</code> не всегда «завис». Он может штатно ждать событие из очереди, пула, scheduler или другого потока. Проблема начинается, когда ожидание мешает полезной работе сервиса.</div>
+</div>
+
+<div class="card">
+<h3>Deadlock: взаимная блокировка</h3>
+<p><b>Deadlock</b> — ситуация, когда два или более потока навсегда ждут друг друга. Например, поток A удерживает ресурс 1 и ждёт ресурс 2, а поток B удерживает ресурс 2 и ждёт ресурс 1. Ни один из них не может продолжить работу.</p>
+<div class="flow">Thread A захватил Lock 1
+Thread B захватил Lock 2
+
+Thread A ждёт Lock 2
+Thread B ждёт Lock 1
+
+Оба потока ждут друг друга
+Полезная работа не выполняется</div>
+<p>Во взаимной блокировке может участвовать больше двух потоков. В thread dump JVM часто явно показывает блок <code>Found one Java-level deadlock</code>.</p>
+<table>
+<tr><th>Признак deadlock</th><th>Что делать поддержке</th></tr>
+<tr><td>В thread dump есть <code>Found one Java-level deadlock</code></td><td>Срочно приложить dump и эскалировать разработке.</td></tr>
+<tr><td>Потоки в <code>BLOCKED</code> ждут locks друг друга</td><td>Снять 2–3 thread dump для подтверждения.</td></tr>
+<tr><td>Сервис не делает прогресс, но процесс жив</td><td>Проверить liveness/readiness, latency, thread dump.</td></tr>
+</table>
+<div class="callout danger"><b>Важно:</b> рестарт может временно снять deadlock, но не исправит дефект синхронизации. Перед рестартом, если возможно, соберите thread dump.</div>
+</div>
+
+<div class="card">
+<h3>Livelock: активность есть, прогресса нет</h3>
+<p><b>Livelock</b> — ситуация, когда потоки не заблокированы формально и продолжают выполнять действия, но эти действия мешают друг другу и не приводят к полезному результату.</p>
+<p>Это похоже на собаку, которая бегает за своим хвостом: движение есть, но прогресса нет. В отличие от deadlock, при livelock потоки могут оставаться активными, менять состояние, потреблять CPU, но бизнес-операция не завершается.</p>
+<div class="flow">Thread A реагирует на действие Thread B
+  ↓
+Thread B реагирует на действие Thread A
+  ↓
+Thread A снова возвращается к исходному действию
+  ↓
+Цикл повторяется
+  ↓
+CPU может тратиться, но полезная работа не завершается</div>
+<table>
+<tr><th>Deadlock</th><th>Livelock</th></tr>
+<tr><td>Потоки ждут locks и часто находятся в BLOCKED/WAITING.</td><td>Потоки активны, могут быть RUNNABLE.</td></tr>
+<tr><td>Прогресса нет, потому что все ждут.</td><td>Прогресса нет, потому что потоки постоянно реагируют друг на друга.</td></tr>
+<tr><td>Часто явно виден в thread dump как deadlock.</td><td>Может требовать JFR, логов и нескольких thread dumps.</td></tr>
+<tr><td>CPU может быть низким.</td><td>CPU может быть высоким.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Как читать проблему потоков в production</h3>
+<table>
+<tr><th>Паттерн</th><th>Что вероятно</th><th>Что делать</th></tr>
+<tr><td>Много <code>BLOCKED</code> на одном monitor</td><td>Lock contention или deadlock.</td><td>Найти owner lock в thread dump, снять 3 дампа.</td></tr>
+<tr><td>Много HTTP workers в JDBC socket read</td><td>Ожидание PostgreSQL.</td><td>Смотреть Hikari, slow queries, locks.</td></tr>
+<tr><td>Много workers ждут connection pool</td><td>Hikari пул соединений исчерпан.</td><td>Смотреть active/idle/pending/acquire timeout.</td></tr>
+<tr><td>Много RUNNABLE и CPU высокий</td><td>CPU-bound код, livelock, GC или busy loop.</td><td>Запустить JFR, снять thread dumps.</td></tr>
+<tr><td>Количество потоков растёт лестницей</td><td>Thread leak или создание executor без shutdown.</td><td>Смотреть thread names, live threads, heap/non-heap.</td></tr>
+<tr><td>Много sleeping в request threads</td><td>Плохая retry/backoff-логика в запросе.</td><td>Смотреть stack trace и внешнюю зависимость.</td></tr>
+</table>
+</div>
+
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>В thread dump много потоков в состоянии <code>BLOCKED</code> на одном и том же monitor. Что это означает в первую очередь?</p>
+<button onclick="q('qthreads1','a','b','Heap может быть заполнен, но BLOCKED на monitor указывает на синхронизацию.')">Переполнен heap</button>
+<button onclick="q('qthreads1','b','b')">Потоки конкурируют за одну synchronized-блокировку</button>
+<button onclick="q('qthreads1','c','b','Hikari обычно проявляется ожиданием connection/JDBC, а не BLOCKED на monitor.')">Всегда закончились соединения Hikari</button>
+<div id="qthreads1" class="res"></div>
+</div>
+</section>
+
+<section id="thread-monitoring" class="page">
+<h2>2.1 Мониторинг потоков в Kubernetes и Grafana</h2>
+
+<div class="card">
+<h3>Зачем мониторить потоки в Kubernetes</h3>
+<p>В Java-микросервисе поток — это не только объект JVM. Обычно Java thread соответствует native thread операционной системы внутри контейнера. Поэтому большое количество потоков влияет сразу на несколько уровней: JVM, контейнер, Kubernetes node и пользовательскую latency.</p>
+<div class="flow">Java Thread
+  ↓
+OS native thread внутри контейнера
+  ↓
+потребляет память на stack: -Xss
+  ↓
+конкурирует за CPU container limit
+  ↓
+может усиливать CPU throttling, latency, readiness/liveness failures</div>
+<div class="callout"><b>Главный вывод:</b> много потоков — это больше памяти на thread stacks, больше переключений контекста и выше риск упереться в CPU limit контейнера.</div>
+</div>
+
+<div class="card">
+<h3>Основные JVM-метрики потоков</h3>
+<table>
+<tr><th>Метрика</th><th>Что показывает</th><th>Когда тревожно</th></tr>
+<tr><td><code>jvm_threads_live_threads</code></td><td>Текущее количество live threads в JVM.</td><td>Постоянный рост без возврата к baseline — возможная утечка потоков.</td></tr>
+<tr><td><code>jvm_threads_daemon_threads</code></td><td>Количество daemon-потоков.</td><td>Резкое изменение после релиза или включения агента.</td></tr>
+<tr><td><code>jvm_threads_peak_threads</code></td><td>Пиковое количество потоков с момента старта JVM.</td><td>Пик сильно выше обычного профиля нагрузки.</td></tr>
+<tr><td><code>jvm_threads_states_threads</code></td><td>Количество потоков по состояниям: runnable, blocked, waiting, timed-waiting.</td><td>Рост <code>blocked</code>, <code>waiting</code> или <code>timed-waiting</code> вместе с latency.</td></tr>
+<tr><td>Executor active/max/queue</td><td>Занятость пулов приложения, если метрики executor опубликованы.</td><td>Active около max и очередь растёт.</td></tr>
+<tr><td>HTTP server threads</td><td>Занятость Tomcat/Jetty/Netty worker threads, если доступны метрики.</td><td>Все worker threads заняты, новые запросы ждут.</td></tr>
+</table>
+<div class="callout warn"><b>Важно:</b> точные названия метрик зависят от Spring Boot, Micrometer, web-сервера и настроек приложения. Если метрика не находится, проверьте <code>/actuator/prometheus</code> и labels.</div>
+</div>
+
+<div class="card">
+<h3>Какие панели сделать в Grafana</h3>
+<table>
+<tr><th>Панель</th><th>Операционный вопрос</th><th>Метрика / источник</th><th>Визуализация</th></tr>
+<tr><td>Live threads</td><td>Сколько потоков сейчас живёт в JVM?</td><td><code>jvm_threads_live_threads</code></td><td>Time series</td></tr>
+<tr><td>Threads by state</td><td>В каких состояниях находятся потоки?</td><td><code>jvm_threads_states_threads</code></td><td>Stacked time series</td></tr>
+<tr><td>Thread count growth</td><td>Потоки растут лестницей?</td><td><code>delta(jvm_threads_live_threads[15m])</code></td><td>Time series / Stat</td></tr>
+<tr><td>Blocked threads</td><td>Есть lock contention?</td><td><code>jvm_threads_states_threads{state="blocked"}</code></td><td>Stat + Time series</td></tr>
+<tr><td>Waiting / Timed waiting</td><td>Потоки ждут БД, HTTP, queue или sleep?</td><td><code>state=~"waiting|timed-waiting"</code></td><td>Stacked time series</td></tr>
+<tr><td>Pod CPU throttling</td><td>Хватает ли CPU потокам?</td><td><code>container_cpu_cfs_throttled_seconds_total</code></td><td>Time series</td></tr>
+<tr><td>Container memory</td><td>Не съедают ли потоки память на stacks?</td><td><code>container_memory_working_set_bytes</code></td><td>Time series / Gauge</td></tr>
+<tr><td>Pod restarts</td><td>Не закончилась ли история рестартом?</td><td><code>kube_pod_container_status_restarts_total</code></td><td>Stat / Table</td></tr>
+<tr><td>Hikari pending</td><td>Ждут ли request threads подключения к БД?</td><td><code>hikaricp_connections_pending</code></td><td>Time series</td></tr>
+<tr><td>GC pause</td><td>Не связаны ли проблемы потоков с GC-паузами?</td><td><code>jvm_gc_pause_seconds_sum/count</code></td><td>Time series</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>PromQL-запросы для Grafana</h3>
+<pre># Live threads по pod
+jvm_threads_live_threads{
+  namespace="$namespace",
+  pod=~"$pod"
+}
+
+# Потоки по состояниям
+sum by (pod, state) (
+  jvm_threads_states_threads{
+    namespace="$namespace",
+    pod=~"$pod"
+  }
+)
+
+# BLOCKED threads по pod
+sum by (pod) (
+  jvm_threads_states_threads{
+    namespace="$namespace",
+    pod=~"$pod",
+    state="blocked"
+  }
+)
+
+# WAITING + TIMED_WAITING
+sum by (pod, state) (
+  jvm_threads_states_threads{
+    namespace="$namespace",
+    pod=~"$pod",
+    state=~"waiting|timed-waiting"
+  }
+)
+
+# Рост количества потоков за 15 минут
+clamp_min(
+  delta(jvm_threads_live_threads{namespace="$namespace", pod=~"$pod"}[15m]),
+  0
+)
+
+# Изменение количества потоков по pod за 1 час
+max_over_time(jvm_threads_live_threads{namespace="$namespace", pod=~"$pod"}[1h])
+-
+min_over_time(jvm_threads_live_threads{namespace="$namespace", pod=~"$pod"}[1h])</pre>
+</div>
+
+<div class="card">
+<h3>PromQL: связь потоков с Kubernetes container</h3>
+<pre># Рестарты pod за 30 минут
+increase(
+  kube_pod_container_status_restarts_total{
+    namespace="$namespace",
+    pod=~"$pod"
+  }[30m]
+)
+
+# CPU usage контейнера
+sum by (pod) (
+  rate(container_cpu_usage_seconds_total{
+    namespace="$namespace",
+    pod=~"$pod",
+    container!="POD",
+    container!=""
+  }[5m])
+)
+
+# CPU throttling контейнера
+sum by (pod) (
+  rate(container_cpu_cfs_throttled_seconds_total{
+    namespace="$namespace",
+    pod=~"$pod",
+    container!="POD",
+    container!=""
+  }[5m])
+)
+
+# Container memory working set
+container_memory_working_set_bytes{
+  namespace="$namespace",
+  pod=~"$pod",
+  container!="POD",
+  container!=""
+}
+
+# Грубая оценка памяти на thread stacks при -Xss1M
+jvm_threads_live_threads{namespace="$namespace", pod=~"$pod"}
+*
+1024 * 1024</pre>
+<div class="callout warn"><b>Оценка stack memory:</b> формула <code>threads × Xss</code> грубая, но полезная для первичной диагностики. Если <code>-Xss1M</code> и в pod 800 потоков, только потенциальный бюджет стеков может составлять около 800 MiB.</div>
+</div>
+
+<div class="card">
+<h3>Как интерпретировать графики</h3>
+<table>
+<tr><th>Паттерн в Grafana</th><th>Возможная причина</th><th>Что делать поддержке</th></tr>
+<tr><td>Live threads растут «лестницей» и не снижаются</td><td>Thread leak, executor создаётся без shutdown, неконтролируемый scheduler.</td><td>Снять thread dump, посмотреть имена потоков, сравнить с релизом.</td></tr>
+<tr><td>Blocked threads растут вместе с latency</td><td>Lock contention или deadlock.</td><td>Снять 3 thread dump с интервалом 10–15 секунд.</td></tr>
+<tr><td>Timed-waiting много на фоне Hikari pending</td><td>Потоки ждут connection или ответ PostgreSQL.</td><td>Смотреть Hikari active/idle/pending, acquire/usage time, pg_stat_activity.</td></tr>
+<tr><td>Waiting много, но latency нормальная</td><td>Возможно, idle worker threads или нормальное ожидание очереди.</td><td>Не считать проблемой без влияния на latency/errors.</td></tr>
+<tr><td>Runnable много + CPU высокий</td><td>CPU-bound код, busy loop, livelock, активный GC.</td><td>Запустить JFR, проверить GC и CPU throttling.</td></tr>
+<tr><td>Threads много + container memory растёт</td><td>Память уходит на thread stacks.</td><td>Проверить <code>-Xss</code>, thread pools, live threads, memory limit.</td></tr>
+<tr><td>Threads нормальные, но latency высокая</td><td>Причина может быть в БД, GC, сети, внешней интеграции.</td><td>Перейти к Hikari, GC, HTTP client, PostgreSQL dashboard.</td></tr>
+<tr><td>После рестарта threads вернулись к норме</td><td>Симптом временно снят, причина не найдена.</td><td>Смотреть previous logs, events, графики до рестарта.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Kubernetes-команды рядом с Grafana</h3>
+<p>Grafana показывает тренд и масштаб, но для расследования нужны факты из Kubernetes: restarts, node, limits, probes, events и логи контейнера.</p>
+<pre># Проверить pod, node, restarts
+kubectl get pod -n &lt;namespace&gt; -o wide
+
+# Проверить events, probes, limits, last state
+kubectl describe pod -n &lt;namespace&gt; &lt;pod&gt;
+
+# Проверить ресурсы контейнера
+kubectl top pod -n &lt;namespace&gt; &lt;pod&gt; --containers
+
+# Логи текущего контейнера
+kubectl logs -n &lt;namespace&gt; &lt;pod&gt; --tail=300
+
+# Логи предыдущего контейнера после рестарта
+kubectl logs -n &lt;namespace&gt; &lt;pod&gt; --previous --tail=300
+
+# Проверить фактические JVM flags, включая -Xss
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 VM.flags'
+
+# Проверить число потоков через JVM
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 Thread.print | grep -c "java.lang.Thread.State"'</pre>
+<div class="callout danger"><b>Важно:</b> если pod уже рестартовал, thread dump старого процесса снять нельзя. Тогда используйте previous logs, Kubernetes events и Grafana-графики до момента рестарта.</div>
+</div>
+
+<div class="card">
+<h3>Когда снимать thread dump</h3>
+<p>Thread dump нужен не всегда. Его стоит снимать, когда метрики потоков связаны с пользовательским симптомом или есть риск зависания.</p>
+<table>
+<tr><th>Триггер</th><th>Почему нужен thread dump</th></tr>
+<tr><td>p95/p99 latency выросла, а CPU/GC/Hikari не дают очевидного ответа</td><td>Нужно понять, где находятся request threads.</td></tr>
+<tr><td><code>jvm_threads_live_threads</code> резко выросли</td><td>Нужно увидеть имена новых потоков и stack trace.</td></tr>
+<tr><td><code>BLOCKED</code> threads держатся несколько минут</td><td>Нужно найти monitor и owner lock.</td></tr>
+<tr><td>Все HTTP worker threads заняты</td><td>Нужно понять, чем они заняты: БД, HTTP, lock, sleep.</td></tr>
+<tr><td>Hikari pending &gt; 0</td><td>Нужно понять, кто держит connection и кто ждёт.</td></tr>
+<tr><td>Сервис жив, но readiness падает или запросы висят</td><td>Нужно проверить starvation, deadlock, зависшие внешние вызовы.</td></tr>
+<tr><td>Есть подозрение на deadlock/livelock</td><td>Нужно несколько дампов и, возможно, JFR.</td></tr>
+</table>
+<pre># 3 thread dump с интервалом 15 секунд
+for i in 1 2 3; do
+  kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 Thread.print -l' &gt; thread-dump-$i.txt
+  sleep 15
+done</pre>
+</div>
+
+<div class="card">
+<h3>Runbook: высокая latency и подозрение на потоки</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Открыть dashboard сервиса</div><div class="step-desc">Проверить p95/p99 latency, RPS и 5xx. Без пользовательского симптома рост потоков может быть нормальным.</div></div>
+<div class="step"><div class="step-title">2. Проверить live threads</div><div class="step-desc">Сравнить текущее количество с обычным baseline и с другими replicas.</div></div>
+<div class="step"><div class="step-title">3. Проверить threads by state</div><div class="step-desc">Определить, какие состояния растут: blocked, runnable, waiting или timed-waiting.</div></div>
+<div class="step"><div class="step-title">4. Связать с Kubernetes</div><div class="step-desc">Проверить CPU usage, CPU throttling, memory, restarts, readiness/liveness events.</div></div>
+<div class="step"><div class="step-title">5. Если BLOCKED растёт — снять 3 thread dump</div><div class="step-desc">Искать monitor, synchronized-блок, owner lock и повторяющиеся stack trace.</div></div>
+<div class="step"><div class="step-title">6. Если WAITING/TIMED_WAITING много — смотреть stack trace</div><div class="step-desc">Определить, ждут ли потоки PostgreSQL, Hikari connection, HTTP-вызов, очередь, sleep или lock.</div></div>
+<div class="step"><div class="step-title">7. Если RUNNABLE много и CPU высокий — запустить JFR</div><div class="step-desc">JFR поможет найти CPU hot methods, livelock, allocation pressure или GC overhead.</div></div>
+<div class="step"><div class="step-title">8. Передать разработке пакет фактов</div><div class="step-desc">Графики, pod, namespace, image version, время начала, thread dumps, логи, events, связь с релизом или нагрузкой.</div></div>
+</div>
+</div>
+
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>В Grafana видно: live threads растут «лестницей», container memory тоже растёт, а heap стабилен. Что проверить в первую очередь?</p>
+<button onclick="q('qthreadmon1','a','b','Heap стабилен, значит обычная heap leak не главный кандидат.')">Только Java heap dump</button>
+<button onclick="q('qthreadmon1','b','b')">Количество потоков, -Xss и расход памяти на thread stacks</button>
+<button onclick="q('qthreadmon1','c','b','CSS не связан с JVM threads.')">CSS фронтенда</button>
+<div id="qthreadmon1" class="res"></div>
+</div>
+</section>
+
+<section id="thread-dump" class="page"><h2>2.2 Thread dump</h2><div class="card"><p><b>Thread dump</b> — снимок всех потоков JVM: имя, состояние, stack trace, locks и ожидания. Нужен при зависаниях, latency, deadlock, starvation, блокировках и ожидании внешних систем.</p><div class="callout success"><b>Практика:</b> снимайте 3 дампа с интервалом 10–15 секунд, чтобы увидеть динамику.</div><pre># Найти Java PID
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd || ps -ef | grep java'
+
+# Thread dump через jcmd
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 Thread.print -l' &gt; thread-dump.txt
+
+# 3 дампа подряд
+for i in 1 2 3; do
+  kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 Thread.print -l' &gt; thread-dump-$i.txt
+  sleep 15
+done</pre><table><tr><th>Паттерн</th><th>Что означает</th></tr><tr><td>Found one Java-level deadlock</td><td>Deadlock, срочно эскалировать разработке.</td></tr><tr><td>Много BLOCKED на одном lock</td><td>Lock contention.</td></tr><tr><td>JDBC / socketRead</td><td>Ожидание PostgreSQL или сети.</td></tr><tr><td>Одинаковые RUNNABLE стеки в 3 дампах</td><td>CPU loop или тяжёлый расчёт.</td></tr></table></div></section>
+
+<section id="jfr" class="page"><h2>2.3 JFR профилировщик</h2><div class="card"><p><b>Java Flight Recorder</b> — встроенный профилировщик JVM. Он собирает события CPU, аллокаций, GC, locks, exceptions, file/socket I/O и thread scheduling.</p><table><tr><th>Когда запускать</th><th>Что покажет</th></tr><tr><td>Высокий CPU</td><td>Горячие методы и busy loops.</td></tr><tr><td>Зависания</td><td>Safepoints, GC pause, blocked threads.</td></tr><tr><td>Рост памяти</td><td>Allocation pressure и типы объектов.</td></tr></table><pre># Запустить JFR на 5 минут
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c '
+  jcmd 1 JFR.start name=support settings=profile duration=5m filename=/tmp/support.jfr
+'
+
+# Проверить записи
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 JFR.check'
+
+# Остановить и сохранить
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c '
+  jcmd 1 JFR.stop name=support filename=/tmp/support.jfr
+'
+
+# Скопировать файл
+kubectl cp &lt;namespace&gt;/&lt;pod&gt;:/tmp/support.jfr ./support.jfr</pre><div class="callout warn"><b>Важно:</b> используйте ограниченную длительность и согласованный runbook, особенно на production.</div></div></section>
+
+<section id="memory" class="page">
+<h2>3. Heap и Non-Heap</h2>
+
+<div class="card">
+<h3>Что такое heap простыми словами</h3>
+<p>Всякий раз, когда Java-приложение создаёт объект, этот объект размещается в области памяти JVM, которая называется <b>heap</b>, или <b>куча</b>. В heap попадают DTO, строки, коллекции, результаты SQL-запросов, JSON/XML-объекты, кэши, доменные сущности и большинство временных объектов, которые возникают при обработке запросов.</p>
+<p>Объём heap ограничен настройками JVM и лимитами контейнера. Поэтому JVM нужен механизм, который освобождает место. Этим занимается <b>Garbage Collector</b>: он ищет объекты, которые больше недостижимы из живых ссылок, и освобождает занимаемую ими память.</p>
+<div class="flow">HTTP-запрос
+  ↓
+Java-код создаёт объекты
+  ↓
+Объекты размещаются в Heap
+  ↓
+Garbage Collector ищет недостижимые объекты
+  ↓
+Недостижимые объекты удаляются
+  ↓
+В heap снова появляется свободное место</div>
+<div class="callout"><b>Главная идея:</b> heap — это рабочая область для Java-объектов, а GC — механизм, который пытается поддерживать в этой области свободное место.</div>
+</div>
+
+<div class="card">
+<h3>Что будет, если heap закончится</h3>
+<p>Если свободное место в heap израсходовано, а Garbage Collector не может освободить достаточно памяти, JVM получает ошибку:</p>
+<pre>Exception in thread "main" java.lang.OutOfMemoryError: Java heap space</pre>
+<p>В production это может проявляться не только как ошибка в логах. Возможны рост latency, частые Full GC, отказ readiness/liveness probes, падение контейнера, рестарт pod или статус <code>OOMKilled</code>, если контейнер превысил memory limit Kubernetes.</p>
+<table>
+<tr><th>Симптом</th><th>Что означает</th><th>Что проверить</th></tr>
+<tr><td><code>java.lang.OutOfMemoryError: Java heap space</code></td><td>JVM не смогла выделить объект в heap.</td><td>Heap used/max, old gen, GC, heap dump.</td></tr>
+<tr><td>Частые Full GC</td><td>JVM пытается освободить старую область.</td><td>Old Gen, live data, GC pause, allocation rate.</td></tr>
+<tr><td>Latency растёт перед падением</td><td>Потоки приложения тормозят из-за GC или нехватки памяти.</td><td>p95/p99 latency рядом с GC pause.</td></tr>
+<tr><td>Pod <code>OOMKilled</code></td><td>Kubernetes убил контейнер за превышение memory limit.</td><td>Container memory, heap, non-heap, direct memory, thread stacks.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Почему GC не всегда спасает</h3>
+<p>Garbage Collector удаляет только те объекты, которые больше <b>недостижимы</b>, то есть на них нет живых ссылок из работающего приложения. Но иногда объект уже не нужен бизнес-логике, однако ссылка на него всё ещё где-то хранится. Для GC такой объект выглядит живым, поэтому он не будет удалён.</p>
+<div class="flow">Объект больше не нужен приложению
+  ↓
+Но ссылка на него осталась в cache / static map / ThreadLocal / очереди
+  ↓
+GC считает объект живым
+  ↓
+Объект не удаляется
+  ↓
+Heap постепенно заполняется
+  ↓
+Возникает memory leak</div>
+<div class="callout warn"><b>Ключевой момент:</b> утечка памяти в Java — это не обязательно «потерянный» объект. Чаще это объект, на который всё ещё есть ссылка, но приложение уже не должно было его хранить.</div>
+</div>
+
+<div class="card">
+<h3>Недостижимые объекты и утечка по ссылкам</h3>
+<table>
+<tr><th>Ситуация</th><th>Как видит GC</th><th>Результат</th><th>Пример</th></tr>
+<tr><td>Объект больше не используется и ссылок нет</td><td>Объект недостижим.</td><td>GC может удалить объект.</td><td>Временный DTO после обработки запроса.</td></tr>
+<tr><td>Объект не нужен, но ссылка осталась</td><td>Объект достижим.</td><td>GC не удалит объект.</td><td>Объект лежит в static Map без TTL.</td></tr>
+<tr><td>Очередь растёт быстрее обработки</td><td>Элементы очереди достижимы.</td><td>Heap растёт.</td><td>Producer быстрее consumer.</td></tr>
+<tr><td>ThreadLocal не очищается</td><td>Объект достижим через поток.</td><td>Память удерживается долго.</td><td>Большой context в worker thread.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Карта памяти JVM в контейнере</h3>
+<p>Важно помнить: heap — только часть памяти контейнера. Kubernetes ограничивает всю память контейнера, а не только heap. Поэтому сервис может быть убит по memory limit даже тогда, когда heap ещё не достиг <code>-Xmx</code>.</p>
+<div class="flow">Container memory limit
+  ├─ Java Heap (-Xmx / MaxRAMPercentage)
+  │  ├─ Young Generation
+  │  │  ├─ Eden
+  │  │  ├─ Survivor S0
+  │  │  └─ Survivor S1
+  │  └─ Old Generation
+  ├─ Non-Heap
+  │  ├─ Metaspace
+  │  ├─ Compressed Class Space
+  │  └─ Code Cache
+  ├─ Direct / off-heap buffers
+  ├─ Thread stacks (-Xss × number of threads)
+  ├─ GC / JVM native structures
+  └─ Native libraries and OS overhead</div>
+<div class="callout danger"><b>Контейнерный риск:</b> нельзя бездумно ставить <code>-Xmx</code> равным memory limit контейнера. Кроме heap есть non-heap, direct memory, стеки потоков и native overhead.</div>
+</div>
+
+<div class="card">
+<h3>Из чего состоит Heap</h3>
+<table>
+<tr><th>Область</th><th>Что хранит</th><th>Что смотреть поддержке</th></tr>
+<tr><td><b>Young Generation</b></td><td>Новые и короткоживущие объекты.</td><td>Allocation rate, частота Minor GC.</td></tr>
+<tr><td><b>Eden</b></td><td>Первичное место размещения новых объектов.</td><td>Быстро заполняется при большом количестве временных объектов.</td></tr>
+<tr><td><b>Survivor S0/S1</b></td><td>Объекты, пережившие один или несколько Minor GC.</td><td>Promotion rate, старение объектов.</td></tr>
+<tr><td><b>Old Generation</b></td><td>Долгоживущие объекты.</td><td>Рост baseline после GC, риск Full GC и OOM.</td></tr>
+</table>
+<div class="callout"><b>Для диагностики утечки:</b> самый важный график — не просто heap used, а поведение heap после GC. Если после каждой сборки baseline становится выше, это подозрение на рост live data или утечку.</div>
+</div>
+
+<div class="card">
+<h3>Non-Heap и native memory</h3>
+<table>
+<tr><th>Область</th><th>Что хранит</th><th>Почему может расти</th></tr>
+<tr><td><b>Metaspace</b></td><td>Метаданные классов.</td><td>Много классов, classloader leak, динамическая генерация классов.</td></tr>
+<tr><td><b>Compressed Class Space</b></td><td>Данные о классах при включённых compressed class pointers.</td><td>Рост числа загруженных классов.</td></tr>
+<tr><td><b>Code Cache</b></td><td>JIT-скомпилированный код.</td><td>Много горячего кода, активная JIT-компиляция.</td></tr>
+<tr><td><b>Direct memory</b></td><td>Off-heap ByteBuffer, Netty, NIO, драйверы.</td><td>Большие buffers, утечки direct buffer.</td></tr>
+<tr><td><b>Thread stacks</b></td><td>Стек каждого потока.</td><td>Слишком много потоков или большой <code>-Xss</code>.</td></tr>
+<tr><td><b>Native memory</b></td><td>Внутренние структуры JVM и нативных библиотек.</td><td>SSL, compression, DNS, malloc, драйверы, JNI.</td></tr>
+</table>
+<div class="callout warn"><b>Практический вывод:</b> если container memory растёт, а heap стабилен, проблема может быть не в Java heap, а в non-heap, direct memory, потоках или native memory.</div>
+</div>
+
+<div class="card">
+<h3>Как мониторить Heap и Non-Heap</h3>
+<pre># Heap usage % по pod
+100 *
+sum by (pod) (jvm_memory_used_bytes{area="heap", namespace="$namespace"})
+/
+sum by (pod) (jvm_memory_max_bytes{area="heap", namespace="$namespace"})
+
+# Heap used по областям/id
+sum by (pod, id) (
+  jvm_memory_used_bytes{area="heap", namespace="$namespace"}
+)
+
+# Non-heap used по областям/id
+sum by (pod, id) (
+  jvm_memory_used_bytes{area="nonheap", namespace="$namespace"}
+)
+
+# Container memory относительно Kubernetes limit
+100 *
+container_memory_working_set_bytes{namespace="$namespace", pod=~"$pod"}
+/
+kube_pod_container_resource_limits{namespace="$namespace", pod=~"$pod", resource="memory"}
+
+# Разница между container memory и heap used
+container_memory_working_set_bytes{namespace="$namespace", pod=~"$pod"}
+-
+sum by (pod) (
+  jvm_memory_used_bytes{area="heap", namespace="$namespace", pod=~"$pod"}
+)</pre>
+</div>
+
+<div class="card">
+<h3>Как понять, что heap переполнен</h3>
+<table>
+<tr><th>Признак</th><th>Что означает</th><th>Насколько критично</th></tr>
+<tr><td>Heap used держится выше 85–90%</td><td>Мало свободного места в heap.</td><td>Высокий риск Full GC и OOM.</td></tr>
+<tr><td>Old Gen растёт и не снижается после GC</td><td>Много живых объектов или утечка.</td><td>Критично, нужен heap dump.</td></tr>
+<tr><td>Full GC становится чаще</td><td>JVM пытается освободить старую область.</td><td>Критично при росте latency.</td></tr>
+<tr><td>GC pause совпадает с p99 latency</td><td>Пользователи чувствуют GC.</td><td>Критично для SLA/SLO.</td></tr>
+<tr><td>В логах <code>Java heap space</code></td><td>JVM не смогла выделить память.</td><td>Критично, возможен рестарт.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Что делать поддержке, если heap переполнен, но сервис ещё живёт в Kubernetes</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Не перезапускать pod сразу</div><div class="step-desc">Рестарт может временно помочь, но уничтожит состояние, по которому можно найти причину. Если сервис ещё отвечает и есть время — сначала соберите факты.</div></div>
+<div class="step"><div class="step-title">2. Зафиксировать масштаб</div><div class="step-desc">Проверьте, проблема на одном pod или на всех replicas. Сравните heap, restarts, version/image, node.</div><pre>kubectl get pod -n &lt;namespace&gt; -o wide
+kubectl describe pod -n &lt;namespace&gt; &lt;pod&gt;</pre></div>
+<div class="step"><div class="step-title">3. Проверить графики памяти</div><div class="step-desc">Откройте heap used/max, old gen, GC pause, Full GC count, container memory, thread count, RPS и latency в одном временном окне.</div></div>
+<div class="step"><div class="step-title">4. Проверить логи на OOM и GC-признаки</div><div class="step-desc">Ищите <code>OutOfMemoryError</code>, <code>Java heap space</code>, частые timeout, readiness/liveness failures.</div><pre>kubectl logs -n &lt;namespace&gt; &lt;pod&gt; --tail=500 | egrep -i "outofmemory|java heap space|gc overhead|killed|readiness|liveness"</pre></div>
+<div class="step"><div class="step-title">5. Проверить свободное место перед heap dump</div><div class="step-desc">Heap dump может быть большим. Если места нет, можно уронить контейнер или забить ephemeral storage.</div><pre>kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'df -h /tmp / || true'</pre></div>
+<div class="step"><div class="step-title">6. Снять heap dump</div><div class="step-desc">Если runbook разрешает и место есть, снимите heap dump, скопируйте его и удалите из контейнера.</div><pre>kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 GC.heap_dump /tmp/heap.hprof'
+kubectl cp &lt;namespace&gt;/&lt;pod&gt;:/tmp/heap.hprof ./heap.hprof
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- rm -f /tmp/heap.hprof</pre></div>
+<div class="step"><div class="step-title">7. Параллельно снять JFR, если проблема развивается</div><div class="step-desc">JFR поможет увидеть allocation pressure, GC, CPU и горячие участки кода.</div><pre>kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c '
+  jcmd 1 JFR.start name=heap-pressure settings=profile duration=5m filename=/tmp/heap-pressure.jfr
+'
+kubectl cp &lt;namespace&gt;/&lt;pod&gt;:/tmp/heap-pressure.jfr ./heap-pressure.jfr</pre></div>
+<div class="step"><div class="step-title">8. Снизить влияние на пользователей</div><div class="step-desc">По регламенту: временно вывести pod из нагрузки, увеличить replicas, сделать rollback, ограничить batch/job, отключить проблемный трафик или согласовать временное увеличение memory limit.</div></div>
+<div class="step"><div class="step-title">9. Эскалировать с полным пакетом фактов</div><div class="step-desc">Передайте разработке heap dump/JFR, графики, время начала, pod, image tag, нагрузку, последние релизы и логи.</div></div>
+</div>
+</div>
+
+<div class="card">
+<h3>Как конфигурировать Java heap и non-heap в Kubernetes</h3>
+<p>В Kubernetes память Java-сервиса нужно настраивать не только через <code>resources.limits.memory</code>, но и через JVM-флаги. Kubernetes ограничивает память контейнера целиком, а JVM внутри этого лимита должна разместить heap, metaspace, compressed class space, code cache, direct memory, стеки потоков и native overhead.</p>
+<div class="callout warn"><b>Главный принцип:</b> сумма JVM-областей должна быть меньше memory limit контейнера. Нужно оставлять запас под native memory, JVM overhead, libc, SSL, DNS, драйверы, monitoring-agent и временные пики.</div>
+</div>
+
+<div class="card">
+<h3>Пример JVM options через переменные окружения</h3>
+<p>Один из практичных подходов — вынести размеры областей памяти в переменные окружения и собирать <code>JAVA_TOOL_OPTIONS</code> или <code>JAVA_OPTS</code> при старте контейнера.</p>
+<pre>-Xms${HEAP_SIZE_MB}M \
+-Xmx${HEAP_SIZE_MB}M \
+-Xss1M \
+-XX:MaxMetaspaceSize=${METASPACE_SIZE_MB}M \
+-XX:CompressedClassSpaceSize=${COMPRESSED_CLASS_SPACE_SIZE_MB}M \
+-XX:ReservedCodeCacheSize=${RESERVED_CODE_CACHE_SIZE_MB}M \
+-XX:MaxDirectMemorySize=${DIRECT_MEMORY_SIZE_MB}M</pre>
+<table>
+<tr><th>Флаг</th><th>Что задаёт</th><th>Комментарий для поддержки</th></tr>
+<tr><td><code>-Xms</code></td><td>Начальный размер heap.</td><td>Если <code>-Xms</code> равен <code>-Xmx</code>, JVM сразу резервирует стабильный размер heap. Это снижает динамическое расширение heap, но требует корректного расчёта memory limit.</td></tr>
+<tr><td><code>-Xmx</code></td><td>Максимальный размер heap.</td><td>Главный лимит Java heap. Если heap заполнен и GC не помогает — возможен <code>Java heap space</code>.</td></tr>
+<tr><td><code>-Xss</code></td><td>Размер стека одного потока.</td><td>Память на стеки считается примерно как <code>thread_count × Xss</code>. При большом числе потоков это заметная часть container memory.</td></tr>
+<tr><td><code>-XX:MaxMetaspaceSize</code></td><td>Максимальный размер Metaspace.</td><td>Ограничивает метаданные классов. При нехватке возможен <code>OutOfMemoryError: Metaspace</code>.</td></tr>
+<tr><td><code>-XX:CompressedClassSpaceSize</code></td><td>Размер области compressed class space.</td><td>Связана с metadata классов. Обычно меняется реже, но важна при большом числе классов.</td></tr>
+<tr><td><code>-XX:ReservedCodeCacheSize</code></td><td>Размер Code Cache для JIT-кода.</td><td>Если code cache заполнится, JIT может деградировать, что влияет на производительность.</td></tr>
+<tr><td><code>-XX:MaxDirectMemorySize</code></td><td>Лимит direct/off-heap memory.</td><td>Важен для Netty, NIO, драйверов, буферов. Если heap стабилен, а container memory растёт — смотреть сюда.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Пример Deployment с настройкой памяти JVM</h3>
+<p>Ниже пример, как это может выглядеть в Kubernetes Deployment. Значения приведены как шаблон, их нельзя копировать в production без расчёта под конкретный сервис.</p>
+<pre>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: payment-api
+        image: registry.example.ru/payment-api:1.0.0
+        resources:
+          requests:
+            memory: "1536Mi"
+            cpu: "500m"
+          limits:
+            memory: "2048Mi"
+            cpu: "1000m"
+        env:
+        - name: HEAP_SIZE_MB
+          value: "1024"
+        - name: METASPACE_SIZE_MB
+          value: "192"
+        - name: COMPRESSED_CLASS_SPACE_SIZE_MB
+          value: "64"
+        - name: RESERVED_CODE_CACHE_SIZE_MB
+          value: "128"
+        - name: DIRECT_MEMORY_SIZE_MB
+          value: "256"
+        - name: JAVA_TOOL_OPTIONS
+          value: >-
+            -Xms$(HEAP_SIZE_MB)M
+            -Xmx$(HEAP_SIZE_MB)M
+            -Xss1M
+            -XX:MaxMetaspaceSize=$(METASPACE_SIZE_MB)M
+            -XX:CompressedClassSpaceSize=$(COMPRESSED_CLASS_SPACE_SIZE_MB)M
+            -XX:ReservedCodeCacheSize=$(RESERVED_CODE_CACHE_SIZE_MB)M
+            -XX:MaxDirectMemorySize=$(DIRECT_MEMORY_SIZE_MB)M
+            -XX:+ExitOnOutOfMemoryError</pre>
+<div class="callout"><b>Зачем <code>-XX:+ExitOnOutOfMemoryError</code>:</b> если JVM получила критический OOM, процесс завершается, а Kubernetes перезапускает контейнер. Это часто лучше, чем оставить приложение в повреждённом состоянии. Но причина OOM всё равно должна расследоваться.</div>
+</div>
+
+<div class="card">
+<h3>Как считать бюджет памяти контейнера</h3>
+<p>Перед тем как задать JVM-флаги, полезно разложить memory limit контейнера на понятные части.</p>
+<pre>container_memory_limit
+  &gt; heap_xmx
+  + max_metaspace
+  + compressed_class_space
+  + reserved_code_cache
+  + max_direct_memory
+  + thread_count * xss
+  + native_overhead
+  + agents_and_libraries
+  + safety_margin</pre>
+<table>
+<tr><th>Компонент</th><th>Пример</th><th>Комментарий</th></tr>
+<tr><td>Container limit</td><td>2048 MiB</td><td>Общий потолок памяти pod/container.</td></tr>
+<tr><td>Heap <code>-Xmx</code></td><td>1024 MiB</td><td>Обычно самая крупная часть.</td></tr>
+<tr><td>Metaspace</td><td>192 MiB</td><td>Зависит от количества классов, фреймворков, прокси.</td></tr>
+<tr><td>Compressed Class Space</td><td>64 MiB</td><td>Часто меньше Metaspace.</td></tr>
+<tr><td>Code Cache</td><td>128 MiB</td><td>Нужен JIT-компилятору.</td></tr>
+<tr><td>Direct Memory</td><td>256 MiB</td><td>Особенно важно для Netty/NIO.</td></tr>
+<tr><td>Thread stacks</td><td>200 threads × 1 MiB = 200 MiB</td><td>При росте потоков быстро съедает память.</td></tr>
+<tr><td>Native overhead + запас</td><td>184+ MiB</td><td>JVM, libc, SSL, DNS, агенты, фрагментация, пики.</td></tr>
+</table>
+<div class="callout danger"><b>Типовая ошибка:</b> container limit = 2048 MiB и <code>-Xmx=2048M</code>. Такой pod почти гарантированно рискует получить <code>OOMKilled</code>, потому что non-heap и native memory тоже требуют место.</div>
+</div>
+
+<div class="card">
+<h3>Heap через фиксированный размер или проценты</h3>
+<p>Есть два распространённых подхода к настройке heap в контейнере.</p>
+<table>
+<tr><th>Подход</th><th>Пример</th><th>Плюсы</th><th>Минусы</th></tr>
+<tr><td>Фиксированный heap</td><td><code>-Xms1024M -Xmx1024M</code></td><td>Предсказуемо, удобно для сопровождения и capacity planning.</td><td>Нужно вручную пересчитывать при изменении memory limit.</td></tr>
+<tr><td>Процент от container memory</td><td><code>-XX:InitialRAMPercentage</code><br><code>-XX:MaxRAMPercentage</code></td><td>Удобно для разных окружений и лимитов.</td><td>Легче забыть про non-heap/direct/thread stacks, если процент слишком большой.</td></tr>
+</table>
+<div class="callout"><b>Для банковского сопровождения:</b> фиксированные значения часто проще расследовать: в инциденте сразу понятно, какой heap, какой metaspace и какой direct memory были у конкретной версии сервиса.</div>
+</div>
+
+<div class="card">
+<h3>Что проверять поддержке в конфигурации pod</h3>
+<pre># Посмотреть limits/requests и переменные окружения
+kubectl describe pod -n &lt;namespace&gt; &lt;pod&gt;
+
+# Посмотреть фактическую команду запуска и env внутри контейнера
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'tr "" " " &lt; /proc/1/cmdline; echo'
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'env | sort | egrep "JAVA|HEAP|META|DIRECT|CODE|CLASS|XMS|XMX"'
+
+# Посмотреть JVM flags, которые реально применились
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 VM.flags'
+
+# Посмотреть системные свойства JVM
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 VM.system_properties | head -100'
+
+# Посмотреть heap summary
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 GC.heap_info'</pre>
+<table>
+<tr><th>Что проверить</th><th>Зачем</th></tr>
+<tr><td><code>resources.limits.memory</code></td><td>Понять общий потолок памяти контейнера.</td></tr>
+<tr><td><code>-Xmx</code> и <code>-Xms</code></td><td>Понять размер heap и совпадает ли он с ожидаемым.</td></tr>
+<tr><td><code>MaxMetaspaceSize</code></td><td>Понять, ограничен ли Metaspace.</td></tr>
+<tr><td><code>MaxDirectMemorySize</code></td><td>Понять, ограничена ли direct memory.</td></tr>
+<tr><td><code>-Xss</code> и число потоков</td><td>Оценить память на thread stacks.</td></tr>
+<tr><td>Фактический <code>JAVA_TOOL_OPTIONS</code></td><td>Убедиться, что env-переменные реально применились.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Типовые ошибки конфигурации JVM в Kubernetes</h3>
+<table>
+<tr><th>Ошибка</th><th>Чем опасна</th><th>Как исправлять</th></tr>
+<tr><td><code>-Xmx</code> почти равен container limit</td><td>OOMKilled из-за non-heap/native memory.</td><td>Уменьшить heap или увеличить limit с расчётом бюджета.</td></tr>
+<tr><td>Не ограничен Direct Memory</td><td>Off-heap может расти неожиданно.</td><td>Задать <code>-XX:MaxDirectMemorySize</code> и мониторить direct buffers.</td></tr>
+<tr><td>Слишком много потоков при <code>-Xss1M</code></td><td>Стеки потоков съедают сотни MiB.</td><td>Проверить thread pools, уменьшить количество потоков или Xss по согласованию.</td></tr>
+<tr><td>Слишком маленький Metaspace</td><td><code>OutOfMemoryError: Metaspace</code>.</td><td>Проверить число классов, classloader leak, увеличить лимит при необходимости.</td></tr>
+<tr><td>Разные настройки в replicas одного deployment</td><td>Нестабильное поведение pod.</td><td>Проверить шаблон deployment, env, configmap, rollout.</td></tr>
+<tr><td>Изменили memory limit, но не пересчитали JVM flags</td><td>Heap/non-heap бюджет стал некорректным.</td><td>Пересчитать все области и safety margin.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Runbook: проверка JVM memory-конфигурации при OOMKilled</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Зафиксировать container memory limit</div><div class="step-desc">Понять, сколько памяти Kubernetes разрешает контейнеру.</div><pre>kubectl describe pod -n &lt;namespace&gt; &lt;pod&gt; | egrep -A5 -i "limits|requests"</pre></div>
+<div class="step"><div class="step-title">2. Проверить фактические JVM flags</div><div class="step-desc">Не доверяйте только deployment yaml: важно увидеть, какие флаги реально применились в процессе.</div><pre>kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 VM.flags'</pre></div>
+<div class="step"><div class="step-title">3. Сравнить Xmx с memory limit</div><div class="step-desc">Если Xmx занимает почти весь limit, это сильный кандидат на причину OOMKilled.</div></div>
+<div class="step"><div class="step-title">4. Посчитать thread stacks</div><div class="step-desc">Оцените <code>jvm_threads_live_threads × Xss</code>. При сотнях потоков это значимый расход памяти.</div></div>
+<div class="step"><div class="step-title">5. Сравнить heap и container memory</div><div class="step-desc">Если heap не полный, а container memory близко к limit — ищите non-heap/direct/native/thread stacks.</div></div>
+<div class="step"><div class="step-title">6. Передать владельцам сервиса расчёт</div><div class="step-desc">В эскалации укажите memory limit, Xmx, metaspace, direct memory, Xss, thread count, RSS/container memory и время OOM.</div></div>
+</div>
+</div>
+
+<div class="card danger callout"><b>Чего не делать:</b> не увеличивайте <code>-Xmx</code> и memory limit вслепую как постоянное решение. Это может только отложить падение, увеличить длительность GC-пауз и скрыть настоящую утечку.</div>
+</section>
+
+<section id="heap-dump" class="page"><h2>3.1 Heap dump</h2><div class="card"><p><b>Heap dump</b> — снимок объектов в Java heap. Нужен для анализа утечки: какие классы занимают память, кто удерживает ссылки, какие коллекции растут.</p><div class="callout warn"><b>Риск:</b> heap dump может быть размером примерно с используемый heap, нагрузить приложение и занять диск.</div><pre># Проверить место
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'df -h /tmp'
+
+# Снять heap dump
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- sh -c 'jcmd 1 GC.heap_dump /tmp/heap.hprof'
+
+# Скопировать
+kubectl cp &lt;namespace&gt;/&lt;pod&gt;:/tmp/heap.hprof ./heap.hprof
+
+# Удалить после копирования
+kubectl exec -n &lt;namespace&gt; &lt;pod&gt; -- rm -f /tmp/heap.hprof</pre><div class="callout danger"><b>Безопасность:</b> heap dump может содержать персональные данные, токены, payload запросов и бизнес-объекты.</div></div></section>
+
+<section id="leaks" class="page"><h2>3.2 Утечки памяти и OOMKilled</h2><div class="card"><h3>Как куча утекает</h3><table><tr><th>Источник</th><th>Пример</th><th>Симптом</th></tr><tr><td>Cache без лимита</td><td>Map, Caffeine без max size/TTL.</td><td>Old gen растёт.</td></tr><tr><td>Static коллекции</td><td>static List/Map.</td><td>Память не освобождается.</td></tr><tr><td>ThreadLocal</td><td>Крупные объекты не удаляются.</td><td>Утечка привязана к worker threads.</td></tr><tr><td>Очереди</td><td>Producer быстрее consumer.</td><td>Queue depth и heap растут.</td></tr><tr><td>Classloader leak</td><td>Динамические классы.</td><td>Metaspace растёт.</td></tr></table></div><div class="card"><h3>Почему pod рестартует</h3><table><tr><th>Причина</th><th>Признак</th><th>Действие</th></tr><tr><td>Java heap space</td><td>Heap близко к max, OOM в логах.</td><td>Heap dump, GC, релиз, нагрузка.</td></tr><tr><td>Metaspace</td><td>Metaspace растёт.</td><td>Classloader/dynamic generation.</td></tr><tr><td>Direct buffer memory</td><td>Heap не полный, RSS растёт.</td><td>Netty/NIO/direct memory.</td></tr><tr><td>OOMKilled</td><td>Reason: OOMKilled.</td><td>container limit, heap, non-heap, threads.</td></tr></table></div></section>
+
+<section id="gc" class="page">
+<h2>4. Garbage Collector</h2>
+
+<div class="card">
+<h3>Зачем нужен Garbage Collector</h3>
+<p><b>Garbage Collector</b> освобождает память от объектов, которые больше недостижимы из живых ссылок. Для поддержки важна практическая цепочка: приложение создаёт объекты → heap заполняется → GC освобождает память → во время пауз может расти latency → при нехватке памяти возможны Full GC, OOM и рестарты pod.</p>
+<div class="flow">Запросы создают Java-объекты
+  ↓
+Объекты попадают в Young Generation
+  ↓
+Young Generation заполняется
+  ↓
+Minor GC очищает короткоживущие объекты
+  ↓
+Выжившие объекты постепенно стареют
+  ↓
+Долгоживущие объекты переходят в Old Generation
+  ↓
+Major / Full GC работает со старой областью
+  ↓
+Если живых объектов слишком много — паузы растут, возможен OOMKilled</div>
+</div>
+
+<div class="card">
+<h3>Работа GC с поколениями</h3>
+<p>Классическая модель heap делит память на области для короткоживущих и долгоживущих объектов. Это сделано потому, что большинство объектов в типичном Java-приложении живут недолго: DTO, временные коллекции, строки, объекты парсинга JSON, промежуточные результаты обработки запроса.</p>
+<table>
+<tr><th>Область</th><th>Для чего нужна</th><th>Что важно поддержке</th></tr>
+<tr><td><b>Eden</b></td><td>Сюда в первую очередь попадают новые объекты.</td><td>Быстрое заполнение Eden означает высокий allocation rate.</td></tr>
+<tr><td><b>Survivor S0 / S1</b></td><td>Две области для объектов, которые пережили Minor GC.</td><td>Объекты копируются между Survivor-областями и получают возраст.</td></tr>
+<tr><td><b>Old Generation</b></td><td>Хранит долгоживущие объекты.</td><td>Рост Old Gen после GC — важный признак memory pressure или утечки.</td></tr>
+</table>
+<div class="callout"><b>Главная идея поколений:</b> часто и быстро очищать молодые объекты, а более дорогую очистку старой области выполнять реже.</div>
+</div>
+
+<div class="card">
+<h3>Minor GC: очистка Young Generation</h3>
+<p><b>Minor GC</b> запускается, когда заполняется Young Generation, чаще всего Eden. Young Generation обычно состоит из одной области Eden и двух Survivor-областей: <code>S0</code> и <code>S1</code>.</p>
+<ol>
+<li>Новые объекты сначала размещаются в <b>Eden</b>.</li>
+<li>Когда Eden заполняется, JVM инициирует <b>Minor GC</b>.</li>
+<li>GC ищет живые объекты в Eden и в активной Survivor-области.</li>
+<li>Живые объекты копируются в другую Survivor-область.</li>
+<li>Eden и предыдущая активная Survivor-область очищаются целиком.</li>
+<li>Объекты, пережившие несколько Minor GC, получают больший возраст.</li>
+<li>После достижения порога возраста объект переносится в <b>Old Generation</b>. Это называется <b>старением</b> или <b>promotion</b>.</li>
+</ol>
+<div class="flow">До Minor GC:
+Eden: много новых объектов
+S0: объекты, пережившие прошлый GC
+S1: пусто
+
+После Minor GC:
+Eden: очищен
+S0: очищен
+S1: живые объекты из Eden и S0
+Old Gen: часть достаточно старых объектов</div>
+<div class="callout success"><b>Почему Minor GC обычно быстрый:</b> он работает с небольшой молодой областью и копирует только живые объекты. Большинство временных объектов просто исчезают при очистке Eden.</div>
+<div class="callout warn"><b>Когда Minor GC становится проблемой:</b> если приложение создаёт слишком много объектов, Minor GC начинает выполняться очень часто. Даже короткие паузы при высокой частоте могут заметно влиять на latency и CPU.</div>
+</div>
+
+<div class="card">
+<h3>Старение объектов и promotion в Old Generation</h3>
+<p>Если объект переживает несколько Minor GC, JVM считает его долгоживущим. Такой объект постепенно «стареет» и затем перемещается в Old Generation. Это нормальный процесс, но для поддержки важно смотреть, насколько быстро растёт Old Generation.</p>
+<table>
+<tr><th>Паттерн</th><th>Что означает</th><th>Действие поддержки</th></tr>
+<tr><td>Old Gen растёт во время нагрузки, но после GC возвращается к baseline</td><td>Похоже на нормальный рабочий набор объектов.</td><td>Сравнить с RPS и latency.</td></tr>
+<tr><td>Old Gen после каждого GC остаётся всё выше</td><td>Возможна утечка или рост live data.</td><td>Готовить heap dump/JFR и эскалацию.</td></tr>
+<tr><td>Promotion rate резко вырос после релиза</td><td>Больше объектов стало доживать до Old Gen.</td><td>Сравнить с изменениями кода, payload, cache, batch.</td></tr>
+<tr><td>Old Gen близко к максимуму</td><td>Риск Full GC, OOM и рестарта.</td><td>Проверить память, логи, GC, возможность собрать heap dump.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Major GC и Full GC: очистка старой области</h3>
+<p><b>Old Generation</b> предназначена для долгоживущих объектов и обычно больше Young Generation. Когда старая область заполняется или JVM испытывает сильное давление по памяти, запускается более тяжёлая сборка мусора.</p>
+<p><b>Major GC</b> обычно связывают с очисткой Old Generation. <b>Full GC</b> часто означает более широкую остановку и обработку разных областей heap и JVM-памяти. В реальных логах и метриках терминология зависит от используемого GC, версии Java и формата логирования.</p>
+<ol>
+<li>GC определяет живые объекты в Old Generation.</li>
+<li>Недоступные объекты освобождаются.</li>
+<li>При необходимости живые объекты перемещаются, чтобы уменьшить фрагментацию памяти.</li>
+<li>Такое перемещение называется <b>compaction</b>, или уплотнение.</li>
+<li>Во время тяжёлых фаз приложение может переживать <b>Stop-The-World</b> паузы.</li>
+</ol>
+<div class="callout danger"><b>Stop-The-World:</b> это пауза, во время которой потоки приложения приостанавливаются. Для пользователя это может выглядеть как резкий рост latency, timeout, срыв readiness/liveness probe или кратковременное зависание сервиса.</div>
+</div>
+
+<div class="card">
+<h3>Почему Major / Full GC опаснее Minor GC</h3>
+<table>
+<tr><th>Сравнение</th><th>Minor GC</th><th>Major / Full GC</th></tr>
+<tr><td>Область работы</td><td>Young Generation: Eden + Survivor.</td><td>Old Generation, а иногда шире.</td></tr>
+<tr><td>Частота</td><td>Часто.</td><td>Реже.</td></tr>
+<tr><td>Обычно по времени</td><td>Короче.</td><td>Дольше и тяжелее.</td></tr>
+<tr><td>Основная причина</td><td>Заполнилась молодая область.</td><td>Давление на Old Gen, фрагментация, нехватка памяти.</td></tr>
+<tr><td>Влияние на сервис</td><td>Может давать мелкие latency spikes.</td><td>Может давать длинные паузы, timeout и рестарты.</td></tr>
+<tr><td>Что смотреть</td><td>Allocation rate, young GC count, pause.</td><td>Old Gen usage, live data, full GC count, pause, OOM.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Что такое фрагментация памяти</h3>
+<p>Фрагментация означает, что свободная память есть, но она разбита на небольшие куски. Для размещения крупного объекта может не хватить непрерывного участка. Поэтому при Major/Full GC JVM может перемещать живые объекты и уплотнять память.</p>
+<div class="flow">До уплотнения:
+[живой][пусто][живой][пусто][пусто][живой]
+
+После уплотнения:
+[живой][живой][живой][пусто][пусто][пусто]</div>
+<div class="callout"><b>Для поддержки:</b> длинные паузы могут быть связаны не только с количеством мусора, но и с необходимостью перемещать живые объекты.</div>
+</div>
+
+<div class="card">
+<h3>Как GC выглядит в мониторинге</h3>
+<table>
+<tr><th>Что видно</th><th>Вероятная причина</th><th>Как интерпретировать</th></tr>
+<tr><td>Частые короткие GC</td><td>Высокий allocation rate.</td><td>Проверить RPS, payload, новые объекты после релиза.</td></tr>
+<tr><td>Редкие длинные GC</td><td>Давление на Old Gen или Full GC.</td><td>Проверить old gen, live data, heap dump.</td></tr>
+<tr><td>GC pause совпадает с p99 latency</td><td>GC влияет на пользовательские запросы.</td><td>Приложить графики GC и latency в одном окне.</td></tr>
+<tr><td>После GC heap не снижается</td><td>Много живых объектов или утечка.</td><td>Готовить heap dump и анализ dominator tree.</td></tr>
+<tr><td>GC count растёт вместе с CPU</td><td>JVM тратит CPU на сборку мусора.</td><td>Проверить allocation rate и CPU throttling.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>PromQL для мониторинга GC</h3>
+<pre># Доля времени в GC за 5 минут
+sum by (pod) (rate(jvm_gc_pause_seconds_sum{namespace="$namespace"}[5m]))
+
+# Количество GC-событий по action/cause
+sum by (pod, action, cause) (
+  rate(jvm_gc_pause_seconds_count{namespace="$namespace"}[5m])
+)
+
+# p95 GC pause, если доступны bucket-метрики
+histogram_quantile(0.95,
+  sum by (le, pod) (
+    rate(jvm_gc_pause_seconds_bucket{namespace="$namespace"}[5m])
+  )
+)
+
+# Allocation rate: сколько памяти создаётся в секунду
+sum by (pod) (
+  rate(jvm_gc_memory_allocated_bytes_total{namespace="$namespace"}[5m])
+)
+
+# Promotion rate: сколько объектов переходит в Old Gen
+sum by (pod) (
+  rate(jvm_gc_memory_promoted_bytes_total{namespace="$namespace"}[5m])
+)</pre>
+</div>
+
+<div class="card">
+<h3>Runbook поддержки при подозрении на проблему GC</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Сравнить GC pause и latency</div><div class="step-desc">Откройте p95/p99 latency и GC pause на одном временном окне. Важно понять, совпадают ли пики.</div></div>
+<div class="step"><div class="step-title">2. Проверить heap до и после GC</div><div class="step-desc">Если baseline heap после GC растёт, это похоже на рост live data или утечку.</div></div>
+<div class="step"><div class="step-title">3. Проверить allocation rate</div><div class="step-desc">Если heap очищается, но GC очень частый, причина может быть в большом количестве временных объектов.</div></div>
+<div class="step"><div class="step-title">4. Проверить CPU throttling</div><div class="step-desc">Ограничение CPU в Kubernetes может растягивать GC-паузы и ухудшать latency.</div></div>
+<div class="step"><div class="step-title">5. Собрать артефакты</div><div class="step-desc">Для CPU/allocation pressure — JFR. Для устойчивого роста Old Gen — heap dump. Для зависания во время пауз — thread dump рядом по времени.</div></div>
+</div>
+</div>
+
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Heap после каждого GC возвращается примерно к прежнему baseline, но GC стал чаще во время роста RPS. Что это больше похоже?</p>
+<button onclick="q('qgc1','a','b','Leak обычно проявляется ростом baseline после GC.')">Классическая утечка heap</button>
+<button onclick="q('qgc1','b','b')">Высокий allocation rate из-за нагрузки</button>
+<button onclick="q('qgc1','c','b','Hikari может быть связан косвенно, но описание про частые GC при стабильном baseline.')">Нехватка подключений Hikari</button>
+<div id="qgc1" class="res"></div>
+</div>
+</section>
+
+<section id="hikari" class="page">
+<h2>5. HikariCP</h2>
+
+<div class="card">
+<h3>Что такое HikariCP</h3>
+<p><b>HikariCP</b> — это JDBC connection pool. Он держит набор заранее открытых соединений к PostgreSQL, чтобы приложение не создавало новое TCP/JDBC-соединение на каждый пользовательский запрос.</p>
+<p>Когда поток приложения хочет выполнить SQL, он берёт connection из пула. После выполнения SQL connection должен быть возвращён обратно в пул. Если свободных соединений нет, поток ждёт. Если он не дождался за отведённое время, приложение получает timeout.</p>
+<div class="flow">HTTP request thread
+  ↓ берёт connection
+Hikari pool
+  ├─ active connections: заняты запросами
+  ├─ idle connections: свободны
+  ├─ pending threads: ждут connection
+  └─ max pool size: верхний лимит
+  ↓
+PostgreSQL sessions / backend processes</div>
+<div class="callout"><b>Главная идея:</b> HikariCP защищает приложение от дорогого создания соединений, но сам пул может стать узким местом, если соединений мало, SQL медленные или PostgreSQL перегружен.</div>
+</div>
+
+<div class="card">
+<h3>Ключевые настройки HikariCP</h3>
+<table>
+<tr><th>Настройка</th><th>Что задаёт</th><th>Как влияет на production</th></tr>
+<tr><td><code>maximumPoolSize</code></td><td>Максимальное количество соединений в пуле одного процесса JVM.</td><td>Если мало — потоки ждут connection. Если много — можно перегрузить PostgreSQL. В Kubernetes считать нужно на все replicas.</td></tr>
+<tr><td><code>minimumIdle</code></td><td>Минимальное количество свободных idle-соединений, которые Hikari старается поддерживать.</td><td>Если равно <code>maximumPoolSize</code> или не задано в fixed-size подходе — пул стремится держать соединения открытыми. Если меньше — пул более динамический.</td></tr>
+<tr><td><code>connectionTimeout</code></td><td>Сколько поток ждёт свободное соединение из пула.</td><td>Должен соответствовать SLA сервиса. Слишком большой timeout удерживает request threads, слишком маленький может давать лишние ошибки при кратком всплеске.</td></tr>
+<tr><td><code>idleTimeout</code></td><td>Сколько idle-соединение может простаивать перед закрытием.</td><td>Имеет смысл, когда пул динамический. Для fixed-size пула влияние меньше.</td></tr>
+<tr><td><code>maxLifetime</code></td><td>Максимальное время жизни connection в пуле.</td><td>Должно быть меньше внешних timeout’ов: PostgreSQL, proxy, firewall, load balancer, NAT. Иначе инфраструктура может закрыть соединение раньше приложения.</td></tr>
+<tr><td><code>keepaliveTime</code></td><td>Периодическая проверка idle-соединений, чтобы они не были silently killed инфраструктурой.</td><td>Полезно, если firewall/NAT/proxy режет idle-соединения.</td></tr>
+<tr><td><code>leakDetectionThreshold</code></td><td>Порог, после которого Hikari логирует подозрение, что connection долго не возвращают.</td><td>Полезно для дебага connection leak. Включать осознанно, не как постоянную замену мониторинга.</td></tr>
+<tr><td><code>poolName</code></td><td>Имя пула.</td><td>Обязательно для удобной диагностики, особенно если есть read/write пулы или несколько datasource.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Пример конфигурации Spring Boot</h3>
+<p>Пример показывает основные параметры. Значения нужно подбирать под сервис, PostgreSQL, количество replicas и результаты нагрузочного теста.</p>
+<pre>spring:
+  datasource:
+    hikari:
+      pool-name: payment-write-pool
+      maximum-pool-size: 20
+      minimum-idle: 20
+      connection-timeout: 1000
+      idle-timeout: 600000
+      max-lifetime: 1740000
+      keepalive-time: 300000
+      leak-detection-threshold: 0</pre>
+<div class="callout warn"><b>Важно:</b> <code>maximumPoolSize=20</code> — это лимит на один pod/JVM. Если replicas = 6, то только этот deployment потенциально может открыть до <code>6 × 20 = 120</code> соединений к PostgreSQL.</div>
+</div>
+
+<div class="card">
+<h3>maximumPoolSize: считать на все replicas</h3>
+<p>В Kubernetes одна из частых ошибок — подобрать <code>maximumPoolSize</code> для одного процесса и забыть, что таких процессов несколько.</p>
+<pre>total_connections_from_service = replicas × maximumPoolSize</pre>
+<table>
+<tr><th>Параметр</th><th>Пример</th></tr>
+<tr><td>Replicas</td><td>6</td></tr>
+<tr><td>maximumPoolSize на pod</td><td>20</td></tr>
+<tr><td>Итого потенциальных соединений</td><td>120</td></tr>
+</table>
+<p>К этому числу нужно добавить другие сервисы, админские подключения, миграции, мониторинг, read-only pool, write pool и запас для PostgreSQL.</p>
+<div class="callout danger"><b>Антипаттерн:</b> при Hikari timeout просто увеличить <code>maximumPoolSize</code>. Если причина в медленных SQL или locks, больший pool может только сильнее нагрузить PostgreSQL.</div>
+</div>
+
+<div class="card">
+<h3>minimumIdle: fixed-size или dynamic pool</h3>
+<table>
+<tr><th>Подход</th><th>Настройка</th><th>Когда подходит</th><th>Риск</th></tr>
+<tr><td><b>Fixed-size pool</b></td><td><code>minimumIdle = maximumPoolSize</code> или <code>minimumIdle</code> не задаётся в типовой fixed-size конфигурации.</td><td>Стабильная высокая нагрузка, важна предсказуемость latency.</td><td>Постоянно держит больше соединений к PostgreSQL.</td></tr>
+<tr><td><b>Dynamic pool</b></td><td><code>minimumIdle &lt; maximumPoolSize</code>.</td><td>Нагрузка переменная, нужно экономить соединения.</td><td>При всплеске может быть задержка на создание новых соединений.</td></tr>
+</table>
+<div class="callout"><b>Для поддержки:</b> если idle всегда много, а PostgreSQL близок к лимиту подключений, проверьте <code>minimumIdle</code>, replicas и наличие нескольких datasource.</div>
+</div>
+
+<div class="card">
+<h3>connectionTimeout, idleTimeout, maxLifetime</h3>
+<table>
+<tr><th>Параметр</th><th>Как выбирать</th><th>Что видно при ошибке</th></tr>
+<tr><td><code>connectionTimeout</code></td><td>Должен быть согласован с SLA endpoint. Если SLA 2 секунды, ожидание connection 30 секунд бессмысленно.</td><td>Request threads долго висят, latency растёт, пользователи ждут.</td></tr>
+<tr><td><code>idleTimeout</code></td><td>Актуален для dynamic pool. Должен учитывать профиль нагрузки и стоимость создания connection.</td><td>Слишком маленький — частое пересоздание соединений; слишком большой — много idle sessions.</td></tr>
+<tr><td><code>maxLifetime</code></td><td>Должен быть меньше внешних connection timeout’ов инфраструктуры.</td><td>Если больше внешнего timeout, можно получить внезапно закрытые соединения.</td></tr>
+<tr><td><code>keepaliveTime</code></td><td>Включать, если инфраструктура закрывает idle-соединения.</td><td>Без keepalive возможны ошибки на давно idle connection.</td></tr>
+</table>
+<div class="callout success"><b>Практический ориентир:</b> Hikari должен сам обновлять соединения раньше, чем это сделает firewall, NAT, proxy, PgBouncer или PostgreSQL timeout.</div>
+</div>
+
+<div class="card">
+<h3>Метрики HikariCP</h3>
+<p>Метрики Hikari показывают не только размер пула, но и поведение потоков приложения вокруг БД: есть ли свободные соединения, ждут ли потоки, как долго получают connection и как долго держат его во время SQL/транзакции.</p>
+<table>
+<tr><th>Метрика</th><th>Что показывает</th><th>Как интерпретировать</th></tr>
+<tr><td><code>hikaricp.connections.active</code><br><code>hikaricp_connections_active</code></td><td>Сколько соединений сейчас занято.</td><td>Если постоянно около max — пул насыщен или SQL выполняются долго.</td></tr>
+<tr><td><code>hikaricp.connections.idle</code><br><code>hikaricp_connections_idle</code></td><td>Сколько соединений свободно.</td><td>Если долго 0 при высокой latency — потоки могут ждать connection.</td></tr>
+<tr><td><code>hikaricp.connections.pending</code><br><code>hikaricp_connections_pending</code></td><td>Сколько потоков ждут соединение.</td><td>Значение выше 0 в течение времени — явный сигнал saturation пула.</td></tr>
+<tr><td><code>hikaricp.connections.timeout</code><br><code>hikaricp_connections_timeout_total</code></td><td>Сколько раз приложение не дождалось соединения.</td><td>Рост обычно связан с ошибками запросов и 5xx.</td></tr>
+<tr><td><code>hikaricp.connections.acquire</code><br><code>hikaricp_connections_acquire_seconds</code></td><td>Сколько времени занимает получение connection из пула.</td><td>Рост acquire time означает, что connection получить всё труднее.</td></tr>
+<tr><td><code>hikaricp.connections.usage</code><br><code>hikaricp_connections_usage_seconds</code></td><td>Как долго приложение держит connection.</td><td>Долгое usage time — признак медленных SQL, долгих транзакций, locks или внешнего ожидания внутри транзакции.</td></tr>
+<tr><td><code>hikaricp.connections.max</code><br><code>hikaricp_connections_max</code></td><td>Максимальный размер пула.</td><td>Нужен для расчёта процента занятости.</td></tr>
+<tr><td><code>hikaricp.connections.min</code><br><code>hikaricp_connections_min</code></td><td>Минимальный размер idle pool.</td><td>Помогает понять fixed-size или dynamic подход.</td></tr>
+</table>
+<div class="callout warn"><b>Названия метрик:</b> в Prometheus через Micrometer точки часто преобразуются в подчёркивания, например <code>hikaricp.connections.active</code> превращается в <code>hikaricp_connections_active</code>.</div>
+</div>
+
+<div class="card">
+<h3>PromQL для HikariCP</h3>
+<pre># Занятость пула в процентах
+100 *
+hikaricp_connections_active{namespace="$namespace", pool=~"$pool"}
+/
+hikaricp_connections_max{namespace="$namespace", pool=~"$pool"}
+
+# Active / Idle / Pending по pod и pool
+sum by (pod, pool) (hikaricp_connections_active{namespace="$namespace"})
+sum by (pod, pool) (hikaricp_connections_idle{namespace="$namespace"})
+sum by (pod, pool) (hikaricp_connections_pending{namespace="$namespace"})
+
+# Timeout rate
+sum by (pod, pool) (
+  rate(hikaricp_connections_timeout_total{namespace="$namespace"}[5m])
+)
+
+# p95 acquire time, если доступны bucket-метрики
+histogram_quantile(0.95,
+  sum by (le, pod, pool) (
+    rate(hikaricp_connections_acquire_seconds_bucket{namespace="$namespace"}[5m])
+  )
+)
+
+# p95 usage time, если доступны bucket-метрики
+histogram_quantile(0.95,
+  sum by (le, pod, pool) (
+    rate(hikaricp_connections_usage_seconds_bucket{namespace="$namespace"}[5m])
+  )
+)</pre>
+</div>
+
+<div class="card">
+<h3>Как читать метрики Hikari вместе</h3>
+<table>
+<tr><th>Паттерн</th><th>Что вероятно</th><th>Что проверить</th></tr>
+<tr><td><code>active=max</code>, <code>idle=0</code>, <code>pending&gt;0</code></td><td>Пул исчерпан.</td><td>Usage time, slow SQL, locks, PostgreSQL capacity.</td></tr>
+<tr><td><code>pending&gt;0</code>, acquire time растёт</td><td>Потоки ждут connection.</td><td>Thread dump, Hikari timeout, HTTP latency.</td></tr>
+<tr><td>Usage time высокий</td><td>Connection долго удерживают.</td><td>Медленные SQL, долгие транзакции, external calls внутри transaction.</td></tr>
+<tr><td>Active высокий, PostgreSQL CPU низкий</td><td>Возможны locks, idle in transaction, network wait.</td><td><code>pg_stat_activity</code>, wait_event, locks.</td></tr>
+<tr><td>Idle много, PostgreSQL max_connections близко к лимиту</td><td>Пулы слишком большие или replicas много.</td><td>Суммарный расчёт <code>replicas × maximumPoolSize</code>.</td></tr>
+<tr><td>Timeout total растёт</td><td>Приложение не дождалось connection.</td><td>Ошибки 5xx, connectionTimeout, saturation пула.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Мини-чеклист для production</h3>
+<table>
+<tr><th>Проверка</th><th>Зачем</th></tr>
+<tr><td><code>maximumPoolSize</code> посчитан на все replicas, а не на один процесс.</td><td>Чтобы не перегрузить PostgreSQL суммарным числом соединений.</td></tr>
+<tr><td><code>minimumIdle</code> выбран осознанно: fixed-size или dynamic.</td><td>Чтобы понимать, держим ли соединения постоянно или экономим их.</td></tr>
+<tr><td><code>connectionTimeout</code> подходит под SLA сервиса.</td><td>Чтобы request threads не ждали connection дольше допустимого времени ответа.</td></tr>
+<tr><td><code>maxLifetime</code> меньше внешних connection timeout’ов.</td><td>Чтобы Hikari закрывал и обновлял connection раньше инфраструктуры.</td></tr>
+<tr><td><code>keepaliveTime</code> включён, если инфраструктура режет idle-соединения.</td><td>Чтобы не получать ошибки на давно простаивающих соединениях.</td></tr>
+<tr><td>Leak detection выключен или включается только для дебага.</td><td>Чтобы не шуметь в логах постоянно и не воспринимать это как замену мониторинга.</td></tr>
+<tr><td>Есть понятный <code>poolName</code>.</td><td>Чтобы различать datasource в метриках, логах и thread dump.</td></tr>
+<tr><td>Есть метрики и алерты.</td><td>Без них saturation пула будет виден только по ошибкам пользователей.</td></tr>
+<tr><td>Был нагрузочный тест после изменения размера пула.</td><td>Размер пула нельзя считать правильным без проверки под нагрузкой.</td></tr>
+<tr><td>Read-only и write-пулы различаются в метриках и логах.</td><td>Иначе непонятно, какой именно datasource деградирует.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Алерты для HikariCP</h3>
+<table>
+<tr><th>Алерт</th><th>Условие</th><th>Что делать</th></tr>
+<tr><td>Hikari pool saturated</td><td><code>active / max &gt; 0.9</code> несколько минут.</td><td>Проверить pending, usage time, PostgreSQL.</td></tr>
+<tr><td>Hikari pending connections</td><td><code>pending &gt; 0</code> держится больше 1–3 минут.</td><td>Снять thread dump, смотреть Hikari и БД.</td></tr>
+<tr><td>Hikari connection timeout</td><td><code>rate(timeout_total[5m]) &gt; 0</code>.</td><td>Проверить 5xx, connectionTimeout, SQL, locks.</td></tr>
+<tr><td>High acquire time</td><td>p95 acquire time выше нормального baseline.</td><td>Искать ожидание connection.</td></tr>
+<tr><td>High usage time</td><td>p95 usage time выше baseline.</td><td>Искать медленные SQL/транзакции.</td></tr>
+</table>
+</div>
+
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>В Kubernetes у deployment 5 replicas, а <code>maximumPoolSize=30</code>. Сколько соединений этот deployment потенциально может открыть к PostgreSQL?</p>
+<button onclick="q('qhikari1','a','c','30 — это только один pod/JVM.')">30</button>
+<button onclick="q('qhikari1','b','c','5 — это количество replicas, а не соединений.')">5</button>
+<button onclick="q('qhikari1','c','c')">150</button>
+<div id="qhikari1" class="res"></div>
+</div>
+</section>
+
+<section id="postgres" class="page"><h2>5.1 PostgreSQL и пул соединений</h2><div class="card"><p>Каждый active connection в Hikari соответствует сессии на стороне PostgreSQL. Если у каждого pod большой pool, суммарное число соединений может перегрузить БД.</p><div class="callout"><b>Формула:</b> replicas × maximumPoolSize должно помещаться в допустимое число соединений PostgreSQL с запасом.</div><pre>-- Активность подключений
+select state, count(*)
+from pg_stat_activity
+group by state
+order by count(*) desc;
+
+-- Долгие активные запросы
+select pid, usename, application_name, state,
+       now() - query_start as duration,
+       wait_event_type, wait_event,
+       left(query, 500) as query
+from pg_stat_activity
+where state &lt;&gt; 'idle'
+order by duration desc
+limit 20;
+
+-- Idle in transaction
+select pid, usename, application_name,
+       now() - xact_start as xact_duration,
+       left(query, 500) as query
+from pg_stat_activity
+where state = 'idle in transaction'
+order by xact_duration desc
+limit 20;</pre></div></section>
+
+<section id="runbooks" class="page"><h2>6. Runbooks инцидентов</h2><div class="card"><h3>Сервис медленно отвечает</h3><ol><li>Проверить масштаб: один pod, все replicas, один endpoint или вся система.</li><li>Проверить RPS, p95/p99 latency, 5xx, CPU, memory, threads, Hikari.</li><li>Если active threads=max или много waiting — снять thread dump.</li><li>Если Hikari pending растёт — проверить PostgreSQL.</li><li>Если GC pause совпадает с latency — собрать JFR и GC-графики.</li></ol></div><div class="card"><h3>Pod OOMKilled</h3><ol><li>Зафиксировать pod, namespace, restart count, время OOM.</li><li>Снять previous logs.</li><li>Проверить container memory vs limit, heap, non-heap, threads.</li><li>Если другая replica показывает такой же рост heap — снять heap dump.</li><li>Проверить релиз, нагрузку, batch, изменение payload.</li></ol></div><div class="card"><h3>Hikari пул соединений исчерпан</h3><ol><li>Проверить active=max, idle=0, pending&gt;0, timeout rate.</li><li>Сравнить с HTTP latency и 5xx.</li><li>Проверить usage/acquire time.</li><li>Снять thread dump.</li><li>Проверить PostgreSQL: slow queries, locks, idle in transaction.</li><li>Не увеличивать maximumPoolSize вслепую.</li></ol></div></section>
+
+<section id="quiz" class="page"><h2>Проверочный квиз</h2><div class="card quiz"><h3>1. Что лучше снять при подозрении на deadlock?</h3><button onclick="q('q1','a','b','Heap dump показывает объекты, а не блокировки потоков.')">Heap dump</button><button onclick="q('q1','b','b')">Thread dump</button><button onclick="q('q1','c','b','PostgreSQL может быть не связан.')">pg_stat_activity</button><div id="q1" class="res"></div></div><div class="card quiz"><h3>2. Heap стабилен, но container memory растёт. Что подозревать?</h3><button onclick="q('q2','a','c','Heap leak обычно проявляется ростом heap.')">Только heap leak</button><button onclick="q('q2','b','c','CSS не относится к JVM.')">CSS</button><button onclick="q('q2','c','c')">Non-heap, direct memory, stacks или native memory</button><div id="q2" class="res"></div></div><div class="card quiz"><h3>3. Hikari active=max, idle=0, pending растёт. Что это значит?</h3><button onclick="q('q3','a','a')">Пул соединений исчерпан</button><button onclick="q('q3','b','a','Heap не следует из этих метрик напрямую.')">Heap переполнен</button><button onclick="q('q3','c','a','Это не метрики GC.')">GC не работает</button><div id="q3" class="res"></div></div><div class="card quiz"><h3>4. Что лучше для анализа высокого CPU в JVM?</h3><button onclick="q('q4','a','b','Heap dump не покажет горячие методы CPU.')">Heap dump</button><button onclick="q('q4','b','b')">JFR на короткое окно</button><button onclick="q('q4','c','b','describe pod не профилирует JVM.')">Только kubectl describe</button><div id="q4" class="res"></div></div></section>
+
+<section id="call-to-action" class="page">
+<h2>Призыв к действию</h2>
+<div class="card">
+<h3>Что должен сделать прикладной администратор после курса</h3>
+<p>Курс должен закончиться не только прочтением, а практической проверкой готовности сервиса к production-инциденту. Ниже — минимальный набор действий, который стоит отработать на тестовом контуре или согласованном стенде.</p>
+<div class="grid">
+<div class="tile"><span class="badge">1</span><h3>🧳 Снять heap dump</h3><p>Проверьте, что умеете снять heap dump, проверить свободное место, скопировать файл из pod и удалить его после копирования.</p></div>
+<div class="tile"><span class="badge">2</span><h3>📄 Снять thread dump</h3><p>Отработайте снятие трёх thread dump с интервалом 10–15 секунд, чтобы видеть не один кадр, а динамику потоков.</p></div>
+<div class="tile"><span class="badge">3</span><h3>🧠 Проверить параметры Java heap</h3><p>Убедитесь, что параметры <code>-Xms</code>, <code>-Xmx</code>, <code>-Xss</code>, Metaspace, Code Cache и Direct Memory вынесены в конфигурацию.</p></div>
+<div class="tile"><span class="badge">4</span><h3>🏊 Проверить параметры HikariCP</h3><p>Проверьте, что <code>maximumPoolSize</code>, <code>minimumIdle</code>, <code>connectionTimeout</code>, <code>maxLifetime</code>, <code>keepaliveTime</code> и <code>poolName</code> задаются явно.</p></div>
+<div class="tile"><span class="badge">5</span><h3>🖥️ Проверить дашборды</h3><p>Убедитесь, что настроены Grafana-панели для мониторинга threads, HikariCP и процента занятого heap.</p></div>
+<div class="tile"><span class="badge">Итог</span><h3>🚀 Подготовить сервис к аварии</h3><p>Метрики, параметры запуска, команды диагностики и runbook должны быть готовы до инцидента, а не во время него.</p></div>
+</div>
+<div class="callout success"><b>Финальная цель:</b> прикладной администратор должен быстро собрать факты: что случилось, где случилось, когда началось, какие артефакты собраны и что передано владельцам сервиса.</div>
+</div>
+
+<div class="card">
+<h3>Мини-чеклист самопроверки</h3>
+<table>
+<tr><th>Проверка</th><th>Готово?</th><th>Что должно быть на выходе</th></tr>
+<tr><td>Снять heap dump</td><td>☐</td><td>Есть команда, понятен путь сохранения, известны риски по месту и чувствительным данным.</td></tr>
+<tr><td>Снять thread dump</td><td>☐</td><td>Есть команда для трёх дампов, понятен интервал и формат передачи.</td></tr>
+<tr><td>Параметры Java heap</td><td>☐</td><td>Параметры heap/non-heap вынесены в env/config и проверяются через <code>jcmd 1 VM.flags</code>.</td></tr>
+<tr><td>Параметры HikariCP</td><td>☐</td><td>Параметры пула вынесены в конфигурацию, размер посчитан на все replicas.</td></tr>
+<tr><td>Дашборды Grafana</td><td>☐</td><td>Есть панели: live threads, threads by state, Hikari active/idle/pending, heap used %, GC pause.</td></tr>
+</table>
+</div>
+</section>
+</main>
+</div>
+  <script src="course-shell.js" defer></script>
+</body>
+</html>

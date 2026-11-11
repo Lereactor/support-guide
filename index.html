@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Практическая база знаний инженера прикладной поддержки: Kubernetes, Java, PostgreSQL, Prometheus, Grafana, интеграции и soft skills.">
+  <meta name="theme-color" content="#10231e">
+  <title>Support Guide — база знаний прикладной поддержки</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#courses">Перейти к курсам</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Support Guide — на главную">
+      <span class="brand-mark" aria-hidden="true">S/</span>
+      <span class="brand-name">SUPPORT<span>/GUIDE</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Основная навигация">
+      <a href="#courses">Курсы</a>
+      <a href="#path">Маршрут</a>
+      <a href="#resources">Ресурсы</a>
+    </nav>
+    <button class="header-search" type="button" data-focus-search aria-label="Перейти к поиску">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+      <span>Поиск</span><kbd>/</kbd>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot"></span> База знаний прикладной поддержки</p>
+        <h1 id="hero-title">От симптома<br><span>к решению.</span></h1>
+        <p class="hero-lead">Практические курсы, команды и пошаговые планы для поиска и устранения сбоев. Начните с основ, даже если раньше не работали с этими технологиями.</p>
+        <div class="hero-actions">
+          <a class="button button-accent" href="kubernetes_support_course_full_marked.html">Начать с самых основ <span aria-hidden="true">↗</span></a>
+          <button class="button button-ghost" type="button" data-focus-search>Найти материал</button>
+        </div>
+      </div>
+      <div class="hero-console" aria-label="Пример маршрута диагностики">
+        <div class="console-top"><span>INCIDENT / WORKFLOW</span><span class="console-status">ONLINE</span></div>
+        <ol class="console-flow">
+          <li><span class="flow-index">01</span><div><strong>Зафиксировать</strong><small>симптом и масштаб</small></div><span class="flow-state">DONE</span></li>
+          <li><span class="flow-index">02</span><div><strong>Локализовать</strong><small>сервис и зависимость</small></div><span class="flow-state">DONE</span></li>
+          <li class="flow-active"><span class="flow-index">03</span><div><strong>Диагностировать</strong><small>логи, метрики, дампы</small></div><span class="flow-state">RUN</span></li>
+          <li><span class="flow-index">04</span><div><strong>Восстановить</strong><small>и задокументировать</small></div><span class="flow-state flow-muted">NEXT</span></li>
+        </ol>
+        <div class="console-footer"><span>5 практических курсов</span><span>81 раздел</span></div>
+      </div>
+    </section>
+
+    <section class="search-section" aria-label="Поиск по базе знаний">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+        <label class="visually-hidden" for="global-search">Поиск по всем курсам</label>
+        <input id="global-search" type="search" autocomplete="off" placeholder="Найти тему, команду или технологию…" aria-controls="search-results" aria-describedby="search-hint">
+        <kbd>/</kbd>
+        <button id="clear-search" class="clear-search" type="button" aria-label="Очистить поиск" hidden>Очистить</button>
+      </div>
+      <div class="search-meta" id="search-hint"><span>Например: <button type="button" data-query="OOMKilled">OOMKilled</button>, <button type="button" data-query="consumer lag">consumer lag</button>, <button type="button" data-query="MVCC">MVCC</button></span><span>Поиск по всем разделам</span></div>
+      <div id="search-status" class="search-status" role="status" aria-live="polite"></div>
+      <div id="search-results" class="search-results"></div>
+    </section>
+
+    <section class="beginner-section" aria-labelledby="beginner-title">
+      <div class="beginner-intro">
+        <p class="section-kicker">Впервые на сайте?</p>
+        <h2 id="beginner-title">Начните с малого.<br>Остальное подскажем.</h2>
+        <p>Не нужно читать всё сразу или разбираться во всех технологиях заранее. Первый курс объясняет базовые понятия простым языком.</p>
+        <a href="kubernetes_support_course_full_marked.html">Открыть первый курс <span aria-hidden="true">↗</span></a>
+      </div>
+      <ol class="beginner-steps">
+        <li><span>01</span><div><strong>Начните с Kubernetes</strong><p>Узнайте, где работает приложение и из каких частей состоит система. Открывайте разделы по порядку.</p></div></li>
+        <li><span>02</span><div><strong>Ищите незнакомые слова</strong><p>Введите термин в строку поиска выше — сайт найдёт объяснение и сразу откроет нужный раздел.</p></div></li>
+        <li><span>03</span><div><strong>Возвращайтесь в любое время</strong><p>Открытые разделы отмечаются автоматически. На карточке курса появится кнопка «Продолжить».</p></div></li>
+      </ol>
+    </section>
+
+    <section class="content-section" id="courses" aria-labelledby="courses-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">01 / Учебные материалы</p><h2 id="courses-title">Выберите направление</h2></div>
+        <p>Каждый курс содержит теорию, практические команды,<br class="desktop-only"> разборы инцидентов и самопроверку.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Фильтр курсов">
+        <button class="filter active" type="button" data-filter="all" aria-pressed="true">Все материалы</button>
+        <button class="filter" type="button" data-filter="infrastructure" aria-pressed="false">Инфраструктура</button>
+        <button class="filter" type="button" data-filter="diagnostics" aria-pressed="false">Диагностика</button>
+        <button class="filter" type="button" data-filter="data" aria-pressed="false">Данные</button>
+        <button class="filter" type="button" data-filter="people" aria-pressed="false">Коммуникации</button>
+      </div>
+
+      <div class="course-grid">
+        <article class="course-card course-kubernetes" data-category="infrastructure" data-course="kubernetes_support_course_full_marked.html" data-total="15">
+          <div class="course-top"><span class="course-code">K8S</span><span class="course-number">01</span></div>
+          <div class="course-tags"><span>Инфраструктура</span><span>15 разделов</span></div>
+          <h3>Kubernetes для прикладной поддержки</h3>
+          <p>Устройство кластера, Pod и Deployment, сеть, конфигурация, Istio и диагностика типовых проблем.</p>
+          <div class="card-progress"><span data-progress-label>Не начат</span><span data-progress-percent>0%</span><div class="progress-track"><span data-progress-bar></span></div></div>
+          <a class="course-link" href="kubernetes_support_course_full_marked.html"><span data-open-label>Открыть курс</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+
+        <article class="course-card course-java" data-category="diagnostics" data-course="java_kubernetes_support_threads_memory_gc_hikari_course.html" data-total="15">
+          <div class="course-top"><span class="course-code">JVM</span><span class="course-number">02</span></div>
+          <div class="course-tags"><span>Диагностика</span><span>15 разделов</span></div>
+          <h3>Java-микросервисы в Kubernetes</h3>
+          <p>Потоки, thread и heap dump, JFR, память, Garbage Collector, HikariCP и готовые runbook'и.</p>
+          <div class="card-progress"><span data-progress-label>Не начат</span><span data-progress-percent>0%</span><div class="progress-track"><span data-progress-bar></span></div></div>
+          <a class="course-link" href="java_kubernetes_support_threads_memory_gc_hikari_course.html"><span data-open-label>Открыть курс</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+
+        <article class="course-card course-postgres" data-category="data" data-course="postgresql.html" data-total="12">
+          <div class="course-top"><span class="course-code">SQL</span><span class="course-number">03</span></div>
+          <div class="course-tags"><span>Данные</span><span>12 разделов</span></div>
+          <h3>PostgreSQL для поддержки</h3>
+          <p>Архитектура и HA, MVCC, блокировки, запросы, репликация, резервное копирование и инциденты.</p>
+          <div class="card-progress"><span data-progress-label>Не начат</span><span data-progress-percent>0%</span><div class="progress-track"><span data-progress-bar></span></div></div>
+          <a class="course-link" href="postgresql.html"><span data-open-label>Открыть курс</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+
+        <article class="course-card course-metrics" data-category="diagnostics" data-course="prometheus_grafana_metrics_support_course_v12.html" data-total="24">
+          <div class="course-top"><span class="course-code">P/G</span><span class="course-number">04</span></div>
+          <div class="course-tags"><span>Наблюдаемость</span><span>24 раздела</span></div>
+          <h3>Prometheus, Grafana и метрики</h3>
+          <p>Модель метрик, PromQL, дашборды, золотые сигналы, SLI/SLO/SLA, алерты и диагностика.</p>
+          <div class="card-progress"><span data-progress-label>Не начат</span><span data-progress-percent>0%</span><div class="progress-track"><span data-progress-bar></span></div></div>
+          <a class="course-link" href="prometheus_grafana_metrics_support_course_v12.html"><span data-open-label>Открыть курс</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+
+        <article class="course-card course-integrations" data-category="infrastructure data" data-course="integration_systems_course.html" data-total="15">
+          <div class="course-top"><span class="course-code">API</span><span class="course-number">05</span></div>
+          <div class="course-tags"><span>Интеграции</span><span>15 разделов</span></div>
+          <h3>Интеграции и брокеры сообщений</h3>
+          <p>REST, Kafka, RabbitMQ и ArtemisMQ: паттерны, надёжность, мониторинг и поиск сбоев.</p>
+          <div class="card-progress"><span data-progress-label>Не начат</span><span data-progress-percent>0%</span><div class="progress-track"><span data-progress-bar></span></div></div>
+          <a class="course-link" href="integration_systems_course.html"><span data-open-label>Открыть курс</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+
+        <article class="course-card course-soft" data-category="people">
+          <div class="course-top"><span class="course-code">EQ</span><span class="course-number">06</span></div>
+          <div class="course-tags"><span>Soft skills</span><span>PDF</span></div>
+          <h3>Коммуникация и работа с людьми</h3>
+          <p>Отдельный материал для развития навыков коммуникации — важной части работы прикладной поддержки.</p>
+          <div class="card-progress card-progress-static"><span>Можно изучать на любом этапе</span></div>
+          <a class="course-link" href="soft_skills.pdf" target="_blank" rel="noopener"><span>Открыть PDF</span><span class="round-arrow" aria-hidden="true">↗</span></a>
+        </article>
+      </div>
+      <p id="filter-empty" class="filter-empty" hidden>В этой категории пока нет материалов.</p>
+    </section>
+
+    <section class="path-section" id="path" aria-labelledby="path-title">
+      <div class="section-heading section-heading-dark">
+        <div><p class="section-kicker">02 / Порядок изучения</p><h2 id="path-title">Маршрут инженера</h2></div>
+        <p>От инфраструктуры к прикладной диагностике.<br class="desktop-only"> Можно начать с темы текущего инцидента.</p>
+      </div>
+      <ol class="learning-path">
+        <li><a href="kubernetes_support_course_full_marked.html"><span class="path-number">01</span><span class="path-name">Среда выполнения<small>Kubernetes и Istio</small></span><span class="path-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="java_kubernetes_support_threads_memory_gc_hikari_course.html"><span class="path-number">02</span><span class="path-name">Приложение<small>JVM, потоки и память</small></span><span class="path-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="postgresql.html"><span class="path-number">03</span><span class="path-name">Данные<small>PostgreSQL и блокировки</small></span><span class="path-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="prometheus_grafana_metrics_support_course_v12.html"><span class="path-number">04</span><span class="path-name">Наблюдаемость<small>Метрики и алерты</small></span><span class="path-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="integration_systems_course.html"><span class="path-number">05</span><span class="path-name">Взаимодействие<small>REST и брокеры</small></span><span class="path-arrow" aria-hidden="true">↗</span></a></li>
+      </ol>
+    </section>
+
+    <section class="content-section resources-section" id="resources" aria-labelledby="resources-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">03 / Дополнительно</p><h2 id="resources-title">Продолжить изучение</h2></div>
+      </div>
+      <a class="resource-banner" href="knowledge_navigator_mobile.html">
+        <div class="resource-icon" aria-hidden="true">12</div>
+        <div><p class="resource-label">Внешний навигатор</p><h3>Технологии и источники для самостоятельного изучения</h3><p>12 тем в пяти группах: инфраструктура, данные, DevOps, архитектура и безопасность. Подборки курсов, видео и статей.</p></div>
+        <span class="resource-action">Открыть навигатор <span aria-hidden="true">↗</span></span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="index.html"><span class="brand-mark" aria-hidden="true">S/</span><span class="brand-name">SUPPORT<span>/GUIDE</span></span></a>
+    <p>Знания, которые помогают восстанавливать сервис.</p>
+    <a href="#courses">Вернуться к курсам ↑</a>
+  </footer>
+</body>
+</html>

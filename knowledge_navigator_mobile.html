@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>УСиЭСПБ. Навигатор знаний инженера прикладной поддержки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   НАВИГАТОР ЗНАНИЙ — Clean Responsive CSS
+   Mobile-first. Tested: iOS Safari, Android Chrome, Windows Chrome/Edge/Firefox
+   Breakpoints: 480 / 640 / 768 / 1024 / 1360
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── RESET ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  font-family: 'Onest', sans-serif;
+  background: #F6F8FC;
+  color: #0D1B3E;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(0,48,135,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,48,135,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F6F8FC; }
+::-webkit-scrollbar-thumb { background: #D4E2F0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #0066CC; }
+
+/* ── HERO ────────────────────────────────────────────────────── */
+.hero {
+  background: #003087;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg-lines { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hero-bg-lines::before, .hero-bg-lines::after {
+  content: ''; position: absolute; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-bg-lines::before { width: 600px; height: 600px; right: -150px; top: -250px; }
+.hero-bg-lines::after  { width: 350px; height: 350px; right: 40px; top: -80px; }
+
+.hero-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 48px 32px 44px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: row; flex-direction: row;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  gap: 40px;
+  -webkit-align-items: center; align-items: center;
+  position: relative;
+}
+.hero-content { -webkit-flex: 1 1 340px; flex: 1 1 340px; min-width: 0; }
+
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+.hero-eyebrow {
+  display: inline-flex;
+  -webkit-align-items: center; align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #7eb8f7;
+  margin-bottom: 16px; padding: 5px 12px;
+  border: 1px solid rgba(126,184,247,0.3);
+  border-radius: 4px; background: rgba(126,184,247,0.07);
+}
+.hero-eyebrow::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #00A651; animation: pulse-dot 2s infinite;
+}
+
+.hero h1 {
+  font-size: clamp(24px, 4vw, 44px);
+  font-weight: 800; letter-spacing: -1px; line-height: 1.1;
+  margin-bottom: 14px;
+}
+.hero h1 span { color: #7eb8f7; }
+.hero-sub {
+  font-size: 15px; color: rgba(255,255,255,0.65);
+  max-width: 520px; line-height: 1.65; font-weight: 400;
+}
+
+.hero-stats {
+  -webkit-flex: 0 0 auto; flex: 0 0 auto;
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 2px; width: 320px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.hero-stat {
+  padding: 18px 16px;
+  background: rgba(0,0,0,0.15);
+  text-align: center;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: baseline; align-items: baseline;
+  -webkit-justify-content: center; justify-content: center;
+  gap: 8px;
+}
+.hero-stat-num {
+  font-size: 32px; font-weight: 800; line-height: 1; color: #fff;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: -1px;
+}
+.hero-stat-num.accent { color: #7eb8f7; }
+.hero-stat-label { font-size: 15px; color: rgba(255,255,255,0.6); font-weight: 600; }
+
+.hero-sub-stats {
+  grid-column: 1 / -1;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  padding: 12px 8px; gap: 0;
+  background: rgba(0,0,0,0.1);
+}
+.hero-sub-stat {
+  -webkit-flex: 1 1 50%; flex: 1 1 50%;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  gap: 2px; font-size: 12px;
+  color: rgba(255,255,255,0.6); font-weight: 500;
+  padding: 6px 4px;
+  text-align: center;
+}
+.hero-sub-stat strong {
+  color: #fff; font-family: 'JetBrains Mono', monospace;
+  font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+/* ── MAIN ────────────────────────────────────────────────────── */
+.main { max-width: 1360px; margin: 0 auto; padding: 32px 32px 72px; }
+
+/* ── SECTION HEADER ──────────────────────────────────────────── */
+.section-head {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 24px;
+  padding-bottom: 20px; border-bottom: 1px solid #D4E2F0;
+}
+.section-head-label {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  gap: 10px; -webkit-flex: 1 1 auto; flex: 1 1 auto;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+}
+.section-index {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  color: #8fa0bb; letter-spacing: 0.06em;
+  background: #EBF3FB; padding: 3px 8px;
+  border-radius: 4px; border: 1px solid #D4E2F0;
+  white-space: nowrap;
+}
+.section-title { font-size: 20px; font-weight: 700; color: #0D1B3E; letter-spacing: -0.3px; }
+.section-hint { font-size: 13px; color: #8fa0bb; font-weight: 400; }
+.section-controls { display: -webkit-flex; display: flex; gap: 6px; -webkit-align-items: center; align-items: center; }
+
+.ctrl-btn, .extra-toggle-btn {
+  display: inline-flex; -webkit-align-items: center; align-items: center;
+  gap: 5px; font-size: 12px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; color: #8fa0bb;
+  background: transparent; border: 1.5px solid #D4E2F0;
+  border-radius: 6px; padding: 6px 12px;
+  cursor: pointer; white-space: nowrap;
+  -webkit-transition: 0.22s; transition: 0.22s; min-height: 36px;
+}
+.ctrl-btn:hover, .extra-toggle-btn:hover {
+  border-color: #0066CC; color: #0066CC; background: #e8f1fb;
+}
+
+/* ── TOPICS GRID (container) ─────────────────────────────────── */
+.topics-grid {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  gap: 0; margin-bottom: 48px;
+  border: 1px solid #D4E2F0; border-radius: 14px;
+  overflow: hidden; background: #FFFFFF;
+}
+
+/* ── GROUP SEPARATOR ─────────────────────────────────────────── */
+.group-separator {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  gap: 8px; padding: 6px 20px 6px 16px;
+  background: #F6F8FC; border-bottom: 1px solid #e8f0f8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.09em; text-transform: uppercase;
+}
+.group-separator-dot {
+  width: 8px; height: 8px; border-radius: 2px;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+
+/* ── TOPIC CARD (details/summary) ────────────────────────────── */
+details.topic-card {
+  border-bottom: 1px solid #e8f0f8;
+  position: relative;
+}
+details.topic-card:last-child { border-bottom: none; }
+
+/* Color stripe */
+details.topic-card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4px; z-index: 1;
+  pointer-events: none;
+}
+details.topic-card[data-group="infra"]::before    { background: #185fa5; }
+details.topic-card[data-group="data"]::before     { background: #ba7517; }
+details.topic-card[data-group="devops"]::before   { background: #3b6d11; }
+details.topic-card[data-group="arch"]::before     { background: #534ab7; }
+details.topic-card[data-group="security"]::before { background: #993c1d; }
+
+details.topic-card > summary {
+  display: grid;
+  grid-template-columns: 48px 48px 1fr auto 150px 44px;
+  -webkit-align-items: center; align-items: center;
+  min-height: 72px; cursor: pointer;
+  list-style: none; -webkit-user-select: none; user-select: none;
+  -webkit-transition: background 0.2s; transition: background 0.2s;
+  padding-left: 4px; /* offset for stripe */
+}
+details.topic-card > summary::-webkit-details-marker { display: none; }
+details.topic-card > summary::marker { display: none; }
+details.topic-card > summary:hover { background: #EBF3FB; }
+details.topic-card[open] > summary {
+  background: linear-gradient(90deg, rgba(0,102,204,0.05) 0%, transparent 60%);
+}
+
+.topic-card-num {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  height: 100%; min-height: 72px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600; color: #8fa0bb;
+  border-right: 1px solid #e8f0f8; background: #F6F8FC;
+}
+details.topic-card[open] .topic-card-num { color: #0066CC; background: #e8f1fb; }
+
+.topic-icon-cell {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  height: 100%; min-height: 72px;
+  font-size: 22px; border-right: 1px solid #e8f0f8;
+}
+.topic-main { padding: 14px 16px; min-width: 0; }
+.topic-name { font-size: 15px; font-weight: 700; color: #0D1B3E; letter-spacing: -0.2px; line-height: 1.3; }
+.topic-desc { font-size: 12px; color: #5A6A84; line-height: 1.5; margin-top: 3px; }
+
+.topic-badge-cell {
+  padding: 0 12px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+}
+.badge {
+  display: inline-flex; -webkit-align-items: center; align-items: center;
+  gap: 4px; font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 5px;
+  letter-spacing: 0.04em; font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.badge-basic   { background: #e6f7ee; color: #00A651; }
+.badge-mid     { background: #fff4e0; color: #a86400; }
+.badge-advanced{ background: #feeaec; color: #E8002D; }
+
+.topic-meta-cell {
+  padding: 0 12px 0 0;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  gap: 3px; -webkit-align-items: flex-end; align-items: flex-end;
+  min-width: 0;
+}
+.topic-res-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  font-weight: 600; color: #003087; white-space: nowrap;
+}
+.topic-time { font-size: 11px; color: #8fa0bb; white-space: nowrap; text-align: right; line-height: 1.4; }
+
+.topic-chevron {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  min-height: 72px; border-left: 1px solid #e8f0f8;
+  width: 44px;
+}
+.topic-chevron svg { color: #8fa0bb; -webkit-transition: -webkit-transform 0.25s; transition: transform 0.25s; }
+details.topic-card[open] .topic-chevron svg { -webkit-transform: rotate(90deg); transform: rotate(90deg); color: #0066CC; }
+
+/* ── DETAIL PANEL ────────────────────────────────────────────── */
+.detail-panel {
+  background: #FFFFFF;
+  border-top: 2px solid #0066CC;
+  animation: expandDown 0.25s ease;
+}
+@keyframes expandDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+.detail-header {
+  background: linear-gradient(105deg, #003087 0%, #004bb5 50%, #1d6abf 100%);
+  color: #fff;
+  padding: 20px 24px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: row; flex-direction: row;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  gap: 16px; -webkit-align-items: center; align-items: center;
+  position: relative; overflow: hidden;
+}
+.detail-header::after {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: rgba(255,255,255,0.04); pointer-events: none;
+}
+
+.detail-icon-wrap {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 26px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.detail-title { font-size: 20px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.2; }
+.detail-meta {
+  margin-top: 5px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  gap: 10px; font-size: 12px; color: rgba(255,255,255,0.65);
+  font-family: 'JetBrains Mono', monospace;
+}
+.detail-meta span { display: inline-flex; -webkit-align-items: center; align-items: center; gap: 4px; }
+.badge-detail-overlay {
+  background: rgba(255,255,255,0.15) !important;
+  color: rgba(255,255,255,0.9) !important;
+  border: none !important;
+}
+
+.detail-body { padding: 24px; }
+.detail-description {
+  font-size: 14px; color: #5A6A84; line-height: 1.65;
+  padding: 14px 18px;
+  background: #e8f1fb;
+  border-left: 3px solid #0066CC;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+}
+
+.key-concepts { margin-bottom: 24px; }
+.concepts-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: #8fa0bb;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 10px;
+}
+.concepts-list { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 6px; }
+.concept-tag {
+  background: transparent; border: 1px solid #D4E2F0;
+  border-radius: 5px; padding: 3px 10px;
+  font-size: 12px; font-family: 'JetBrains Mono', monospace;
+  font-weight: 500; color: #5A6A84;
+}
+
+.resources-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: #8fa0bb;
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 14px;
+}
+
+/* ── RESOURCES GRID ──────────────────────────────────────────── */
+.resources-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+/* ── RESOURCE CARD ───────────────────────────────────────────── */
+.resource-card {
+  border: 1px solid #D4E2F0; border-radius: 8px;
+  background: #F6F8FC; overflow: hidden;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+}
+.resource-card-top {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: flex-start; align-items: flex-start;
+  gap: 14px; padding: 16px 18px 12px;
+  background: #FFFFFF; border-bottom: 1px solid #e8f0f8;
+}
+.res-type-icon {
+  width: 40px; height: 40px; border-radius: 9px;
+  background: #EBF3FB; border: 1px solid #D4E2F0;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 20px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.res-title {
+  font-size: 14px; font-weight: 700; color: #0D1B3E;
+  line-height: 1.35; margin-bottom: 6px; letter-spacing: -0.1px;
+}
+.res-meta { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 4px; }
+.res-meta span {
+  font-size: 11px; font-weight: 500;
+  font-family: 'JetBrains Mono', monospace; color: #8fa0bb;
+  background: #F6F8FC; padding: 2px 7px;
+  border-radius: 4px; border: 1px solid #D4E2F0;
+  word-break: keep-all;
+}
+
+.res-body {
+  padding: 14px 18px 16px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  gap: 10px; -webkit-flex: 1; flex: 1;
+}
+.res-summary { font-size: 13px; color: #5A6A84; line-height: 1.6; }
+.res-points { list-style: none; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 5px; }
+.res-points li {
+  font-size: 13px; color: #5A6A84;
+  display: -webkit-flex; display: flex;
+  gap: 8px; -webkit-align-items: flex-start; align-items: flex-start; line-height: 1.5;
+}
+.res-points li::before {
+  content: '›'; color: #0066CC; font-weight: 700;
+  -webkit-flex-shrink: 0; flex-shrink: 0; font-size: 16px; line-height: 1.2;
+}
+.res-why {
+  font-size: 12px; color: #8fa0bb;
+  border-top: 1px solid #e8f0f8;
+  padding-top: 10px; font-style: italic;
+}
+.res-why strong { color: #0066CC; font-style: normal; font-weight: 600; }
+
+.res-link {
+  display: inline-flex; -webkit-align-items: center; align-items: center;
+  gap: 6px; background: #003087; color: #fff;
+  border: none; border-radius: 8px; padding: 9px 16px;
+  font-family: 'Onest', sans-serif; font-size: 13px; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  -webkit-transition: 0.2s; transition: 0.2s;
+  -webkit-align-self: flex-start; align-self: flex-start;
+  margin-top: auto; white-space: nowrap;
+}
+.res-link:hover { background: #0066CC; }
+.res-links-multi { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.res-link-part { font-size: 12px; padding: 6px 12px; }
+
+/* ── NO RESULTS ──────────────────────────────────────────────── */
+.no-results { display: none; text-align: center; padding: 64px 24px; color: #5A6A84; }
+.no-results.show { display: block; }
+.no-results-icon { font-size: 48px; margin-bottom: 14px; opacity: 0.5; }
+
+/* ── EXTRA SECTION ───────────────────────────────────────────── */
+.extra-section-wrap { background: #F6F8FC; padding-bottom: 8px; }
+.extra-section-inner { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
+
+.extra-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+.extra-grid.open { display: grid; }
+
+.extra-card {
+  background: #FFFFFF; border: 1px solid #D4E2F0;
+  border-radius: 8px; padding: 16px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: flex-start; align-items: flex-start;
+  gap: 12px; text-decoration: none; color: inherit;
+  -webkit-transition: 0.2s; transition: 0.2s;
+}
+.extra-card:hover { border-color: #0066CC; box-shadow: 0 4px 16px rgba(0,102,204,0.08); }
+.extra-card-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #EBF3FB; border: 1px solid #D4E2F0;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 18px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.extra-card-body { -webkit-flex: 1; flex: 1; min-width: 0; }
+.extra-card-title { font-size: 13px; font-weight: 700; color: #0D1B3E; margin-bottom: 3px; line-height: 1.3; }
+.extra-card-meta { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #8fa0bb; margin-bottom: 5px; }
+.extra-card-summary { font-size: 12px; color: #5A6A84; line-height: 1.45; }
+.extra-card-why { font-size: 11px; color: #0066CC; margin-top: 5px; font-style: italic; }
+
+/* ── LIBRARY SECTION ─────────────────────────────────────────── */
+.library-section-wrap { background: #F6F8FC; padding-bottom: 64px; }
+.library-section-inner { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
+
+.library-card {
+  background: #003087; border-radius: 14px;
+  padding: 36px 40px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: row; flex-direction: row;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  gap: 40px; -webkit-align-items: center; align-items: center;
+  color: #fff; position: relative; overflow: hidden;
+}
+.library-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 28px 28px; pointer-events: none;
+}
+.library-text { -webkit-flex: 1 1 300px; flex: 1 1 300px; position: relative; z-index: 1; }
+.library-badge {
+  display: inline-flex; -webkit-align-items: center; align-items: center;
+  gap: 6px; background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+  padding: 5px 14px; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #7eb8f7; margin-bottom: 14px;
+}
+.library-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 10px; }
+.library-desc { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.65; margin-bottom: 20px; max-width: 480px; }
+.library-tags { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.library-tag {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 5px; padding: 4px 10px; font-size: 12px;
+  font-weight: 500; color: rgba(255,255,255,0.8);
+}
+.library-btn {
+  display: inline-flex; -webkit-align-items: center; align-items: center;
+  gap: 8px; background: #fff; color: #003087;
+  border: none; border-radius: 10px; padding: 12px 24px;
+  font-family: 'Onest', sans-serif; font-size: 15px; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  -webkit-transition: 0.2s; transition: 0.2s; letter-spacing: -0.1px;
+}
+.library-btn:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+.library-qr-block {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  gap: 10px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+.library-qr-frame {
+  background: #fff; border-radius: 12px;
+  padding: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+.library-qr-canvas { display: block; }
+.library-qr-label {
+  font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  color: rgba(255,255,255,0.6); text-align: center;
+  line-height: 1.5; letter-spacing: 0.04em;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+footer {
+  background: #003087; color: rgba(255,255,255,0.5);
+  text-align: center; padding: 24px;
+  font-size: 12px; font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+}
+footer strong { color: rgba(255,255,255,0.9); }
+
+.section-head-clickable { cursor: pointer; -webkit-user-select: none; user-select: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile first
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── ≤ 1359px desktop ────────────────────────────────────────── */
+@media (max-width: 1359px) {
+  .hero-inner { padding: 40px 24px 36px; }
+  .main { padding: 28px 24px 64px; }
+  .extra-section-inner, .library-section-inner { padding: 0 24px; }
+}
+
+/* ── ≤ 1100px: hero stats wrap ───────────────────────────────── */
+@media (max-width: 1100px) {
+  .hero-stats { width: 100%; }
+  .hero-sub-stats { -webkit-flex-wrap: nowrap; flex-wrap: nowrap; }
+  .hero-sub-stat { -webkit-flex: 1 1 0; flex: 1 1 0; }
+}
+
+/* ── ≤ 1024px: 2-column resources, topic card narrower ──────── */
+@media (max-width: 1024px) {
+  .resources-grid { grid-template-columns: 1fr; }
+  details.topic-card > summary {
+    grid-template-columns: 44px 44px 1fr auto 44px;
+  }
+  .topic-badge-cell { display: none; }
+  .extra-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── ≤ 768px: tablet ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-inner { padding: 28px 16px 24px; gap: 24px; }
+  .hero-sub { font-size: 14px; }
+  .hero-stats { width: 100%; border-radius: 10px; }
+  .hero-sub-stats { -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+  .hero-sub-stat { -webkit-flex: 1 1 50%; flex: 1 1 50%; padding: 6px 4px; }
+
+  .main { padding: 20px 16px 56px; }
+  .extra-section-inner, .library-section-inner { padding: 0 16px; }
+  .section-hint { display: none; }
+  .section-title { font-size: 17px; }
+
+  details.topic-card > summary {
+    grid-template-columns: 40px 44px 1fr 40px;
+  }
+  .topic-badge-cell, .topic-meta-cell { display: none; }
+
+  .detail-header { padding: 16px; gap: 12px; }
+  .detail-icon-wrap { width: 44px; height: 44px; font-size: 22px; }
+  .detail-title { font-size: 17px; }
+  .detail-body { padding: 16px; }
+  .detail-description { font-size: 13px; padding: 12px 14px; }
+
+  .resource-card-top { padding: 14px 14px 10px; gap: 10px; }
+  .res-type-icon { width: 36px; height: 36px; font-size: 18px; }
+  .res-title { font-size: 13px; }
+  .res-body { padding: 12px 14px 14px; gap: 8px; }
+  .res-summary { font-size: 12px; }
+  .res-points li { font-size: 12px; }
+  .res-link { font-size: 12px; padding: 8px 14px; width: 100%; -webkit-justify-content: center; justify-content: center; }
+  .res-link-part { width: 100%; text-align: center; -webkit-justify-content: center; justify-content: center; }
+  .res-links-multi { -webkit-flex-direction: column; flex-direction: column; }
+
+  .library-card { padding: 24px 20px; gap: 24px; border-radius: 10px; }
+  .library-title { font-size: 22px; }
+  .library-btn { width: 100%; -webkit-justify-content: center; justify-content: center; font-size: 14px; }
+
+  .extra-grid { grid-template-columns: 1fr; }
+}
+
+/* ── ≤ 480px: small phone ────────────────────────────────────── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 26px; letter-spacing: -0.5px; }
+  .hero-eyebrow { font-size: 10px; padding: 4px 8px; }
+  .hero-stat { padding: 14px 10px; }
+  .hero-stat-num { font-size: 26px; }
+  .hero-stat-label { font-size: 13px; }
+
+  details.topic-card > summary {
+    grid-template-columns: 34px 40px 1fr 38px;
+    min-height: 62px;
+  }
+  .topic-card-num { font-size: 10px; min-height: 62px; }
+  .topic-icon-cell { font-size: 18px; min-height: 62px; }
+  .topic-main { padding: 10px 12px; }
+  .topic-name { font-size: 13px; }
+  .topic-desc { font-size: 11px; }
+  .topic-chevron { width: 38px; min-height: 62px; }
+
+  .detail-title { font-size: 15px; }
+  .detail-meta { font-size: 11px; gap: 6px; }
+  .detail-body { padding: 12px; }
+  .detail-description { padding: 10px 12px; }
+  .concept-tag { font-size: 11px; padding: 3px 8px; }
+
+  .res-meta span { font-size: 10px; padding: 2px 5px; }
+  .res-why { font-size: 11px; }
+
+  .library-card { padding: 20px 16px; }
+  .library-title { font-size: 20px; }
+  .library-desc { font-size: 13px; }
+  .library-qr-frame { padding: 8px; }
+  .library-qr-canvas svg { width: 120px !important; height: 120px !important; }
+}
+
+/* ── iOS safe area (notch / home bar) ───────────────────────── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  footer { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  @media (max-width: 768px) {
+    .main { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    .hero-inner { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    .extra-section-inner, .library-section-inner { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  }
+}
+
+/* ── Touch: larger tap targets ──────────────────────────────── */
+@media (hover: none) {
+  .res-link { min-height: 44px; }
+}
+
+</style>
+  <link rel="stylesheet" href="course-shell.css">
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-lines"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">База знаний УСиЭСПБ · Микросервисная архитектура</div>
+      <h1>Навигатор<br><span>инженера поддержки</span></h1>
+      <p class="hero-sub">Структурированный навигатор по базовым темам стека микросервисной архитектуры<br>12 тем в 5 группах: Инфраструктура · Данные и хранилища · DevOps · Архитектура · Безопасность</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num accent">12</div>
+        <div class="hero-stat-label">Тем</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">56</div>
+        <div class="hero-stat-label">Ресурсов</div>
+      </div>
+      <div class="hero-sub-stats">
+        <div class="hero-sub-stat"><strong>7</strong><span>Курсов</span></div>
+        <div class="hero-sub-stat"><strong>25</strong><span>Видео и плейлисты</span></div>
+        <div class="hero-sub-stat"><strong>23</strong><span>Статьи и справочники</span></div>
+        <div class="hero-sub-stat"><strong>1</strong><span>Подкаст</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- MAIN -->
+<main class="main">
+  <div class="section-head">
+    <div class="section-head-label">
+      <span class="section-index">01</span>
+      <span class="section-title">Темы навигатора</span>
+      <span class="section-hint">— нажмите на тему, чтобы открыть ресурсы</span>
+    </div>
+
+  </div>
+
+  <div class="topics-grid" id="topicsGrid">
+    <div class="group-separator"><span class="group-separator-dot" style="background:#185fa5"></span><span style="color:#185fa5">Инфраструктура</span></div><details class="topic-card" data-group="infra" data-id="computer-arch"><summary class="topic-summary"><div class="topic-card-num">01</div><div class="topic-icon-cell">💻</div><div class="topic-main"><div class="topic-name">Архитектура компьютера</div><div class="topic-desc">CPU, память, I/O, виртуализация, уровень ОС. Понимание железа помогает объяснить поведение систем под нагрузкой и диагностировать узкие места.</div></div><div class="topic-badge-cell"><span class="badge badge-basic">Базовый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 3 ресурса</div><div class="topic-time">⏱ 2–3 недели<br><span style="font-size:10px">при изучении 3–5 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="computer-arch"><div class="detail-header"><div class="detail-icon-wrap">💻</div><div><div class="detail-title">Архитектура компьютера</div><div class="detail-meta"><span>⏱ 2–3 недели — при изучении 3–5 ч/нед</span><span>📚 Ресурсов: 3</span><span class="badge badge-basic badge-detail-overlay">Базовый</span></div></div></div><div class="detail-body"><div class="detail-description">CPU, память, I/O, виртуализация, уровень ОС. Понимание железа помогает объяснить поведение систем под нагрузкой и диагностировать узкие места.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">CPU &amp; Кэш</span><span class="concept-tag">RAM &amp; Heap</span><span class="concept-tag">Файловая система</span><span class="concept-tag">I/O &amp; Прерывания</span><span class="concept-tag">Виртуализация</span><span class="concept-tag">Ядро ОС</span><span class="concept-tag">Планировщик</span><span class="concept-tag">Системные вызовы</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Основы компьютерных наук (Яндекс Учебник)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 4 тематические главы</span><span>🎯 начальный</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Базовый образовательный ресурс, объясняющий принципы работы вычислительной техники «с нуля». От двоичной логики и устройства процессора до основ клиент-серверного взаимодействия.</div><ul class="res-points"><li>Аппаратное обеспечение: эволюция компонентов, системы счисления, принципы обработки данных процессором</li><li>Системное и прикладное ПО: ОС, классификация языков программирования, устройство интернета</li><li>ИТ-процессы и инструменты: методология разработки, Git, понятие «чистого» кода</li><li>Интерактивная система проверки заданий с подсказками для закрепления теории</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Эффективно устраняет пробелы в фундаментальных знаниях. Выверенный баланс между академической точностью и доступностью изложения.</div><a class="res-link" href="https://education.yandex.ru/handbook/vvedenie-v-kompiuternie-nauki" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Как работает память компьютера (Alek OS)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 19:26</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Технический обзор иерархии памяти компьютера от регистров до внешних накопителей. Способы представления данных, единицы измерения и физические ограничения адресации.</div><ul class="res-points"><li>Иерархия памяти: скорость и объём регистров, RAM и накопителей</li><li>Единицы и форматы: бит, байт, «машинное слово», кодировки (ASCII)</li><li>Лимиты адресации: разрядность процессора и максимальный объём RAM (проблема 4 ГБ в 32-бит)</li><li>Типы данных: знаковые и беззнаковые числа, работа с адресами ячеек</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Фундаментальные знания о хранении данных позволяют эффективно выбирать типы переменных и понимать причины утечек памяти или переполнения буфера.</div><a class="res-link" href="https://vkvideo.ru/playlist/-209186427_1/video-209186427_456239018" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Как работает процессор (Alek OS)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 33:48</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Разбор фундаментальных принципов работы CPU с фокусом на архитектуру x86/x64. Взаимодействие процессора с памятью, работа регистров и режимы исполнения программ.</div><ul class="res-points"><li>Архитектурные различия: x86, x64, AMD64 и несовместимость инструкций между семействами</li><li>Регистровая модель: регистры как сверхбыстрая память внутри CPU и иерархия обратной совместимости</li><li>Режимы работы: реальный, защищённый и длинный (Long Mode), механизмы сегментации</li><li>Управление памятью: адресация, ограничение 4 ГБ в 32-бит и виртуализация для изоляции процессов</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт системное понимание того, как программный код превращается в физические сигналы — критически важно для низкоуровневой оптимизации и понимания работы ОС.</div><a class="res-link" href="https://vkvideo.ru/playlist/-209186427_1/video-209186427_456239019" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="infra" data-id="linux"><summary class="topic-summary"><div class="topic-card-num">02</div><div class="topic-icon-cell">🐧</div><div class="topic-main"><div class="topic-name">Linux</div><div class="topic-desc">Linux — это базовый навык. Большинство серверных систем работает на ОС Linux. Командная строка, процессы, файловая система, systemd, мониторинг.</div></div><div class="topic-badge-cell"><span class="badge badge-basic">Базовый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 6 ресурсов</div><div class="topic-time">⏱ 2–4 недели<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="linux"><div class="detail-header"><div class="detail-icon-wrap">🐧</div><div><div class="detail-title">Linux</div><div class="detail-meta"><span>⏱ 2–4 недели — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 6</span><span class="badge badge-basic badge-detail-overlay">Базовый</span></div></div></div><div class="detail-body"><div class="detail-description">Linux — это базовый навык. Большинство серверных систем работает на ОС Linux. Командная строка, процессы, файловая система, systemd, мониторинг.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Shell &amp; Bash</span><span class="concept-tag">Process Management</span><span class="concept-tag">File System</span><span class="concept-tag">Permissions</span><span class="concept-tag">systemd</span><span class="concept-tag">Networking tools</span><span class="concept-tag">Package Management</span><span class="concept-tag">Cron &amp; Logs</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Linux: Администрирование. Базовый уровень (Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ программа курса с модулями</span><span>🎯 начальный</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Структурированная учебная программа для подготовки младших системных администраторов. Охватывает практические навыки развёртывания и поддержки инфраструктуры в production-среде.</div><ul class="res-points"><li>Установка системы, работа с загрузчиками (GRUB) и инициализация (systemd)</li><li>Пакетные менеджеры (apt, yum) и управление зависимостями</li><li>Работа с текстовыми редакторами и потоковая обработка текста (sed, awk)</li><li>Автоматизация рутинных задач с помощью Bash-скриптов</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Отраслевой стандарт подготовки инженеров. Даже программа курса служит отличным чек-листом необходимых компетенций для трудоустройства.</div><a class="res-link" href="https://slurm.io/linux-admin-base" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Учебник по Linux (Яндекс Образование)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ многостраничный интерактивный учебник</span><span>🎯 начальный → средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Академически выверенное и интерактивное пособие по Linux. Учебник сочетает теорию с практическими заданиями, проверяемыми автоматизированной системой.</div><ul class="res-points"><li>Иерархия файловой системы (FHS) и стандартные пути Linux</li><li>Глубокое погружение в Bash: переменные, циклы, регулярные выражения</li><li>Управление процессами, сигналами и фоновыми задачами</li><li>Основы виртуализации и контейнеризации через призму ОС</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Один из лучших бесплатных ресурсов по качеству подачи материала. Подходит как для системного изучения с нуля, так и для закрытия пробелов у опытных разработчиков.</div><a class="res-link" href="https://education.yandex.ru/handbook/linux" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">История Unix и Linux: документальный фильм (System Design Space)</div><div class="res-meta"><span>🌍 Русский / English</span><span>⏱ ~1 час видео + описание</span><span>🎯 начальный</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Ретроспектива развития Unix-подобных систем — от лабораторий Bell Labs до ядра Linux и Open Source движения. Анализируются причины доминирования POSIX-стандартов.</div><ul class="res-points"><li>Эволюция философии Unix: минимализм и модульность (Unix Philosophy)</li><li>Влияние проекта GNU и лицензии GPL на становление Linux</li><li>Коммерческие Unix-системы vs дистрибутивы Linux сообщества</li><li>Ключевые личности: Томпсон, Ритчи, Столлман, Торвальдс</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт понимание контекста создания инструментов, которыми инженеры пользуются сегодня. Формирует инженерное мировоззрение через призму истории стандартов.</div><a class="res-link" href="https://system-design.space/chapter/unix-linux-evolution-film" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Обзор операционной системы Linux (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~15 минут чтения</span><span>🎯 средний</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Технический обзор архитектуры Linux в контексте системного дизайна. Рассматриваются компоненты ядра, иерархия процессов и механизмы взаимодействия с аппаратным обеспечением.</div><ul class="res-points"><li>Архитектура ядра (монолитность против модульности) и пространство пользователя (userspace)</li><li>Системные вызовы (syscalls) как интерфейс взаимодействия приложений с ядром</li><li>Управление памятью: виртуализация, страницы и своппинг</li><li>Концепция «всё есть файл» и структура файловых дескрипторов</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет понять, как низкоуровневые особенности ОС влияют на производительность высоконагруженных распределённых систем.</div><a class="res-link" href="https://system-design.space/chapter/linux-overview" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Linux: системное администрирование и сетевые технологии (Rutube, Кирилл Семаев)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 31 видео (~20–40 мин каждое)</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Фундаментальный курс по администрированию Linux-систем с упором на сетевое взаимодействие и безопасность. Путь от базовых команд терминала до настройки серверных ролей и протоколов.</div><ul class="res-points"><li>Управление пользователями, правами доступа (ACL) и дисковыми подсистемами (LVM)</li><li>Настройка сетевых интерфейсов, маршрутизации и работа с брандмауэром (iptables/nftables)</li><li>Мониторинг системных ресурсов и анализ логов через стандартные утилиты</li><li>Конфигурирование базовых сервисов: SSH, DHCP, DNS</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Структурированная база для системного администратора. Автор даёт глубокое понимание механик ОС, избегая поверхностного перечисления команд.</div><a class="res-link" href="https://rutube.ru/plst/1143377/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Linux: сети и безопасность (Rutube, Кирилл Семаев — продвинутый блок)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 53 видео (~30–50 мин каждое)</span><span>🎯 средний → продвинутый</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Углублённое изучение сетевого стека в Linux и инструментов обеспечения информационной безопасности. Фокус на реализацию отказоустойчивых решений и глубокий траблшутинг трафика.</div><ul class="res-points"><li>Протоколы динамической маршрутизации (BGP, OSPF) и работа с Quagga/Bird</li><li>Построение VPN-туннелей (IPsec, OpenVPN) и инкапсуляция трафика</li><li>Анализ сетевых пакетов с помощью tcpdump и Wireshark в консольном режиме</li><li>Защита периметра и обнаружение вторжений (IDS/IPS)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Критически важно для инженеров, проектирующих сетевую инфраструктуру на базе Linux-серверов. Редкий контент по сложным сетевым сценариям на русском языке.</div><a class="res-link" href="https://rutube.ru/plst/1151789/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="infra" data-id="networks"><summary class="topic-summary"><div class="topic-card-num">03</div><div class="topic-icon-cell">🌐</div><div class="topic-main"><div class="topic-name">Сети</div><div class="topic-desc">TCP/IP, DNS, HTTP/HTTPS, балансировка нагрузки. Понимание сетей необходимо для диагностики инцидентов, аварий и понимания взаимодействия микросервисов.</div></div><div class="topic-badge-cell"><span class="badge badge-basic">Базовый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 11 ресурсов</div><div class="topic-time">⏱ 2–3 недели<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="networks"><div class="detail-header"><div class="detail-icon-wrap">🌐</div><div><div class="detail-title">Сети</div><div class="detail-meta"><span>⏱ 2–3 недели — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 11</span><span class="badge badge-basic badge-detail-overlay">Базовый</span></div></div></div><div class="detail-body"><div class="detail-description">TCP/IP, DNS, HTTP/HTTPS, балансировка нагрузки. Понимание сетей необходимо для диагностики инцидентов, аварий и понимания взаимодействия микросервисов.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">OSI Model</span><span class="concept-tag">TCP/IP Stack</span><span class="concept-tag">HTTP/HTTPS</span><span class="concept-tag">DNS Resolution</span><span class="concept-tag">WebSocket</span><span class="concept-tag">UDP</span><span class="concept-tag">IPv4 vs IPv6</span><span class="concept-tag">Load Balancing</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Сети в Linux. Курс по сетевому администрированию (Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 6 модулей, ~10.5 ч теории + ЛР</span><span>🎯 продвинутый</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Программа по превращению Linux-системы в полноценный сетевой узел или роутер. Включает разбор L2/L3 уровней, настройку сервисов (DHCP, DNS), безопасность (iptables) и VPN-решения.</div><ul class="res-points"><li>Администрирование через современные утилиты: ip, netplan, ss, tcpdump</li><li>Реализация офисного роутера: статика, NAT, DHCP и защита через Stateful Firewall</li><li>Продвинутые технологии: VLAN, LACP Bonding, STP и резервирование шлюза через VRRP</li><li>Организация удалённого доступа через WireGuard, OpenVPN и IPSec</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Охватывает все аспекты сетевого инжиниринга в среде Linux: от настройки интерфейса до динамической маршрутизации (BGP).</div><a class="res-link" href="https://slurm.io/linux-networking" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое TCP/IP: Объясняем на пальцах (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, ~16 мин</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Концептуальный обзор стека протоколов TCP/IP через аналогию с почтовой службой. Разбор основ адресации, портов, сокетов и логики взаимодействия клиента с сервером.</div><ul class="res-points"><li>IP-адрес идентифицирует хост, порт — конкретное приложение на нём</li><li>Комбинация IP и порта образует сокет для установления соединения</li><li>Различия TCP (гарантированная доставка) и UDP (передача без подтверждения)</li><li>Базовая диагностика соединений с помощью утилиты netstat</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Максимально упрощает порог входа в сетевые технологии. Идеально для формирования ментальной модели перед изучением глубоких инженерных спецификаций.</div><a class="res-link" href="https://vkvideo.ru/video-231669217_456239020" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Компьютерные сети (Плейлист VK Video)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 44 видео (~10–20 мин каждое)</span><span>🎯 средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Курс лекций по фундаментальным принципам работы компьютерных сетей с точки зрения системного администрирования и DevOps. Путь пакета от физического уровня до прикладных протоколов.</div><ul class="res-points"><li>Стек TCP/IP: детальный разбор инкапсуляции и прохождения трафика</li><li>Маршрутизация и коммутация: работа L2/L3 устройств в корпоративных сетях</li><li>Сетевые утилиты: диагностика производительности и отладка соединений</li><li>Безопасность: базовые принципы фильтрации трафика и работы брандмауэров</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт системное понимание того, как данные перемещаются между узлами — критично для траблшутинга распределённых систем.</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_1" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Модель OSI (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~10 мин чтения</span><span>🎯 начальный</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Разбор семиуровневой эталонной модели взаимодействия открытых систем. Описание ответственности каждого уровня и примеров соответствующих протоколов.</div><ul class="res-points"><li>Разграничение уровней: от физического до прикладного</li><li>Процессы инкапсуляции и декапсуляции данных</li><li>Соответствие уровней OSI реальному стеку TCP/IP</li><li>Диагностика проблем по уровням (L1–L7)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Создаёт ментальную модель для классификации сетевых технологий и упрощает локализацию ошибок в системе.</div><a class="res-link" href="https://system-design.space/chapter/osi-model" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Протокол UDP (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~8 мин чтения</span><span>🎯 начальный → средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Описание протокола пользовательских датаграмм. Кейсы, где скорость передачи важнее подтверждения доставки.</div><ul class="res-points"><li>Stateless и минимальные накладные расходы на заголовки</li><li>Сценарии применения: Real-time стриминг, VoIP, онлайн-игры</li><li>Сравнение производительности с TCP в условиях нестабильного канала</li><li>Использование UDP в современных протоколах (QUIC/HTTP3)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Помогает осознанно выбирать транспортный протокол в зависимости от требований к скорости и надёжности.</div><a class="res-link" href="https://system-design.space/chapter/udp-protocol" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Принципы компьютерных сетей (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~10–15 мин чтения</span><span>🎯 начальный → средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Вводная глава учебника по системному дизайну, посвящённая сетевым фундаментам. Объясняет, почему инженеру по архитектуре необходимо знать устройство сетей.</div><ul class="res-points"><li>Топологии сетей: влияние физической структуры на отказоустойчивость</li><li>Пропускная способность vs Задержка (Latency): ключевые метрики</li><li>Масштабируемость сетевой инфраструктуры в облачных средах</li><li>Стандартизация протоколов и их совместимость</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Связывает теоретические знания о сетях с практическими задачами проектирования высоконагруженных систем.</div><a class="res-link" href="https://system-design.space/chapter/computer-networks-principles-book" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">IPv4 и IPv6 (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~12 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Техническое сравнение двух версий протокола IP. Анализ структуры заголовков, адресного пространства и механизмов маршрутизации.</div><ul class="res-points"><li>Проблема исчерпания адресов IPv4 и методы решения (NAT, CIDR)</li><li>Преимущества IPv6: упрощённые заголовки, автоконфигурация (SLAAC), встроенная безопасность</li><li>Структура адресации и маски подсетей</li><li>Механизмы перехода и сосуществования (Dual Stack)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Необходимо для настройки сетевого окружения в Kubernetes, облачных провайдерах и при проектировании глобально распределённых сервисов.</div><a class="res-link" href="https://system-design.space/chapter/ipv4-ipv6" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Протокол TCP (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~15 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Глубокий разбор протокола управления передачей данных. Фокус на обеспечении надёжности, упорядоченности и контроле целостности потока.</div><ul class="res-points"><li>Механизм Three-way handshake: установка и разрыв соединения</li><li>Управление окном (Sliding Window) и контроль перегрузок (Congestion Control)</li><li>Гарантированная доставка и повторная отправка потерянных пакетов</li><li>Флаги TCP и их роль в управлении состоянием сессии</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет оптимизировать производительность приложений на транспортном уровне и понимать причины сетевых задержек.</div><a class="res-link" href="https://system-design.space/chapter/tcp-protocol" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">DNS (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~12 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Разбор иерархической системы доменных имён. Описание процесса резолвинга имён в IP-адреса и типов ресурсных записей.</div><ul class="res-points"><li>Рекурсивные и итеративные запросы: путь от клиента до Root-серверов</li><li>Типы записей: A, AAAA, CNAME, MX, TXT и их назначение</li><li>TTL и кэширование на разных уровнях</li><li>Безопасность DNS и балансировка нагрузки через DNS (Round Robin)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>DNS — критическая точка отказа любой системы. Знание его работы необходимо для настройки Service Discovery и маршрутизации трафика.</div><a class="res-link" href="https://system-design.space/chapter/dns" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Протокол HTTP (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~15 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Анализ основного протокола прикладного уровня для веба. Эволюция версий от HTTP/1.1 до HTTP/3.</div><ul class="res-points"><li>Структура запроса и ответа: методы (GET, POST и др.), заголовки и коды состояний</li><li>Механизмы кэширования и управления сессиями (Cookies, JWT)</li><li>Отличия версий: Keep-alive, мультиплексирование в HTTP/2, переход на QUIC в HTTP/3</li><li>Безопасность: работа поверх TLS (HTTPS)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Фундаментальный навык для любого разработчика и системного архитектора при проектировании API и веб-сервисов.</div><a class="res-link" href="https://system-design.space/chapter/http-protocol" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">WebSocket (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~10 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Описание технологии для реализации двунаправленного обмена данными в реальном времени между клиентом и сервером.</div><ul class="res-points"><li>Процесс Handshake: переключение с HTTP на WebSocket протокол</li><li>Полнодуплексная связь: отправка данных без постоянных HTTP-запросов</li><li>Поддержание соединения (Ping/Pong) и обработка разрывов</li><li>Сравнение с Long Polling и Server-Sent Events (SSE)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Необходимо для разработки интерактивных систем: чатов, панелей мониторинга и инструментов совместной работы.</div><a class="res-link" href="https://system-design.space/chapter/websocket-protocol" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="infra" data-id="docker"><summary class="topic-summary"><div class="topic-card-num">04</div><div class="topic-icon-cell">🐳</div><div class="topic-main"><div class="topic-name">Docker и Kubernetes</div><div class="topic-desc">Контейнеризация, оркестрация, Helm, манифесты. Kubernetes — де-факто стандарт деплоя микросервисов в финтехе.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 5 ресурсов</div><div class="topic-time">⏱ 3–5 недель<br><span style="font-size:10px">при изучении 5–10 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="docker"><div class="detail-header"><div class="detail-icon-wrap">🐳</div><div><div class="detail-title">Docker и Kubernetes</div><div class="detail-meta"><span>⏱ 3–5 недель — при изучении 5–10 ч/нед</span><span>📚 Ресурсов: 5</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Контейнеризация, оркестрация, Helm, манифесты. Kubernetes — де-факто стандарт деплоя микросервисов в финтехе.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Pods, Services, Deployments</span><span class="concept-tag">Docker Images &amp; Layers</span><span class="concept-tag">Helm Charts</span><span class="concept-tag">ConfigMap &amp; Secrets</span><span class="concept-tag">Namespaces</span><span class="concept-tag">Liveness &amp; Readiness</span><span class="concept-tag">HPA</span><span class="concept-tag">PersistentVolume</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое Docker за 5 минут (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 05:50</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Технический обзор технологии Docker: концепция контейнеризации, механизмы изоляции в Windows и Linux, фундаментальные отличия контейнеров от виртуальных машин.</div><ul class="res-points"><li>Контейнеры используют общее ядро ОС хоста — высокая плотность развёртывания и быстрый запуск vs VM</li><li>Образ Docker состоит из неизменяемых слоёв (ReadOnly), каждый слой — набор изменений файловой системы</li><li>Два режима изоляции в Windows: уровень процессов и Hyper-V (оптимизированная VM на каждый контейнер)</li><li>Воспроизводимость среды: одинаковое окружение на dev, test и prod — решение проблемы «у меня работает»</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Лаконично структурирует базовые понятия Docker без лишней воды. Быстрый вход для понимания архитектурных принципов изоляции и слоистых образов в CI/CD.</div><a class="res-link" href="https://vkvideo.ru/video-231669217_456239018" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Вечерняя школа Слёрм по Kubernetes (Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 25 видео (~80–90 мин каждое)</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Цикл видеолекций для быстрого погружения разработчиков в экосистему Cloud Native. Путь от сборки Docker-образа до настройки CI/CD пайплайнов внутри кластера.</div><ul class="res-points"><li>Архитектура Control Plane и Worker Nodes</li><li>Жизненный цикл трафика: от внешнего запроса до конкретного пода через Ingress</li><li>Основы мониторинга и сбора логов в распределённых системах</li><li>Подходы к отладке приложений непосредственно в K8s</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Комплексный видеокурс с живыми демонстрациями — закрывает пробелы в понимании того, как приложение живёт внутри оркестратора.</div><a class="res-link" href="https://rutube.ru/plst/1190911/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Kubernetes для разработчиков. Открытая вечерняя школа (Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 26 видео (~90 мин каждое)</span><span>🎯 средний → продвинутый</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Практико-ориентированный курс по фундаментальному освоению Kubernetes. Фокус на разработке cloud-native приложений, их конфигурации, отладке и автоматизации деплоя через CI/CD.</div><ul class="res-points"><li>Управление жизненным циклом приложений через Pod, Deployment и StatefulSet</li><li>Работа с сетевыми абстракциями (Service, Ingress) и конфигурациями (ConfigMap, Secret)</li><li>Реализация персистентного хранения данных с использованием PVC и Helm-чартов</li><li>Настройка пайплайнов в GitLab CI для автоматизированного релиза в кластер</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Минимизирует зависимость разработчика от DevOps-команды: инструменты для самостоятельного дебага и развёртывания в изолированных средах (Minikube).</div><a class="res-link" href="https://rutube.ru/plst/1192791/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Обзор виртуализации (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~12 мин чтения</span><span>🎯 начальный → средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Анализ технологий виртуализации как фундамента современной облачной инфраструктуры. Типы гипервизоров и их влияние на утилизацию аппаратных ресурсов.</div><ul class="res-points"><li>Аппаратная виртуализация vs Паравиртуализация</li><li>Классификация гипервизоров (Тип 1 и Тип 2)</li><li>Оверхед на эмуляцию оборудования и гостевые ОС</li><li>Сравнение эффективности виртуальных машин и контейнеров</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Помогает архитектору обоснованно выбирать между Bare Metal, VM и контейнерами под конкретные бизнес-задачи.</div><a class="res-link" href="https://system-design.space/chapter/virtualization-overview" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Обзор контейнеризации (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~15 мин чтения</span><span>🎯 начальный → средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Технический разбор контейнеризации с точки зрения системного проектирования. Изоляция процессов на уровне ядра ОС и отличия от других методов деплоя.</div><ul class="res-points"><li>Механизмы изоляции: namespaces и cgroups в Linux</li><li>Структура образа (Images) и слоистая файловая система (UnionFS)</li><li>Преимущества переносимости и консистентности окружений</li><li>Сравнение Docker-контейнеров с альтернативными рантаймами</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт понимание «под капотом» — критически важно для отладки производительности и безопасности контейнеров.</div><a class="res-link" href="https://system-design.space/chapter/containerization-overview" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><div class="group-separator"><span class="group-separator-dot" style="background:#ba7517"></span><span style="color:#ba7517">Данные и хранилища</span></div><details class="topic-card" data-group="data" data-id="sql"><summary class="topic-summary"><div class="topic-card-num">05</div><div class="topic-icon-cell">🗄️</div><div class="topic-main"><div class="topic-name">SQL / Базы данных</div><div class="topic-desc">Реляционные базы данных, SQL-запросы, транзакции, индексы. Фундаментальный навык для работы с данными любой финтех-системы.</div></div><div class="topic-badge-cell"><span class="badge badge-basic">Базовый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 4 ресурса</div><div class="topic-time">⏱ 2–3 недели<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="sql"><div class="detail-header"><div class="detail-icon-wrap">🗄️</div><div><div class="detail-title">SQL / Базы данных</div><div class="detail-meta"><span>⏱ 2–3 недели — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 4</span><span class="badge badge-basic badge-detail-overlay">Базовый</span></div></div></div><div class="detail-body"><div class="detail-description">Реляционные базы данных, SQL-запросы, транзакции, индексы. Фундаментальный навык для работы с данными любой финтех-системы.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">SELECT &amp; JOIN</span><span class="concept-tag">Transactions &amp; ACID</span><span class="concept-tag">Indexes</span><span class="concept-tag">Normalization</span><span class="concept-tag">Views &amp; CTEs</span><span class="concept-tag">Window Functions</span><span class="concept-tag">Database Design</span><span class="concept-tag">Query Optimization</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Основы SQL и баз данных (Яндекс Практикум)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ текстовые модули + тренажёр, ~2–4 ч</span><span>🎯 начальный</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Бесплатный вводный курс на получение практического опыта написания запросов. Обучение построено на решении прикладных задач в интерактивном тренажёре браузера.</div><ul class="res-points"><li>Введение в реляционные БД и их отличия от других способов хранения</li><li>Написание простых и вложенных SQL-запросов</li><li>Работа с агрегатами и фильтрацией сложных выборок</li><li>Практическое применение SQL для анализа данных</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Встроенный тренажёр позволяет закрепить навыки написания кода без развёртывания локальной среды.</div><a class="res-link" href="https://start.practicum.yandex/sql-database-basics/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Введение в SQL и работу с базой данных (Нетология)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~1–2 ч чтения/просмотра</span><span>🎯 начальный</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Ознакомительный ресурс о роли SQL в современной IT-разработке и аналитике. Помогает сформировать общую картину необходимых компетенций для работы с данными.</div><ul class="res-points"><li>Обзор популярных СУБД: PostgreSQL, MySQL, MS SQL</li><li>Разница между ролями разработчика БД и дата-аналитика</li><li>Основные операторы SQL и их бизнес-применение</li><li>Карьерный трек и требования индустрии к специалистам по данным</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет структурировать знания о рынке баз данных и определить вектор дальнейшего глубокого обучения.</div><a class="res-link" href="https://netology.ru/programs/vvedenie-v-sql-i-rabotu-s-bazoi-dannih#/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое SQL и реляционные базы данных (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 13:12</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Аудиовизуальный конспект об основах SQL для быстрого погружения в терминологию. Роль SQL в бэкенд-разработке и аналитике данных.</div><ul class="res-points"><li>Различия между SQL и языками общего назначения</li><li>Реляционная модель: атрибуты, кортежи, ключи (Primary/Foreign)</li><li>Классификация операторов: DDL, DML, DCL, TCL</li><li>Сравнительный обзор СУБД: PostgreSQL, MySQL, SQLite, Oracle</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Идеально для экспресс-ознакомления с архитектурой БД и подготовки к собеседованию на Junior-уровне.</div><a class="res-link" href="https://vkvideo.ru/video-231669217_456239024" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Основы SQL (VK Video, Андрей Созыкин)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 19 видео (~10–15 мин каждое)</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Академически структурированный курс по реляционным базам данных и языку SQL. Последовательно от теории проектирования до реализации запросов в PostgreSQL и SQLite.</div><ul class="res-points"><li>Установка и настройка окружения для работы с БД</li><li>Реляционная алгебра как теоретический фундамент SQL</li><li>Глубокий разбор SELECT, JOIN, GROUP BY и агрегатных функций</li><li>Создание и изменение структуры таблиц (DDL) и управление индексами</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Один из самых системных русскоязычных видеокурсов — сложные концепции через простые инженерные аналогии без лишней воды.</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_2/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="data" data-id="kafka"><summary class="topic-summary"><div class="topic-card-num">06</div><div class="topic-icon-cell">📨</div><div class="topic-main"><div class="topic-name">Apache Kafka</div><div class="topic-desc">Брокер сообщений для event-driven архитектуры и потоковой обработки данных в реальном времени. Критически важен для построения масштабируемых систем Банка.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 3 ресурса</div><div class="topic-time">⏱ 2–6 недель<br><span style="font-size:10px">при изучении 5–10 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="kafka"><div class="detail-header"><div class="detail-icon-wrap">📨</div><div><div class="detail-title">Apache Kafka</div><div class="detail-meta"><span>⏱ 2–6 недель — при изучении 5–10 ч/нед</span><span>📚 Ресурсов: 3</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Брокер сообщений для event-driven архитектуры и потоковой обработки данных в реальном времени. Критически важен для построения масштабируемых систем Банка.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Topics &amp; Partitions</span><span class="concept-tag">Producers &amp; Consumers</span><span class="concept-tag">Consumer Groups</span><span class="concept-tag">Replication</span><span class="concept-tag">Kafka Streams</span><span class="concept-tag">Kafka Connect</span><span class="concept-tag">Zookeeper/KRaft</span><span class="concept-tag">Offset Management</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Apache Kafka за 5 минут (YouTube)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~5 мин</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Краткое и ёмкое введение в Apache Kafka: ключевые концепции, архитектура и сценарии применения.</div><ul class="res-points"><li>Что такое Kafka и зачем она нужна</li><li>Topics, partitions, brokers</li><li>Producers и consumers</li><li>Основные сценарии применения</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Быстрый старт — за 5 минут получить целостное представление о Kafka.</div><a class="res-link" href="https://www.youtube.com/watch?v=Mw9YFay8-WM" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Введение в Apache Kafka (плейлист Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~9 видео (16–90 мин)</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Плейлист с вводными лекциями и митапами по Apache Kafka: от базовых концепций до практических кейсов использования.</div><ul class="res-points"><li>Kafka как брокер сообщений для распределённых систем</li><li>Основные сущности: топики, брокеры, продюсеры, консьюмеры</li><li>Отказоустойчивость через партиции</li><li>Реальные кейсы внедрения</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт визуальное и практическое понимание Kafka через реальные инженерные кейсы.</div><a class="res-link" href="https://rutube.ru/plst/477896/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Kafka Book (System Design)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ онлайн-гайд</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Глава из system design-ресурса, объясняющая Kafka как часть архитектуры распределённых систем и потоковой обработки данных.</div><ul class="res-points"><li>Kafka в контексте системного дизайна</li><li>Batch и stream processing</li><li>Шаблоны проектирования распределённых систем</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Показывает Kafka не изолированно, а в контексте системного дизайна.</div><a class="res-link" href="https://system-design.space/chapter/kafka-book" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="data" data-id="postgresql"><summary class="topic-summary"><div class="topic-card-num">07</div><div class="topic-icon-cell">🐘</div><div class="topic-main"><div class="topic-name">PostgreSQL</div><div class="topic-desc">Продвинутый SQL, репликация, производительность, мониторинг. PostgreSQL — основная СУБД в большинстве финтех-компаний России.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 2 ресурса</div><div class="topic-time">⏱ 3–6 недель<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="postgresql"><div class="detail-header"><div class="detail-icon-wrap">🐘</div><div><div class="detail-title">PostgreSQL</div><div class="detail-meta"><span>⏱ 3–6 недель — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 2</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Продвинутый SQL, репликация, производительность, мониторинг. PostgreSQL — основная СУБД в большинстве финтех-компаний России.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Индексы &amp; EXPLAIN</span><span class="concept-tag">VACUUM &amp; ANALYZE</span><span class="concept-tag">Репликация</span><span class="concept-tag">Партиционирование</span><span class="concept-tag">JSONB</span><span class="concept-tag">pg_stat</span><span class="concept-tag">Транзакции &amp; MVCC</span><span class="concept-tag">Connection Pooling</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Администрирование PostgreSQL 16. Базовый курс (Postgres Pro)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 24 модуля (видеолекции + практические работы)</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Профессиональный курс по фундаментальному администрированию PostgreSQL, охватывающий жизненный цикл СУБД от установки до резервного копирования. Теоретическая база + практические лабораторные работы в среде Linux.</div><ul class="res-points"><li>Архитектура процессов и памяти: Postmaster, Background Writer, WAL Writer и Shared Buffers</li><li>Управление доступом: pg_hba.conf, роли, привилегии и схемы данных</li><li>Физическая структура: хранение на уровне файлов, табличных пространств (Tablespaces) и системного каталога</li><li>Обслуживание и мониторинг: Autovacuum, сбор статистики и стандартные расширения</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Эталонный структурированный материал от вендора. Устраняет пробелы в понимании СУБД «под капотом». Подходит для подготовки к сертификации и работы с высоконагруженными системами.</div><a class="res-link" href="https://rutube.ru/plst/913726/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Документация PostgreSQL 17 (Postgres Pro)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ полная техническая документация</span><span>🎯 средний → продвинутый</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Полное официальное руководство по PostgreSQL 17, адаптированное и переведённое командой Postgres Professional. Исчерпывающее описание SQL-синтаксиса, внутренних механизмов и параметров конфигурации.</div><ul class="res-points"><li>Расширенный SQL: оконные функции, CTE, JSONB и партиционирование таблиц</li><li>Транзакции и изоляция: Read Committed, Repeatable Read и Serializable</li><li>Производительность: EXPLAIN, типы индексов (B-tree, GiST, GIN) и оптимизатор запросов</li><li>Репликация и отказоустойчивость: логическая и физическая репликация, Slot и публикации</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Единственный достоверный источник истины для инженера. Версия 17 включает важные обновления производительности вакуумирования и управления инкрементальным бэкапом.</div><a class="res-link" href="https://postgrespro.ru/docs/postgresql/17/index" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><div class="group-separator"><span class="group-separator-dot" style="background:#3b6d11"></span><span style="color:#3b6d11">DevOps</span></div><details class="topic-card" data-group="devops" data-id="git"><summary class="topic-summary"><div class="topic-card-num">08</div><div class="topic-icon-cell">🔀</div><div class="topic-main"><div class="topic-name">Git</div><div class="topic-desc">Система контроля версий — фундамент командной разработки. Без понимания Git невозможно участвовать в CI/CD процессах и работать с кодовой базой.</div></div><div class="topic-badge-cell"><span class="badge badge-basic">Базовый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 4 ресурса</div><div class="topic-time">⏱ 1–2 недели<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="git"><div class="detail-header"><div class="detail-icon-wrap">🔀</div><div><div class="detail-title">Git</div><div class="detail-meta"><span>⏱ 1–2 недели — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 4</span><span class="badge badge-basic badge-detail-overlay">Базовый</span></div></div></div><div class="detail-body"><div class="detail-description">Система контроля версий — фундамент командной разработки. Без понимания Git невозможно участвовать в CI/CD процессах и работать с кодовой базой.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Commit &amp; Push</span><span class="concept-tag">Branching</span><span class="concept-tag">Merge &amp; Rebase</span><span class="concept-tag">Pull Request</span><span class="concept-tag">Git Flow</span><span class="concept-tag">Conflict Resolution</span><span class="concept-tag">CI/CD интеграция</span><span class="concept-tag">Remote Repositories</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Git Basics (Яндекс Практикум)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ интерактивный курс</span><span>🎯 начальный</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Интерактивный курс по базовым операциям Git: коммиты, ветки, работа с удалённым репозиторием.</div><ul class="res-points"><li>Основные команды: commit, push, pull, branch</li><li>Работа с ветками и слияниями</li><li>Освоение workflow разработчика</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Подходит для быстрого входа в Git через практику.</div><a class="res-link" href="https://practicum.yandex.com/git-basics/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Git (Rebrain)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ курс с практикой</span><span>🎯 начальный → средний</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Курс по Git с упором на практику и реальные сценарии использования в разработке.</div><ul class="res-points"><li>Работа с репозиториями и ветками</li><li>Разрешение конфликтов</li><li>Практические сценарии командной разработки</li><li>Использование Git в CI/CD</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Фокус на реальной работе в команде, а не только на синтаксисе команд.</div><a class="res-link" href="https://rebrainme.com/courses/git" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="course"><div class="resource-card-top"><div class="res-type-icon">🎓</div><div><div class="res-title">Git (Slurm)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ онлайн-курс</span><span>🎯 средний</span><span>🏷️ Курс</span></div></div></div><div class="res-body"><div class="res-summary">Курс по Git с уклоном в DevOps-практики и работу в production-среде.</div><ul class="res-points"><li>Продвинутые сценарии работы с Git</li><li>Git-flow и командная работа</li><li>Интеграция с CI/CD</li><li>Практика DevOps-процессов</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Покрывает Git с позиции DevOps и production-процессов.</div><a class="res-link" href="https://slurm.io/git" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Git: основы и архитектура (Habr/OTUS)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ статья</span><span>🎯 начальный → средний</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Подробное объяснение внутренней модели Git и принципов работы команд через концепцию четырёх хранилищ.</div><ul class="res-points"><li>4 уровня хранения: working dir, staging, local, remote</li><li>Git — распределённая система контроля версий</li><li>Merge сохраняет историю, rebase её переписывает</li><li>Rebase нельзя использовать на публичных ветках</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт фундаментальное понимание Git, а не просто набор команд.</div><a class="res-link" href="https://habr.com/ru/companies/otus/articles/994162/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="devops" data-id="jenkins"><summary class="topic-summary"><div class="topic-card-num">09</div><div class="topic-icon-cell">⚙️</div><div class="topic-main"><div class="topic-name">Jenkins</div><div class="topic-desc">Jenkins основной инструмент доставки кода в продакшн. CI/CD pipelines, Jenkinsfile, автоматизация сборки и деплоя.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 5 ресурсов</div><div class="topic-time">⏱ 2–3 недели<br><span style="font-size:10px">при изучении 5–7 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="jenkins"><div class="detail-header"><div class="detail-icon-wrap">⚙️</div><div><div class="detail-title">Jenkins</div><div class="detail-meta"><span>⏱ 2–3 недели — при изучении 5–7 ч/нед</span><span>📚 Ресурсов: 5</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Jenkins основной инструмент доставки кода в продакшн. CI/CD pipelines, Jenkinsfile, автоматизация сборки и деплоя.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Pipeline as Code</span><span class="concept-tag">Jenkinsfile</span><span class="concept-tag">Stages &amp; Steps</span><span class="concept-tag">Agents</span><span class="concept-tag">Credentials</span><span class="concept-tag">Webhooks</span><span class="concept-tag">Blue Ocean</span><span class="concept-tag">Shared Libraries</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое Jenkins? (Merion Academy)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 07:58 мин</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Популярное введение в Jenkins: роль «цифрового дворецкого» для автоматизации CI/CD. История появления, архитектура и основы написания пайплайнов.</div><ul class="res-points"><li>История и Fork: Jenkins возник как ответ на коммерциализацию Hudson компанией Oracle</li><li>Архитектура Master-Agent: Controller для планирования, Agents для выполнения сборок в разных окружениях</li><li>Jenkinsfile и Groovy: декларативный стиль, stages, steps и условия выполнения (when/post)</li><li>Экосистема плагинов: тысячи расширений для Docker, Kubernetes, облаков и мониторинга</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Лучший вариант для быстрого старта — за 8 минут понять логику работы и структуру Jenkinsfile без глубокого погружения в код.</div><a class="res-link" href="https://vkvideo.ru/video-99113354_456239332" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое CI/CD? (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 видео, 12:59 мин</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Разбор базовых концепций CI/CD: разница между Continuous Integration, Delivery и Deployment, роль автоматизации в жизненном цикле разработки ПО.</div><ul class="res-points"><li>CI: частое слияние кода с автозапуском сборок и тестов для раннего обнаружения конфликтов</li><li>CD Delivery vs Deployment: автоподготовка релиза vs полная автоматизация выпуска без участия человека</li><li>Feature Flags для управления доступностью функций и GitFlow как модель ветвления</li><li>Метрики: Deployment Frequency и MTTR как показатели эффективности внедрения</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет быстро синхронизировать терминологию и понять архитектурный скелет современных пайплайнов без лишней воды.</div><a class="res-link" href="https://www.youtube.com/watch?v=Hkq_78xSfSY" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Jenkins на русском языке (ADV-IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 15 видео (~15–20 мин каждое)</span><span>🎯 начальный → средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Комплексный обучающий курс по Jenkins для инженеров, переходящих в DevOps. От установки до написания сложных пайплайнов в виде кода (Pipeline as Code).</div><ul class="res-points"><li>Интеграции: GitHub, Docker Hub и облачные провайдеры (AWS)</li><li>Jenkins Pipeline: синтаксис Declarative и Scripted Pipeline, работа с Jenkinsfile</li><li>Безопасность и плагины: RBAC, аутентификация, критически важные расширения</li><li>Параметризация: динамические сборки, переменные окружения и секреты (Credentials)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Лучший русскоязычный ресурс для прикладных навыков «руками» с постепенным усложнением задач.</div><a class="res-link" href="https://www.youtube.com/playlist?list=PLg5SS_4L6LYvQbMrSuOjTL1HOiDhUE_5a" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Основы CI/CD. Знакомство с Jenkins (Slurm, Habr)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~8 мин чтения</span><span>🎯 начальный</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Вводное руководство по экосистеме Jenkins: архитектура Master-Agent и первичная настройка на Ubuntu. Jenkins как гибкий фреймворк автоматизации, а не просто изолированный инструмент.</div><ul class="res-points"><li>Архитектура: Controller (управление, логи, планирование) и Agents (выполнение задач)</li><li>Jenkins Home: хранение конфигураций, плагинов и истории сборок в файловой системе без внешней БД</li><li>Жизненный цикл: от планирования и кодинга до мониторинга и обратной связи</li><li>Практический старт: установка Java 11, настройка лимитов системы и безопасности (UFW)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Идеально для формирования базы по администрированию Jenkins и понимания его файловой структуры.</div><a class="res-link" href="https://habr.com/ru/companies/slurm/articles/691876/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Jenkins. От монолита к распределению (Habr)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~8 мин чтения</span><span>🎯 продвинутый</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Технический кейс Сбера по трансформации множества разрозненных инстансов Jenkins в масштабируемый кластер. Горизонтальное масштабирование монолитного приложения и собственная обвязка для репликации данных.</div><ul class="res-points"><li>Проблематика: деградация мастера при росте конвейеров и отсутствие нативного резервирования</li><li>Стек: ETCD для метаинформации, S3 как буфер для файлов, Python/FastAPI для управляющей логики</li><li>Syncer на базе inotify: отслеживание изменений ФС и репликация на пассивные узлы</li><li>HAProxy для бесшовного переключения трафика между шардами без прерывания работы</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Уникальный опыт Enterprise-уровня (1 млн запусков в сутки), которого нет в официальной документации Jenkins.</div><a class="res-link" href="https://habr.com/ru/companies/sberbank/articles/843712/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><div class="group-separator"><span class="group-separator-dot" style="background:#534ab7"></span><span style="color:#534ab7">Архитектура и системный дизайн</span></div><details class="topic-card" data-group="arch" data-id="microservices"><summary class="topic-summary"><div class="topic-card-num">10</div><div class="topic-icon-cell">🔧</div><div class="topic-main"><div class="topic-name">Микросервисы</div><div class="topic-desc">Паттерны проектирования, API Gateway, service mesh, трассировка, логирование. Ядро современной архитектуры платформ, систем и сервисов.</div></div><div class="topic-badge-cell"><span class="badge badge-advanced">Продвинутый</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 3 ресурса</div><div class="topic-time">⏱ 4–8 недель<br><span style="font-size:10px">при изучении 5–10 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="microservices"><div class="detail-header"><div class="detail-icon-wrap">🔧</div><div><div class="detail-title">Микросервисы</div><div class="detail-meta"><span>⏱ 4–8 недель — при изучении 5–10 ч/нед</span><span>📚 Ресурсов: 3</span><span class="badge badge-advanced badge-detail-overlay">Продвинутый</span></div></div></div><div class="detail-body"><div class="detail-description">Паттерны проектирования, API Gateway, service mesh, трассировка, логирование. Ядро современной архитектуры платформ, систем и сервисов.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Decomposition Patterns</span><span class="concept-tag">API Gateway</span><span class="concept-tag">Service Mesh</span><span class="concept-tag">Saga Pattern</span><span class="concept-tag">Circuit Breaker</span><span class="concept-tag">Distributed Tracing</span><span class="concept-tag">Event Sourcing</span><span class="concept-tag">CQRS</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Цикл статей ВТБ по Highload (Habr, 9 частей)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 9 статей, ~2 ч чтения</span><span>🎯 средний → продвинутый</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Обзор архитектуры 5-го поколения омниканальной платформы ВТБ. Переход от размазанной логики к строгому пятислойному разделению ответственности для ускорения Time-to-market.</div><ul class="res-points"><li>Слоистая архитектура (5 слоёв): КП → СУБО → ОПС → ОС → СС, нижние слои изолированы</li><li>Отвязка логики от каналов: вся продуктовая логика в СУБО, каналы — только «витрина»</li><li>Надёжность 99,999%: 3–6-кратное резервирование, слабая связность и автомасштабирование</li><li>Стек: Java/Spring Boot, Kubernetes, Istio и ФинПлатформа Т1 (импортонезависимость)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Наглядно демонстрирует, как Enterprise-архитектура сокращает цикл вывода продукта с 240 до 30 дней.</div><div class="res-links-multi"><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/863372/" target="_blank" rel="noopener noreferrer">Часть 1 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/866436/" target="_blank" rel="noopener noreferrer">Часть 2 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/866446/" target="_blank" rel="noopener noreferrer">Часть 3 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/866454/" target="_blank" rel="noopener noreferrer">Часть 4 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/869954/" target="_blank" rel="noopener noreferrer">Часть 5 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/869958/" target="_blank" rel="noopener noreferrer">Часть 6 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/872538/" target="_blank" rel="noopener noreferrer">Часть 7 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/875594/" target="_blank" rel="noopener noreferrer">Часть 8 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="res-link res-link-part" href="https://habr.com/ru/companies/vtb/articles/872550/" target="_blank" rel="noopener noreferrer">Часть 9 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">Monolith to Microservices (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 1 лонгрид</span><span>🎯 средний → продвинутый</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Детальный разбор стратегий миграции с монолитной архитектуры на микросервисную. Фокус на паттернах декомпозиции и управлении данными в переходный период.</div><ul class="res-points"><li>Определение границ сервисов через Bounded Contexts (DDD)</li><li>Паттерны миграции: Strangler Fig, Parallel Application, UI Composition</li><li>Проблематика распределённых транзакций и консистентности данных</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Ключевой теоретический фундамент для понимания стратегий перехода к микросервисам.</div><a class="res-link" href="https://system-design.space/chapter/monolith-to-microservices-book" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="podcast"><div class="resource-card-top"><div class="res-type-icon">🎙️</div><div><div class="res-title">Выпуск подкаста «Запуск завтра»: Как устроены микросервисы</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~60 минут</span><span>🎯 начальный → средний</span><span>🏷️ Подкаст</span></div></div></div><div class="res-body"><div class="res-summary">Обсуждение инженерных вызовов при переходе на микросервисы. Разбор целесообразности архитектуры и операционных затрат.</div><ul class="res-points"><li>Инженерные вызовы перехода на микросервисы</li><li>Целесообразность микросервисной архитектуры</li><li>Операционные затраты и компромиссы</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Живое обсуждение реального опыта — удобный аудиоформат для первого знакомства с темой.</div><a class="res-link" href="https://music.yandex.ru/album/7570122/track/53118514" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><details class="topic-card" data-group="arch" data-id="c4model"><summary class="topic-summary"><div class="topic-card-num">11</div><div class="topic-icon-cell">📐</div><div class="topic-main"><div class="topic-name">C4 Модель</div><div class="topic-desc">Архитектурное моделирование: Context, Container, Component, Code. Единый язык для коммуникации об архитектуре между командами.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 2 ресурса</div><div class="topic-time">⏱ 1–2 недели<br><span style="font-size:10px">при изучении 3–5 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="c4model"><div class="detail-header"><div class="detail-icon-wrap">📐</div><div><div class="detail-title">C4 Модель</div><div class="detail-meta"><span>⏱ 1–2 недели — при изучении 3–5 ч/нед</span><span>📚 Ресурсов: 2</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Архитектурное моделирование: Context, Container, Component, Code. Единый язык для коммуникации об архитектуре между командами.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">Level 1: Context</span><span class="concept-tag">Level 2: Container</span><span class="concept-tag">Level 3: Component</span><span class="concept-tag">Level 4: Code</span><span class="concept-tag">PlantUML / Mermaid</span><span class="concept-tag">ADR</span><span class="concept-tag">Structurizr</span><span class="concept-tag">Коммуникация</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="reference"><div class="resource-card-top"><div class="res-type-icon">📚</div><div><div class="res-title">C4 Model — визуализация архитектуры (System Design Space)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~15 мин чтения</span><span>🎯 средний</span><span>🏷️ Справочник</span></div></div></div><div class="res-body"><div class="res-summary">Руководство по нотации C4 для документирования программной архитектуры. Иерархический подход к декомпозиции систем: от контекста бизнеса до уровня кода.</div><ul class="res-points"><li>Четыре уровня абстракции: Context, Containers, Components, Code</li><li>Фокус на статических структурах и взаимодействии между контейнерами (сервисами, БД)</li><li>Правила именования и визуализации для исключения двусмысленности в схемах</li><li>Интеграция с подходами &quot;Architecture as Code&quot; (Structurizr, PlantUML)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет отойти от неструктурированных «облаков и стрелок» к стандартизированному способу описания сложных систем, понятному и разработчикам, и стейкхолдерам.</div><a class="res-link" href="https://system-design.space/chapter/c4-model" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="article"><div class="resource-card-top"><div class="res-type-icon">📄</div><div><div class="res-title">Как рисовать понятные архитектурные диаграммы (Habr)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ ~20 мин чтения</span><span>🎯 средний</span><span>🏷️ Статья</span></div></div></div><div class="res-body"><div class="res-summary">Практический разбор методологий визуализации ИТ-архитектуры с акцентом на прагматизм и читаемость. Типичные ошибки проектировщиков и алгоритм выбора инструментов для разных задач.</div><ul class="res-points"><li>Критерии качества диаграмм: консистентность, актуальность, соответствие аудитории</li><li>Сравнение нотаций: UML vs C4 vs Freeform</li><li>Принципы layout-дизайна для уменьшения когнитивной нагрузки при чтении схем</li><li>Обзор инструментов: от графических (Lucidchart, Miro) до текстовых (Mermaid, PlantUML)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Содержит прикладные советы по коммуникации через графику — помогает архитектору сократить время на объяснение проектных решений команде.</div><a class="res-link" href="https://habr.com/ru/articles/778726/" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details><div class="group-separator"><span class="group-separator-dot" style="background:#993c1d"></span><span style="color:#993c1d">Безопасность</span></div><details class="topic-card" data-group="security" data-id="security"><summary class="topic-summary"><div class="topic-card-num">12</div><div class="topic-icon-cell">🔐</div><div class="topic-main"><div class="topic-name">Безопасность</div><div class="topic-desc">Аутентификация, авторизация, шифрование, OAuth2/JWT, OWASP. В финтехе безопасность — не опция, а обязательное требование регуляторов.</div></div><div class="topic-badge-cell"><span class="badge badge-mid">Средний</span></div><div class="topic-meta-cell"><div class="topic-res-count">📚 8 ресурсов</div><div class="topic-time">⏱ 3–5 недель<br><span style="font-size:10px">при изучении 5–10 ч/нед</span></div></div><div class="topic-chevron"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></summary><div class="detail-panel" data-topic-id="security"><div class="detail-header"><div class="detail-icon-wrap">🔐</div><div><div class="detail-title">Безопасность</div><div class="detail-meta"><span>⏱ 3–5 недель — при изучении 5–10 ч/нед</span><span>📚 Ресурсов: 8</span><span class="badge badge-mid badge-detail-overlay">Средний</span></div></div></div><div class="detail-body"><div class="detail-description">Аутентификация, авторизация, шифрование, OAuth2/JWT, OWASP. В финтехе безопасность — не опция, а обязательное требование регуляторов.</div><div class="key-concepts"><div class="concepts-label">Ключевые концепции</div><div class="concepts-list"><span class="concept-tag">CIA-триада</span><span class="concept-tag">OAuth2 &amp; JWT</span><span class="concept-tag">OWASP Top 10</span><span class="concept-tag">SQL Injection</span><span class="concept-tag">XSS &amp; CSRF</span><span class="concept-tag">TLS/SSL</span><span class="concept-tag">Threat Modeling</span><span class="concept-tag">Zero Trust</span></div></div><div class="resources-section-label">Ресурсы для изучения</div><div class="resources-grid"><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое HTTP и HTTPS за 9 минут (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 09:17</span><span>🎯 начальный</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Технический обзор протоколов HTTP и HTTPS: структура стартовой строки, обязательные заголовки и принципы работы веб-глаголов.</div><ul class="res-points"><li>Методы и URI: разграничение ответственности GET, POST, DELETE и роль идентификаторов ресурсов</li><li>Работа поверх TCP/IP: 80 порт для HTTP и 443 для HTTPS</li><li>HTTPS: криптографические обёртки SSL/TLS для конфиденциальности и целостности</li><li>Цифровые сертификаты: идентификация сервера и защита от Man-in-the-Middle</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Концентрированная база по работе веба — необходима для понимания того, как браузеры и API взаимодействуют с серверной частью.</div><a class="res-link" href="https://vkvideo.ru/video-231669217_456239017" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое JWT и как его создать (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 14:32</span><span>🎯 средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Разбор стандарта JSON Web Token (RFC 7519): от структуры объекта до сценариев использования в микросервисах. Разница между кодированием, шифрованием и подписью.</div><ul class="res-points"><li>Анатомия токена: Header (алгоритм), Payload (claims) и Signature (защита от правок)</li><li>Stateless аутентификация: проверка прав без обращения к БД на каждом запросе</li><li>Access vs Refresh: короткоживущие токены доступа и долгоживущие токены обновления</li><li>Меры безопасности: HTTPS, ограничение данных в payload, строгая валидация алгоритмов</li></ul><div class="res-why"><strong>💡 Зачем: </strong>JWT — стандарт де-факто для авторизации в современных веб-приложениях. Видео даёт чёткий алгоритм работы с ним.</div><a class="res-link" href="https://www.youtube.com/watch?v=7iuwfKOcvkE" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Что такое OAuth 2.0 и OpenID Connect за 15 минут (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 14:27</span><span>🎯 средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Иллюстрированное руководство по протоколам делегированной авторизации и идентификации. Взаимодействие четырёх ролей OAuth на примере «сайта с каламбурами».</div><ul class="res-points"><li>Делегирование прав: доступ к контактам без передачи пароля от почты</li><li>Authorization Code Flow: пошаговый обмен кода авторизации на Access Token</li><li>OpenID Connect (OIDC): надстройка над OAuth 2.0 с ID Token для профиля пользователя</li><li>Ключевые сущности: Client ID, Client Secret, Scope и Redirect URI</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Устраняет путаницу между «входом через Google» (аутентификация) и «доступом приложения к диску» (авторизация).</div><a class="res-link" href="https://www.youtube.com/watch?v=W_ffwyefi8A" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Шифрование в протоколе TLS (Андрей Созыкин)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 16:21</span><span>🎯 средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Инженерный разбор механизмов приватности в протоколе TLS. Переход от SSL к TLS и логика работы гибридного шифрования.</div><ul class="res-points"><li>Гибридная модель: асимметричное шифрование для обмена ключами + симметричное для передачи данных</li><li>Алгоритмы обмена: RSA (устаревший в TLS 1.3) vs Диффи-Хеллман (DH/ECDH)</li><li>Forward Secrecy: невозможность расшифровки старых сессий при компрометации текущего ключа</li><li>TLS 1.3 как актуальный стандарт безопасности</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Позволяет понять «математику» защищённого соединения, акцентируя внимание на архитектурных уязвимостях старых методов.</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_1/video-211221104_456239078" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Целостность данных в TLS (Андрей Созыкин)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 09:56</span><span>🎯 средний</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Защита данных от преднамеренного изменения в процессе передачи. Эволюция от простых контрольных сумм до криптографических кодов аутентификации.</div><ul class="res-points"><li>Криптографический хэш: функции SHA для уникальных отпечатков сообщений</li><li>Механизм MAC: секретный ключ при расчёте хэша для предотвращения подмены данных</li><li>AEAD шифры: алгоритмы (AES-GCM) с одновременным шифрованием и проверкой целостности</li><li>Имитовставка: код, который невозможно подделать без знания ключа</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Критически важно для инженеров, проектирующих системы с высокими требованиями к неизменности данных (финтех, документооборот).</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_1/video-211221104_456239079" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Как защитить API: Уязвимости и решения (Listen IT)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 23:28</span><span>🎯 средний → продвинутый</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Практический гайд по безопасности программных интерфейсов. Векторы атак на REST и SOAP, современные инструменты защиты (WAF, API Security платформы).</div><ul class="res-points"><li>Атаки на парсеры: дублирующиеся ключи в JSON и Unicode-коллизии для обхода бизнес-логики</li><li>Уязвимости SOAP: XML External Entity (XXE) и спуфинг заголовка SOAPAction</li><li>Инструментарий WAAP: Web Application and API Protection и механизмы виртуального патчинга</li><li>Сигнатурный vs Поведенческий анализ для защиты от ботов и злоупотреблений API</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Формирует комплексный взгляд на безопасность API, выходящий за рамки простого использования HTTPS.</div><a class="res-link" href="https://www.youtube.com/watch?v=4TMbRR7ThjI" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Инфраструктура открытых ключей в TLS/SSL (Андрей Созыкин)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 17:16</span><span>🎯 средний → продвинутый</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Разбор процесса аутентификации серверов через иерархию доверия. Устройство PKI (Public Key Infrastructure) и логика работы цифровых сертификатов.</div><ul class="res-points"><li>Электронная подпись: асимметричное шифрование «наоборот» для подтверждения авторства</li><li>Стандарт X.509: структура сертификата — серийные номера, сроки действия, данные субъекта</li><li>Цепочки доверия: путь от сертификата сайта через промежуточные АЦ до Root CA</li><li>Самоподписанные сертификаты: почему вызывают предупреждения и где допустимы (внутренние сети)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Даёт понимание того, почему мы доверяем сайтам в интернете и как работает глобальная система верификации.</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_1/video-211221104_456239080" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div class="resource-card" data-type="video"><div class="resource-card-top"><div class="res-type-icon">🎬</div><div><div class="res-title">Протокол TLS (Андрей Созыкин)</div><div class="res-meta"><span>🌍 Русский</span><span>⏱ 13:10</span><span>🎯 продвинутый</span><span>🏷️ Видео</span></div></div></div><div class="res-body"><div class="res-summary">Системный разбор внутреннего устройства протокола TLS. Взаимодействие Record Protocol и Handshake Protocol, архитектурные новшества версии 1.3.</div><ul class="res-points"><li>Многоуровневость: Record Protocol (транспорт) + управляющие протоколы (handshake, алерты)</li><li>Скрытие метаданных в TLS 1.3: защита типа сообщений и их длины от анализа трафика</li><li>Управление сессиями: создание новой и возобновление старой (session resumption) для ускорения</li><li>Протокол Alert: фатальные ошибки (разрыв) vs предупреждения (истечение сертификата)</li></ul><div class="res-why"><strong>💡 Зачем: </strong>Необходимо для глубокого понимания сетевого стека на уровне реализации — полезно при отладке сложных сетевых проблем и настройке балансировщиков.</div><a class="res-link" href="https://vkvideo.ru/playlist/-211221104_1/video-211221104_456239081" target="_blank" rel="noopener noreferrer">Открыть ресурс <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div></div></div></div></details>
+  </div>
+
+
+</main>
+
+<!-- EXTRA RESOURCES -->
+<section class="extra-section-wrap">
+  <div class="extra-section-inner">
+    <div class="section-head">
+      <div class="section-head-label">
+        <span class="section-index">02</span>
+        <span class="section-title">Дополнительно полезное</span>
+        <span class="section-hint">— каналы, подкасты и ресурсы для расширенного изучения</span>
+      </div>
+    </div>
+    <div id="extraGrid" class="extra-grid extra-grid-mb" style="display:grid">
+      <a class="extra-card" href="https://slurm.io/algorithms" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎓</div><div class="extra-card-body"><div class="extra-card-title">Алгоритмы для разработчиков (Slurm)</div><div class="extra-card-meta">Курс · 🌍 Русский</div><div class="extra-card-summary">Специализированный ресурс по классическим алгоритмам и структурам данных в контексте промышленной разработки. Повышение качества кода и оптимизация ресурсов.</div><div class="extra-card-why">Позволяет перейти от «копирования библиотек» к осознанному выбору эффективных архитектурных решений на уровне кода.</div></div></a><a class="extra-card" href="https://slurm.io/devops-start" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎓</div><div class="extra-card-body"><div class="extra-card-title">DevOps: быстрый старт (Slurm)</div><div class="extra-card-meta">Курс · 🌍 Русский</div><div class="extra-card-summary">Курс-погружение в методологию DevOps: жизненный цикл разработки ПО (SDLC) и инструменты автоматизации. Философия CAMS, Git, Docker, Jenkins/GitLab CI, мониторинг.</div><div class="extra-card-why">Эффективная точка входа для понимания процессов доставки кода без глубокого погружения в узкоспециализированные инструменты.</div></div></a><a class="extra-card" href="https://education.yandex.ru/handbook/algorithms" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎓</div><div class="extra-card-body"><div class="extra-card-title">Основы алгоритмов (Яндекс Образование)</div><div class="extra-card-meta">Курс · 🌍 Русский</div><div class="extra-card-summary">Фундаментальный онлайн-учебник по алгоритмам и структурам данных с автопроверкой решений. 6 глав, &gt;50 задач: динамическое программирование, жадные алгоритмы, суффиксные деревья.</div><div class="extra-card-why">«Золотой стандарт» подготовки к алгоритмическим интервью от ведущих разработчиков Яндекса.</div></div></a><a class="extra-card" href="https://rutube.ru/channel/46724910/" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎬</div><div class="extra-card-body"><div class="extra-card-title">DevOpsChannel (Rutube)</div><div class="extra-card-meta">Видео · 🌍 Русский</div><div class="extra-card-summary">Профильное сообщество: доклады с конференций, митапы и технические разборы для SRE и DevOps-специалистов. GitOps, Service Mesh, безопасность контейнеров, облачная инфраструктура.</div><div class="extra-card-why">Позволяет отслеживать актуальные тренды индустрии и учиться на реальных кейсах крупных тех-компаний.</div></div></a><a class="extra-card" href="https://rutube.ru/channel/44202758/" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎬</div><div class="extra-card-body"><div class="extra-card-title">HighLoad Channel (Rutube)</div><div class="extra-card-meta">Видео · 🌍 Русский</div><div class="extra-card-summary">Главный архив выступлений с конференции HighLoad++. Производительность, масштабируемость, архитектура: PostgreSQL, ClickHouse, распределённые системы, обработка миллиардов запросов.</div><div class="extra-card-why">Единственный в своём роде источник о том, как устроены крупнейшие IT-сервисы изнутри — от архитектуры БД до сетевого стека.</div></div></a><a class="extra-card" href="https://music.yandex.ru/album/7570122" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">🎙️</div><div class="extra-card-body"><div class="extra-card-title">Подкаст «Запуск завтра» (Яндекс Музыка)</div><div class="extra-card-meta">Подкаст · 🌍 Русский</div><div class="extra-card-summary">Научно-популярный и технический подкаст о технологиях. &gt;150 эпизодов: архитектура крупных IT-сервисов, кибербезопасность, приватность данных, инсайды технических команд.</div><div class="extra-card-why">Расширяет кругозор и помогает понять контекст использования технологий за пределами написания кода.</div></div></a><a class="extra-card" href="https://system-design.space/" target="_blank" rel="noopener noreferrer"><div class="extra-card-icon">📚</div><div class="extra-card-body"><div class="extra-card-title">System Design Space</div><div class="extra-card-meta">Справочник · 🌍 Русский</div><div class="extra-card-summary">Специализированный ресурс по проектированию высоконагруженных распределённых систем. Паттерны, CAP-теорема, кэширование, шардирование, API, кейсы Netflix/Uber/Amazon.</div><div class="extra-card-why">Критически важен для инженеров, стремящихся к уровню Senior/Lead, для понимания связей между компонентами больших систем.</div></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- LIBRARY -->
+<section class="library-section-wrap">
+  <div class="library-section-inner">
+    <div class="section-head">
+      <div class="section-head-label">
+        <span class="section-index">03</span>
+        <span class="section-title">Библиотека</span>
+        <span class="section-hint">— литература и электронные книги</span>
+      </div>
+    </div>
+    
+<div class="library-card">
+  <div class="library-text">
+    <div class="library-badge">📚 Библиотека знаний</div>
+    <div class="library-title">Электронные книги и литература</div>
+    <div class="library-desc">Подборка профессиональной литературы по темам навигатора: системный дизайн, микросервисы, DevOps, базы данных, архитектура и прочее</div>
+    <div class="library-tags">
+      <span class="library-tag">📘 Системный дизайн</span>
+      <span class="library-tag">🔧 Микросервисы</span>
+      <span class="library-tag">🐧 Linux &amp; DevOps</span>
+      <span class="library-tag">🗄️ Базы данных</span>
+      <span class="library-tag">☸️ Kubernetes</span>
+    </div>
+    <a class="library-btn" href="https://cloud.mail.ru/public/Mxzz/CPNgsebhn" target="_blank" rel="noopener noreferrer">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="2"/></svg>
+      Перейти в библиотеку
+    </a>
+  </div>
+  <div class="library-qr-block">
+    <div class="library-qr-frame">
+      <div id="libraryQR" class="library-qr-canvas"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 153 153" width="148" height="148" style="display:block"><rect width="153" height="153" fill="#fff"/><g fill="#003087"><rect x="4" y="4" width="5" height="5"/><rect x="9" y="4" width="5" height="5"/><rect x="14" y="4" width="5" height="5"/><rect x="19" y="4" width="5" height="5"/><rect x="24" y="4" width="5" height="5"/><rect x="29" y="4" width="5" height="5"/><rect x="34" y="4" width="5" height="5"/><rect x="49" y="4" width="5" height="5"/><rect x="59" y="4" width="5" height="5"/><rect x="64" y="4" width="5" height="5"/><rect x="69" y="4" width="5" height="5"/><rect x="74" y="4" width="5" height="5"/><rect x="99" y="4" width="5" height="5"/><rect x="114" y="4" width="5" height="5"/><rect x="119" y="4" width="5" height="5"/><rect x="124" y="4" width="5" height="5"/><rect x="129" y="4" width="5" height="5"/><rect x="134" y="4" width="5" height="5"/><rect x="139" y="4" width="5" height="5"/><rect x="144" y="4" width="5" height="5"/><rect x="4" y="9" width="5" height="5"/><rect x="34" y="9" width="5" height="5"/><rect x="44" y="9" width="5" height="5"/><rect x="54" y="9" width="5" height="5"/><rect x="59" y="9" width="5" height="5"/><rect x="64" y="9" width="5" height="5"/><rect x="74" y="9" width="5" height="5"/><rect x="79" y="9" width="5" height="5"/><rect x="89" y="9" width="5" height="5"/><rect x="99" y="9" width="5" height="5"/><rect x="104" y="9" width="5" height="5"/><rect x="114" y="9" width="5" height="5"/><rect x="144" y="9" width="5" height="5"/><rect x="4" y="14" width="5" height="5"/><rect x="14" y="14" width="5" height="5"/><rect x="19" y="14" width="5" height="5"/><rect x="24" y="14" width="5" height="5"/><rect x="34" y="14" width="5" height="5"/><rect x="54" y="14" width="5" height="5"/><rect x="59" y="14" width="5" height="5"/><rect x="74" y="14" width="5" height="5"/><rect x="84" y="14" width="5" height="5"/><rect x="94" y="14" width="5" height="5"/><rect x="99" y="14" width="5" height="5"/><rect x="114" y="14" width="5" height="5"/><rect x="124" y="14" width="5" height="5"/><rect x="129" y="14" width="5" height="5"/><rect x="134" y="14" width="5" height="5"/><rect x="144" y="14" width="5" height="5"/><rect x="4" y="19" width="5" height="5"/><rect x="14" y="19" width="5" height="5"/><rect x="19" y="19" width="5" height="5"/><rect x="24" y="19" width="5" height="5"/><rect x="34" y="19" width="5" height="5"/><rect x="54" y="19" width="5" height="5"/><rect x="59" y="19" width="5" height="5"/><rect x="74" y="19" width="5" height="5"/><rect x="79" y="19" width="5" height="5"/><rect x="84" y="19" width="5" height="5"/><rect x="94" y="19" width="5" height="5"/><rect x="114" y="19" width="5" height="5"/><rect x="124" y="19" width="5" height="5"/><rect x="129" y="19" width="5" height="5"/><rect x="134" y="19" width="5" height="5"/><rect x="144" y="19" width="5" height="5"/><rect x="4" y="24" width="5" height="5"/><rect x="14" y="24" width="5" height="5"/><rect x="19" y="24" width="5" height="5"/><rect x="24" y="24" width="5" height="5"/><rect x="34" y="24" width="5" height="5"/><rect x="44" y="24" width="5" height="5"/><rect x="54" y="24" width="5" height="5"/><rect x="64" y="24" width="5" height="5"/><rect x="74" y="24" width="5" height="5"/><rect x="99" y="24" width="5" height="5"/><rect x="104" y="24" width="5" height="5"/><rect x="114" y="24" width="5" height="5"/><rect x="124" y="24" width="5" height="5"/><rect x="129" y="24" width="5" height="5"/><rect x="134" y="24" width="5" height="5"/><rect x="144" y="24" width="5" height="5"/><rect x="4" y="29" width="5" height="5"/><rect x="34" y="29" width="5" height="5"/><rect x="74" y="29" width="5" height="5"/><rect x="79" y="29" width="5" height="5"/><rect x="84" y="29" width="5" height="5"/><rect x="89" y="29" width="5" height="5"/><rect x="94" y="29" width="5" height="5"/><rect x="99" y="29" width="5" height="5"/><rect x="104" y="29" width="5" height="5"/><rect x="114" y="29" width="5" height="5"/><rect x="144" y="29" width="5" height="5"/><rect x="4" y="34" width="5" height="5"/><rect x="9" y="34" width="5" height="5"/><rect x="14" y="34" width="5" height="5"/><rect x="19" y="34" width="5" height="5"/><rect x="24" y="34" width="5" height="5"/><rect x="29" y="34" width="5" height="5"/><rect x="34" y="34" width="5" height="5"/><rect x="44" y="34" width="5" height="5"/><rect x="54" y="34" width="5" height="5"/><rect x="64" y="34" width="5" height="5"/><rect x="74" y="34" width="5" height="5"/><rect x="84" y="34" width="5" height="5"/><rect x="94" y="34" width="5" height="5"/><rect x="104" y="34" width="5" height="5"/><rect x="114" y="34" width="5" height="5"/><rect x="119" y="34" width="5" height="5"/><rect x="124" y="34" width="5" height="5"/><rect x="129" y="34" width="5" height="5"/><rect x="134" y="34" width="5" height="5"/><rect x="139" y="34" width="5" height="5"/><rect x="144" y="34" width="5" height="5"/><rect x="49" y="39" width="5" height="5"/><rect x="54" y="39" width="5" height="5"/><rect x="69" y="39" width="5" height="5"/><rect x="74" y="39" width="5" height="5"/><rect x="89" y="39" width="5" height="5"/><rect x="94" y="39" width="5" height="5"/><rect x="99" y="39" width="5" height="5"/><rect x="104" y="39" width="5" height="5"/><rect x="4" y="44" width="5" height="5"/><rect x="14" y="44" width="5" height="5"/><rect x="24" y="44" width="5" height="5"/><rect x="34" y="44" width="5" height="5"/><rect x="54" y="44" width="5" height="5"/><rect x="59" y="44" width="5" height="5"/><rect x="64" y="44" width="5" height="5"/><rect x="69" y="44" width="5" height="5"/><rect x="84" y="44" width="5" height="5"/><rect x="89" y="44" width="5" height="5"/><rect x="124" y="44" width="5" height="5"/><rect x="139" y="44" width="5" height="5"/><rect x="9" y="49" width="5" height="5"/><rect x="19" y="49" width="5" height="5"/><rect x="24" y="49" width="5" height="5"/><rect x="44" y="49" width="5" height="5"/><rect x="49" y="49" width="5" height="5"/><rect x="69" y="49" width="5" height="5"/><rect x="74" y="49" width="5" height="5"/><rect x="79" y="49" width="5" height="5"/><rect x="84" y="49" width="5" height="5"/><rect x="89" y="49" width="5" height="5"/><rect x="104" y="49" width="5" height="5"/><rect x="109" y="49" width="5" height="5"/><rect x="114" y="49" width="5" height="5"/><rect x="129" y="49" width="5" height="5"/><rect x="144" y="49" width="5" height="5"/><rect x="4" y="54" width="5" height="5"/><rect x="14" y="54" width="5" height="5"/><rect x="24" y="54" width="5" height="5"/><rect x="34" y="54" width="5" height="5"/><rect x="44" y="54" width="5" height="5"/><rect x="49" y="54" width="5" height="5"/><rect x="64" y="54" width="5" height="5"/><rect x="69" y="54" width="5" height="5"/><rect x="74" y="54" width="5" height="5"/><rect x="89" y="54" width="5" height="5"/><rect x="94" y="54" width="5" height="5"/><rect x="104" y="54" width="5" height="5"/><rect x="109" y="54" width="5" height="5"/><rect x="114" y="54" width="5" height="5"/><rect x="119" y="54" width="5" height="5"/><rect x="124" y="54" width="5" height="5"/><rect x="134" y="54" width="5" height="5"/><rect x="139" y="54" width="5" height="5"/><rect x="144" y="54" width="5" height="5"/><rect x="9" y="59" width="5" height="5"/><rect x="19" y="59" width="5" height="5"/><rect x="24" y="59" width="5" height="5"/><rect x="54" y="59" width="5" height="5"/><rect x="59" y="59" width="5" height="5"/><rect x="64" y="59" width="5" height="5"/><rect x="69" y="59" width="5" height="5"/><rect x="74" y="59" width="5" height="5"/><rect x="84" y="59" width="5" height="5"/><rect x="89" y="59" width="5" height="5"/><rect x="109" y="59" width="5" height="5"/><rect x="139" y="59" width="5" height="5"/><rect x="4" y="64" width="5" height="5"/><rect x="14" y="64" width="5" height="5"/><rect x="24" y="64" width="5" height="5"/><rect x="29" y="64" width="5" height="5"/><rect x="34" y="64" width="5" height="5"/><rect x="44" y="64" width="5" height="5"/><rect x="59" y="64" width="5" height="5"/><rect x="64" y="64" width="5" height="5"/><rect x="69" y="64" width="5" height="5"/><rect x="79" y="64" width="5" height="5"/><rect x="84" y="64" width="5" height="5"/><rect x="89" y="64" width="5" height="5"/><rect x="114" y="64" width="5" height="5"/><rect x="119" y="64" width="5" height="5"/><rect x="129" y="64" width="5" height="5"/><rect x="139" y="64" width="5" height="5"/><rect x="144" y="64" width="5" height="5"/><rect x="9" y="69" width="5" height="5"/><rect x="29" y="69" width="5" height="5"/><rect x="39" y="69" width="5" height="5"/><rect x="54" y="69" width="5" height="5"/><rect x="59" y="69" width="5" height="5"/><rect x="69" y="69" width="5" height="5"/><rect x="104" y="69" width="5" height="5"/><rect x="109" y="69" width="5" height="5"/><rect x="114" y="69" width="5" height="5"/><rect x="129" y="69" width="5" height="5"/><rect x="144" y="69" width="5" height="5"/><rect x="4" y="74" width="5" height="5"/><rect x="34" y="74" width="5" height="5"/><rect x="49" y="74" width="5" height="5"/><rect x="54" y="74" width="5" height="5"/><rect x="59" y="74" width="5" height="5"/><rect x="84" y="74" width="5" height="5"/><rect x="104" y="74" width="5" height="5"/><rect x="109" y="74" width="5" height="5"/><rect x="119" y="74" width="5" height="5"/><rect x="129" y="74" width="5" height="5"/><rect x="139" y="74" width="5" height="5"/><rect x="144" y="74" width="5" height="5"/><rect x="9" y="79" width="5" height="5"/><rect x="29" y="79" width="5" height="5"/><rect x="39" y="79" width="5" height="5"/><rect x="54" y="79" width="5" height="5"/><rect x="59" y="79" width="5" height="5"/><rect x="64" y="79" width="5" height="5"/><rect x="69" y="79" width="5" height="5"/><rect x="74" y="79" width="5" height="5"/><rect x="89" y="79" width="5" height="5"/><rect x="104" y="79" width="5" height="5"/><rect x="109" y="79" width="5" height="5"/><rect x="114" y="79" width="5" height="5"/><rect x="124" y="79" width="5" height="5"/><rect x="129" y="79" width="5" height="5"/><rect x="139" y="79" width="5" height="5"/><rect x="4" y="84" width="5" height="5"/><rect x="19" y="84" width="5" height="5"/><rect x="29" y="84" width="5" height="5"/><rect x="34" y="84" width="5" height="5"/><rect x="44" y="84" width="5" height="5"/><rect x="49" y="84" width="5" height="5"/><rect x="54" y="84" width="5" height="5"/><rect x="69" y="84" width="5" height="5"/><rect x="79" y="84" width="5" height="5"/><rect x="89" y="84" width="5" height="5"/><rect x="99" y="84" width="5" height="5"/><rect x="104" y="84" width="5" height="5"/><rect x="109" y="84" width="5" height="5"/><rect x="114" y="84" width="5" height="5"/><rect x="129" y="84" width="5" height="5"/><rect x="139" y="84" width="5" height="5"/><rect x="144" y="84" width="5" height="5"/><rect x="9" y="89" width="5" height="5"/><rect x="19" y="89" width="5" height="5"/><rect x="29" y="89" width="5" height="5"/><rect x="44" y="89" width="5" height="5"/><rect x="54" y="89" width="5" height="5"/><rect x="64" y="89" width="5" height="5"/><rect x="69" y="89" width="5" height="5"/><rect x="84" y="89" width="5" height="5"/><rect x="109" y="89" width="5" height="5"/><rect x="114" y="89" width="5" height="5"/><rect x="129" y="89" width="5" height="5"/><rect x="134" y="89" width="5" height="5"/><rect x="144" y="89" width="5" height="5"/><rect x="4" y="94" width="5" height="5"/><rect x="24" y="94" width="5" height="5"/><rect x="29" y="94" width="5" height="5"/><rect x="34" y="94" width="5" height="5"/><rect x="39" y="94" width="5" height="5"/><rect x="49" y="94" width="5" height="5"/><rect x="69" y="94" width="5" height="5"/><rect x="74" y="94" width="5" height="5"/><rect x="84" y="94" width="5" height="5"/><rect x="94" y="94" width="5" height="5"/><rect x="104" y="94" width="5" height="5"/><rect x="109" y="94" width="5" height="5"/><rect x="124" y="94" width="5" height="5"/><rect x="139" y="94" width="5" height="5"/><rect x="144" y="94" width="5" height="5"/><rect x="9" y="99" width="5" height="5"/><rect x="24" y="99" width="5" height="5"/><rect x="29" y="99" width="5" height="5"/><rect x="59" y="99" width="5" height="5"/><rect x="64" y="99" width="5" height="5"/><rect x="69" y="99" width="5" height="5"/><rect x="89" y="99" width="5" height="5"/><rect x="94" y="99" width="5" height="5"/><rect x="99" y="99" width="5" height="5"/><rect x="104" y="99" width="5" height="5"/><rect x="124" y="99" width="5" height="5"/><rect x="129" y="99" width="5" height="5"/><rect x="139" y="99" width="5" height="5"/><rect x="4" y="104" width="5" height="5"/><rect x="24" y="104" width="5" height="5"/><rect x="29" y="104" width="5" height="5"/><rect x="34" y="104" width="5" height="5"/><rect x="44" y="104" width="5" height="5"/><rect x="49" y="104" width="5" height="5"/><rect x="54" y="104" width="5" height="5"/><rect x="59" y="104" width="5" height="5"/><rect x="64" y="104" width="5" height="5"/><rect x="69" y="104" width="5" height="5"/><rect x="79" y="104" width="5" height="5"/><rect x="89" y="104" width="5" height="5"/><rect x="99" y="104" width="5" height="5"/><rect x="104" y="104" width="5" height="5"/><rect x="109" y="104" width="5" height="5"/><rect x="114" y="104" width="5" height="5"/><rect x="119" y="104" width="5" height="5"/><rect x="124" y="104" width="5" height="5"/><rect x="44" y="109" width="5" height="5"/><rect x="54" y="109" width="5" height="5"/><rect x="59" y="109" width="5" height="5"/><rect x="84" y="109" width="5" height="5"/><rect x="89" y="109" width="5" height="5"/><rect x="99" y="109" width="5" height="5"/><rect x="104" y="109" width="5" height="5"/><rect x="124" y="109" width="5" height="5"/><rect x="134" y="109" width="5" height="5"/><rect x="139" y="109" width="5" height="5"/><rect x="144" y="109" width="5" height="5"/><rect x="4" y="114" width="5" height="5"/><rect x="9" y="114" width="5" height="5"/><rect x="14" y="114" width="5" height="5"/><rect x="19" y="114" width="5" height="5"/><rect x="24" y="114" width="5" height="5"/><rect x="29" y="114" width="5" height="5"/><rect x="34" y="114" width="5" height="5"/><rect x="54" y="114" width="5" height="5"/><rect x="64" y="114" width="5" height="5"/><rect x="74" y="114" width="5" height="5"/><rect x="84" y="114" width="5" height="5"/><rect x="89" y="114" width="5" height="5"/><rect x="94" y="114" width="5" height="5"/><rect x="99" y="114" width="5" height="5"/><rect x="104" y="114" width="5" height="5"/><rect x="114" y="114" width="5" height="5"/><rect x="124" y="114" width="5" height="5"/><rect x="129" y="114" width="5" height="5"/><rect x="139" y="114" width="5" height="5"/><rect x="144" y="114" width="5" height="5"/><rect x="4" y="119" width="5" height="5"/><rect x="34" y="119" width="5" height="5"/><rect x="64" y="119" width="5" height="5"/><rect x="69" y="119" width="5" height="5"/><rect x="79" y="119" width="5" height="5"/><rect x="89" y="119" width="5" height="5"/><rect x="94" y="119" width="5" height="5"/><rect x="104" y="119" width="5" height="5"/><rect x="124" y="119" width="5" height="5"/><rect x="129" y="119" width="5" height="5"/><rect x="144" y="119" width="5" height="5"/><rect x="4" y="124" width="5" height="5"/><rect x="14" y="124" width="5" height="5"/><rect x="19" y="124" width="5" height="5"/><rect x="24" y="124" width="5" height="5"/><rect x="34" y="124" width="5" height="5"/><rect x="44" y="124" width="5" height="5"/><rect x="49" y="124" width="5" height="5"/><rect x="54" y="124" width="5" height="5"/><rect x="69" y="124" width="5" height="5"/><rect x="79" y="124" width="5" height="5"/><rect x="89" y="124" width="5" height="5"/><rect x="94" y="124" width="5" height="5"/><rect x="104" y="124" width="5" height="5"/><rect x="109" y="124" width="5" height="5"/><rect x="114" y="124" width="5" height="5"/><rect x="119" y="124" width="5" height="5"/><rect x="124" y="124" width="5" height="5"/><rect x="4" y="129" width="5" height="5"/><rect x="14" y="129" width="5" height="5"/><rect x="19" y="129" width="5" height="5"/><rect x="24" y="129" width="5" height="5"/><rect x="34" y="129" width="5" height="5"/><rect x="49" y="129" width="5" height="5"/><rect x="54" y="129" width="5" height="5"/><rect x="84" y="129" width="5" height="5"/><rect x="119" y="129" width="5" height="5"/><rect x="124" y="129" width="5" height="5"/><rect x="134" y="129" width="5" height="5"/><rect x="139" y="129" width="5" height="5"/><rect x="144" y="129" width="5" height="5"/><rect x="4" y="134" width="5" height="5"/><rect x="14" y="134" width="5" height="5"/><rect x="19" y="134" width="5" height="5"/><rect x="24" y="134" width="5" height="5"/><rect x="34" y="134" width="5" height="5"/><rect x="44" y="134" width="5" height="5"/><rect x="64" y="134" width="5" height="5"/><rect x="69" y="134" width="5" height="5"/><rect x="89" y="134" width="5" height="5"/><rect x="119" y="134" width="5" height="5"/><rect x="124" y="134" width="5" height="5"/><rect x="129" y="134" width="5" height="5"/><rect x="144" y="134" width="5" height="5"/><rect x="4" y="139" width="5" height="5"/><rect x="34" y="139" width="5" height="5"/><rect x="54" y="139" width="5" height="5"/><rect x="59" y="139" width="5" height="5"/><rect x="69" y="139" width="5" height="5"/><rect x="79" y="139" width="5" height="5"/><rect x="84" y="139" width="5" height="5"/><rect x="89" y="139" width="5" height="5"/><rect x="94" y="139" width="5" height="5"/><rect x="99" y="139" width="5" height="5"/><rect x="104" y="139" width="5" height="5"/><rect x="109" y="139" width="5" height="5"/><rect x="124" y="139" width="5" height="5"/><rect x="139" y="139" width="5" height="5"/><rect x="4" y="144" width="5" height="5"/><rect x="9" y="144" width="5" height="5"/><rect x="14" y="144" width="5" height="5"/><rect x="19" y="144" width="5" height="5"/><rect x="24" y="144" width="5" height="5"/><rect x="29" y="144" width="5" height="5"/><rect x="34" y="144" width="5" height="5"/><rect x="44" y="144" width="5" height="5"/><rect x="49" y="144" width="5" height="5"/><rect x="54" y="144" width="5" height="5"/><rect x="64" y="144" width="5" height="5"/><rect x="74" y="144" width="5" height="5"/><rect x="79" y="144" width="5" height="5"/><rect x="84" y="144" width="5" height="5"/><rect x="99" y="144" width="5" height="5"/><rect x="104" y="144" width="5" height="5"/><rect x="109" y="144" width="5" height="5"/><rect x="114" y="144" width="5" height="5"/><rect x="124" y="144" width="5" height="5"/><rect x="139" y="144" width="5" height="5"/><rect x="144" y="144" width="5" height="5"/></g></svg></div>
+    </div>
+    <div class="library-qr-label">Наведите камеру<br>для перехода</div>
+  </div>
+</div>
+  </div>
+</section>
+
+<footer>
+  <strong>УСиЭСПБ</strong> &nbsp;·&nbsp; Инженерная академия &nbsp;·&nbsp; Навигатор знаний v 6.0 &nbsp;·&nbsp; 2026
+</footer>
+
+
+<script>
+window.onload = function(){
+  // QR code via canvas (with try/catch for WebViews that block canvas)
+  try {
+    var qrEl = document.getElementById('libraryQR');
+    if(qrEl && typeof generateQR === 'function') generateQR();
+  } catch(e) {}
+};
+</script>
+  <script src="course-shell.js" defer></script>
+</body>
+</html>

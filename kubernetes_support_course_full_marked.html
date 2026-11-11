@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>УСиЭСКБ. Kubernetes для прикладной поддержки </title>
+<style>
+:root{--bg:#070b16;--panel:#0f172a;--text:#e5e7eb;--muted:#94a3b8;--blue:#60a5fa;--cyan:#22d3ee;--green:#86efac;--red:#fca5a5;--yellow:#fde68a;--accent:linear-gradient(135deg,#2563eb,#06b6d4 55%,#14b8a6);--shadow:0 18px 50px rgba(0,0,0,.35);--radius:22px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(37,99,235,.22),transparent 34%),radial-gradient(circle at top right,rgba(20,184,166,.16),transparent 32%),var(--bg);color:var(--text);line-height:1.65}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 80%)}header{background:rgba(15,23,42,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);padding:18px 26px;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}header h1{margin:0;font-size:25px;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}.version{font-size:12px;color:#bbf7d0;border:1px solid rgba(34,197,94,.4);background:rgba(20,83,45,.28);padding:5px 10px;border-radius:999px}.searchBox{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:280px;max-width:560px;flex:1 1 360px;justify-content:flex-end}.searchBox input{width:min(420px,100%);padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.88);color:var(--text);outline:none}.searchBox button,.mobile-toggle{padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.24);background:rgba(30,41,59,.82);color:#fff;cursor:pointer}.search-count{font-size:13px;color:#93c5fd;white-space:nowrap;min-width:88px}.mobile-toggle{display:none;width:100%;margin-top:12px;text-align:left;font-size:16px}.layout{display:flex;min-height:100vh}aside{width:350px;background:rgba(15,23,42,.74);backdrop-filter:blur(16px);padding:18px;border-right:1px solid rgba(148,163,184,.16);position:sticky;top:78px;height:calc(100vh - 78px);overflow:auto;flex-shrink:0}main{flex:1;padding:32px;min-width:0;max-width:1180px;margin:0 auto}.page{display:none}.page.active{display:block}.menu{display:flex;align-items:center;gap:9px;color:#cbd5e1;text-decoration:none;padding:11px 13px;border-radius:14px;margin:6px 0;font-size:15px;border:1px solid transparent;transition:.18s}.menu:hover{background:rgba(30,41,59,.75);color:#fff;border-color:rgba(148,163,184,.18);transform:translateX(2px)}.menu.active,.menu.search-match{background:linear-gradient(135deg,rgba(37,99,235,.26),rgba(6,182,212,.16));color:#fff;border-color:rgba(96,165,250,.38);box-shadow:0 10px 26px rgba(37,99,235,.12)}.menu.search-hidden{display:none!important}.card{background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(15,23,42,.92));border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);padding:22px;margin:18px 0;overflow:hidden;box-shadow:var(--shadow);position:relative}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(96,165,250,.65),transparent)}.card.quiz{border-color:rgba(34,211,238,.28);background:linear-gradient(180deg,rgba(8,47,73,.42),rgba(15,23,42,.94))}.quiz button{padding:11px 14px;border:1px solid rgba(96,165,250,.32);border-radius:13px;background:rgba(37,99,235,.22);color:#fff;cursor:pointer;margin:6px;min-height:42px}.res{margin-top:9px;font-weight:800}.quiz-progress{margin:14px 0 18px;padding:12px 14px;border-radius:16px;background:rgba(20,83,45,.22);border:1px solid rgba(34,197,94,.3);color:#bbf7d0;font-weight:800}.answer-explain{display:none;margin-top:10px;border-left:4px solid #22c55e;padding:12px 14px;background:rgba(20,83,45,.25);border-radius:14px;color:#bbf7d0}.answer-explain.show{display:block}.ok{color:var(--green)}.bad{color:var(--red)}h2{color:#bfdbfe;font-size:30px;margin:0 0 18px;line-height:1.2}h2:after{content:"";display:block;width:72px;height:4px;margin-top:12px;border-radius:999px;background:var(--accent)}h3{color:#dbeafe;margin-top:12px;font-size:20px}p{margin:10px 0}ul,ol{padding-left:23px}li{margin:5px 0}.badge{display:inline-flex;padding:4px 9px;border-radius:999px;background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.26);color:#bfdbfe;font-size:13px}.callout{border-left:4px solid var(--cyan);padding:12px 14px;background:rgba(8,47,73,.28);border-radius:14px;margin:14px 0;color:#dbeafe}.warn{border-left-color:#fbbf24;background:rgba(113,63,18,.25);color:#fde68a}.success{border-left-color:#22c55e;background:rgba(20,83,45,.25);color:#bbf7d0}.danger{border-left-color:#ef4444;background:rgba(127,29,29,.22);color:#fecaca}pre{background:#020617;color:#a7f3d0;padding:15px;border-radius:16px;overflow-x:auto;white-space:pre;max-width:100%;font-size:14px;border:1px solid rgba(148,163,184,.16)}code{background:#020617;color:#a7f3d0;padding:3px 7px;border-radius:8px;border:1px solid rgba(148,163,184,.14)}table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(148,163,184,.2);margin:12px 0}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;vertical-align:top}th{background:rgba(37,99,235,.18);color:#dbeafe}tr:last-child td{border-bottom:0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tile{padding:16px;border-radius:18px;background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.16);transition:.22s;position:relative;overflow:hidden}.tile:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.14),transparent 46%,rgba(34,211,238,.08));opacity:0;transition:.22s;pointer-events:none}.tile:hover{transform:translateY(-4px);border-color:rgba(96,165,250,.48);box-shadow:0 16px 34px rgba(37,99,235,.18)}.tile:hover:before{opacity:1}.tile h3,.tile p,.tile .badge{position:relative;z-index:1}.flow{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#020617;border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:16px;color:#a7f3d0;overflow:auto;white-space:pre-line}.playbook{display:flex;flex-direction:column;gap:14px;margin:14px 0}.playbook-intro{border-left:4px solid var(--cyan);background:rgba(8,47,73,.28);border-radius:14px;padding:12px 14px;color:#dbeafe}.step{background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:14px;transition:.2s}.step:hover{border-color:rgba(96,165,250,.5);box-shadow:0 8px 20px rgba(37,99,235,.15);transform:translateY(-1px)}.step-title{font-weight:800;color:#bfdbfe;margin-bottom:8px;display:flex;align-items:center;gap:8px}.step-title:before{content:"▶";font-size:11px;color:#22d3ee}.step-desc{color:#cbd5e1;margin:6px 0 10px}.step pre{margin:0;background:#020617;color:#a7f3d0;padding:13px;border-radius:14px;border:1px solid rgba(148,163,184,.16);overflow-x:auto}.small{color:var(--muted);font-size:14px}mark.search-hit{background:#facc15;color:#111827;border-radius:5px;padding:0 3px}.search-empty{display:none;margin:18px 0;padding:16px;border-radius:16px;background:rgba(127,29,29,.22);border:1px solid rgba(252,165,165,.25);color:#fecaca}.search-empty.active{display:block}@media(max-width:900px){header h1{font-size:20px}.mobile-toggle{display:block}.searchBox{order:3;width:100%;max-width:none;min-width:0}.searchBox input{width:100%;flex:1}.layout{display:block}aside{display:none;position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid rgba(148,163,184,.16);padding:10px 14px;background:rgba(15,23,42,.96)}body.menu-open aside{display:block}main{padding:17px}.grid,.grid2{grid-template-columns:1fr}.card{padding:16px}.quiz button{display:block;width:100%;margin:8px 0;text-align:left}table{display:block;overflow-x:auto;white-space:nowrap}}
+
+</style>
+<script>
+function safeId(id){return String(id||'').replace(/[^a-zA-Z0-9_-]/g,'')}
+function getMenuTargetId(item){const m=(item.getAttribute('onclick')||'').match(/show\(['"]([^'"]+)['"]\)/);return m?safeId(m[1]):''}
+function show(id){const t=document.getElementById(safeId(id));if(!t)return false;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.menu').forEach(i=>i.classList.toggle('active',getMenuTargetId(i)===t.id));document.body.classList.remove('menu-open');window.scrollTo(0,0);return false}
+function updateQuizProgress(){const progress=document.getElementById('quizProgress');if(!progress)return;const total=10;const correct=document.querySelectorAll('#quiz .res.ok').length;progress.textContent=`Прогресс: ${correct}/${total} правильных ответов`;progress.style.display='block'}
+function q(id,a,c,msg){const r=document.getElementById(safeId(id));if(!r)return;const ok=a===c;r.className='res '+(ok?'ok':'bad');r.textContent=ok?'Верно ✅':'Неверно ❌ '+(msg||'Попробуйте ещё раз.');const explain=document.getElementById(safeId(id)+'-explain');if(explain){explain.classList.toggle('show',ok)}updateQuizProgress()}
+function clearMarks(root){root.querySelectorAll('mark.search-hit').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));root.normalize()}
+function highlight(root,term){let count=0;const skip=new Set(['SCRIPT','STYLE','INPUT','BUTTON','MARK']);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){const p=n.parentElement;if(!p||skip.has(p.tagName)||!n.nodeValue.trim())return NodeFilter.FILTER_REJECT;return n.nodeValue.toLowerCase().includes(term)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});const nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(n=>{const text=n.nodeValue,lower=text.toLowerCase(),frag=document.createDocumentFragment();let pos=0,idx=lower.indexOf(term);while(idx!==-1){frag.appendChild(document.createTextNode(text.slice(pos,idx)));const mark=document.createElement('mark');mark.className='search-hit';mark.textContent=text.slice(idx,idx+term.length);frag.appendChild(mark);count++;pos=idx+term.length;idx=lower.indexOf(term,pos)}frag.appendChild(document.createTextNode(text.slice(pos)));n.parentNode.replaceChild(frag,n)});return count}
+function searchCourse(){const input=document.getElementById('courseSearch'),counter=document.getElementById('searchCount'),empty=document.getElementById('searchEmpty'),term=(input.value||'').trim().toLowerCase();let total=0,sections=0,first='';document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'));empty.classList.remove('active');if(!term){counter.textContent='';return}document.querySelectorAll('.page').forEach(p=>{if(p.textContent.toLowerCase().includes(term)){p.dataset.searchMatch='1';sections++;total+=highlight(p,term);if(!first)first=p.id}});document.querySelectorAll('.menu').forEach(i=>{const target=document.getElementById(getMenuTargetId(i));const match=target&&target.dataset.searchMatch==='1';i.classList.toggle('search-hidden',!match);i.classList.toggle('search-match',!!match)});counter.textContent=total?`Найдено: ${total} / разделов: ${sections}`:'Ничего не найдено';if(!total)empty.classList.add('active');if(first)show(first)}
+function clearCourseSearch(){document.getElementById('courseSearch').value='';document.getElementById('searchCount').textContent='';document.getElementById('searchEmpty').classList.remove('active');document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'))}
+document.addEventListener('DOMContentLoaded',()=>show('home'));
+
+</script>
+  <link rel="stylesheet" href="course-shell.css">
+</head>
+<body>
+<header>
+<h1>УСиЭСКБ. Kubernetes для прикладной поддержки</h1>
+
+<div class="searchBox">
+<input id="courseSearch" type="search" placeholder="🔍 Поиск по курсу: pod, service, selector..." oninput="searchCourse()">
+<button onclick="clearCourseSearch()">Сброс</button>
+<span id="searchCount" class="search-count">
+</span>
+</div>
+<button class="mobile-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню курса</button>
+</header>
+<div class="layout">
+<aside>
+<a class="menu" href="javascript:void(0)" onclick="return show('home')">🏠 Главная</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('basics')">🧱 1. Основы устройства кластера</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('cluster-flow')">🔄 1.1 Как кластер принимает решения</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('support-view')">🛠️ 1.2 Что важно поддержке</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('entities')">🧩 2. Сущности Kubernetes</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('workload')">🚀 2.1 Pod, ReplicaSet, Deployment</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('network')">🌐 2.2 Service, Ingress, DNS</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('config')">🔐 2.3 ConfigMap, Secret, Volume</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('ops')">🏷️ 2.4 Namespace, labels, probes</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('links')">🔗 2.5 Связи сущностей</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('istio')">🕸️ 3. Istio для прикладной поддержки</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('istio-entities')">🚦 3.1 Gateway, VirtualService, Service</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('quiz')">✅ Проверочный квиз</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('cheatsheet')">📌 Шпаргалка поддержки</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('practice')">🧪 Диагностика и самопроверка</a>
+</aside>
+<main>
+<div id="searchEmpty" class="search-empty">Ничего не найдено. Попробуйте другой запрос.</div>
+
+<section id="home" class="page">
+<h2>Курс: Kubernetes-кластер для прикладной поддержки</h2>
+
+<div class="card">
+<p>Этот курс помогает инженеру прикладной поддержки понимать, что происходит с приложением в Kubernetes: где оно запущено, почему оно недоступно, куда смотреть при инциденте и как связаны основные сущности.</p>
+<div class="grid">
+<div class="tile">
+<span class="badge">Раздел 1</span>
+<h3>🧠 Устройство кластера</h3>
+<p>Control Plane, Worker Nodes, kubelet, etcd и простые аналогии.</p>
+</div>
+<div class="tile">
+<span class="badge">Раздел 2</span>
+<h3>⚙️ Сущности Kubernetes</h3>
+<p>Pod, Service, Deployment, ConfigMap, Secret, Ingress и их связи.</p>
+</div>
+<div class="tile">
+<span class="badge">Раздел 3</span>
+<h3>🌐 Istio (Service Mesh)</h3>
+<p>Gateway, VirtualService, маршрутизация, безопасность и диагностика сетевых проблем.</p>
+</div>
+</div>
+<div class="card callout">
+<b>Главная идея Kubernetes:</b> инженер описывает желаемое состояние, а кластер постоянно сравнивает его с реальностью и старается привести реальность к описанию.</div>
+
+</section>
+
+
+<section id="basics" class="page">
+<h2>1. Основы устройства кластера</h2>
+
+<div class="card">
+<h3>Что такое Kubernetes-кластер</h3>
+<p>
+<b>Kubernetes-кластер</b> — это группа серверов, которые вместе запускают контейнерные приложения и следят, чтобы они работали в нужном количестве экземпляров.</p>
+<p>Для поддержки удобно думать так: Kubernetes — это не просто «место, где крутится контейнер», а диспетчерская система. Она знает, какие приложения должны работать, где они запущены, сколько копий нужно и что делать при сбое.</p>
+<div class="callout">
+<b>Аналогия:</b> кластер похож на торговый центр. Есть администрация, которая распределяет помещения и следит за правилами, и есть магазины, где реально работают сотрудники. Control Plane — администрация, Worker Nodes — этажи и помещения, Pods — отдельные торговые точки.</div>
+</div>
+
+<div class="card">
+<h3>Две главные части кластера</h3>
+
+<table>
+<tr>
+<th>Часть</th>
+<th>Роль</th>
+<th>Аналогия</th>
+<th>Что смотрит поддержка</th>
+</tr>
+<tr>
+<td>Control Plane</td>
+<td>Управляет кластером и хранит желаемое состояние.</td>
+<td>Диспетчерская аэропорта.</td>
+<td>Доступен ли API, работают ли контроллеры, нет ли проблем планирования.</td>
+</tr>
+<tr>
+<td>Worker Node</td>
+<td>Сервер, на котором реально запускаются Pods.</td>
+<td>Цех, где выполняется работа.</td>
+<td>Готова ли Node, хватает ли CPU/RAM, не упал ли kubelet.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Виды Node в кластере</h3>
+<p>В реальных Kubernetes-кластерах Node часто разделяют по назначению. Это помогает изолировать системные компоненты, бизнес-приложения, мониторинг и инфраструктурные сервисы друг от друга.</p>
+
+<table>
+<tr>
+<th>Вид Node</th>
+<th>Назначение</th>
+<th>Аналогия</th>
+<th>Что важно поддержке</th>
+</tr>
+<tr>
+<td>Master / Control Plane Node</td>
+<td>Узел управляющего слоя. На нём работают компоненты управления: API Server, Scheduler, Controller Manager, etcd или часть этих компонентов.</td>
+<td>Диспетчерская и кабинет управления объектом.</td>
+<td>Проверять доступность API, состояние управляющих компонентов, etcd и отсутствие перегрузки. Обычно прикладные Pods на такие Node не размещают.</td>
+</tr>
+<tr>
+<td>Worker Node</td>
+<td>Основной рабочий узел, где запускаются прикладные Pods: backend, frontend, batch-задачи, интеграционные сервисы.</td>
+<td>Производственный цех, где выполняется основная работа.</td>
+<td>Смотреть Ready/NotReady, нехватку CPU/RAM, DiskPressure, рестарты kubelet, ошибки image pull и события Pods.</td>
+</tr>
+<tr>
+<td>Infra Node</td>
+<td>Узел для инфраструктурных компонентов, которые обслуживают приложения: Ingress Controller, DNS-дополнения, service mesh, registry-proxy, системные агенты.</td>
+<td>Инженерная зона здания: вентиляция, электрика, маршрутизация.</td>
+<td>Понимать, что сбой infra Node может повлиять сразу на много приложений: внешний вход, маршрутизацию, DNS или сетевые политики.</td>
+</tr>
+<tr>
+<td>Monitoring Node</td>
+<td>Узел для систем наблюдаемости: Prometheus, Grafana, Alertmanager, Loki, агенты сбора логов и метрик.</td>
+<td>Пост охраны и диспетчерская с камерами.</td>
+<td>Если monitoring Node перегружена или недоступна, приложение может работать, но поддержка потеряет метрики, алерты или логи.</td>
+</tr>
+</table>
+
+<div class="callout warn">
+<b>Важно:</b> разделение Node обычно реализуют через labels, taints и tolerations. Поэтому при диагностике Pending Pods поддержке нужно проверять не только ресурсы, но и ограничения размещения.</div>
+
+<pre>kubectl get nodes --show-labels
+kubectl describe node &lt;node-name&gt;
+kubectl get pods -A -o wide</pre>
+
+</div>
+
+<div class="card">
+<h3>Базовая схема</h3>
+
+<pre>Пользователь / CI/CD / kubectl
+          |
+          v
+      API Server  &lt;-- точка входа
+          |
+  +-------+---------+---------+
+  |                 |         |
+etcd          Scheduler  Controller Manager
+  |                 |         |
+  +-----------------+---------+
+                    |
+                    v
+             Worker Nodes
+                    |
+                  kubelet
+                    |
+                   Pods</pre>
+
+</div>
+
+<div class="card">
+<h3>Простой пример</h3>
+<p>Вы описали: «приложение payment-api должно работать в 3 экземплярах». Это желаемое состояние. Если один экземпляр упал, Kubernetes замечает, что вместо 3 осталось 2, и запускает новый Pod.</p>
+<div class="callout success">
+<b>Для поддержки:</b> важно искать не только ошибку в контейнере, но и причину, почему кластер не смог восстановить желаемое состояние: нет ресурсов, Node NotReady, неправильный image, ошибка probes, неверные labels.</div>
+</div>
+</section>
+
+
+<section id="cluster-flow" class="page">
+<h2>1.1 Как кластер принимает решения</h2>
+
+<div class="card">
+<h3>Кто за что отвечает</h3>
+
+<table>
+<tr>
+<th>Компонент</th>
+<th>Что делает</th>
+<th>Аналогия</th>
+</tr>
+<tr>
+<td>API Server</td>
+<td>Принимает все запросы: kubectl, CI/CD, контроллеры.</td>
+<td>Единое окно заявок.</td>
+</tr>
+<tr>
+<td>etcd</td>
+<td>Хранит состояние кластера.</td>
+<td>Журнал распоряжений и фактов.</td>
+</tr>
+<tr>
+<td>Scheduler</td>
+<td>Выбирает Node для нового Pod.</td>
+<td>Диспетчер, который выбирает свободный зал.</td>
+</tr>
+<tr>
+<td>Controller Manager</td>
+<td>Следит, чтобы реальность совпадала с желаемым состоянием.</td>
+<td>Менеджер смены, сверяющий план и факт.</td>
+</tr>
+<tr>
+<td>kubelet</td>
+<td>Агент на Node: запускает и проверяет Pods.</td>
+<td>Бригадир на конкретной площадке.</td>
+</tr>
+<tr>
+<td>Container Runtime</td>
+<td>Запускает контейнеры.</td>
+<td>Станок, который выполняет работу.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Что происходит при создании Deployment</h3>
+<div class="playbook">
+  <div class="step"><div class="step-title">1. Применить YAML</div><div class="step-desc">Инженер отправляет описание желаемого состояния через kubectl apply.</div><pre>kubectl apply -f deployment.yaml</pre></div>
+  <div class="step"><div class="step-title">2. Передать запрос в API Server</div><div class="step-desc">API Server принимает запрос и проверяет его корректность.</div></div>
+  <div class="step"><div class="step-title">3. Сохранить состояние в etcd</div><div class="step-desc">Описание Deployment становится частью состояния кластера.</div></div>
+  <div class="step"><div class="step-title">4. Запустить работу контроллеров</div><div class="step-desc">Controller Manager видит, что нужны Pods, и создаёт ReplicaSet.</div></div>
+  <div class="step"><div class="step-title">5. Выбрать Worker Nodes</div><div class="step-desc">Scheduler подбирает подходящие Node с учётом ресурсов и ограничений размещения.</div></div>
+  <div class="step"><div class="step-title">6. Запустить контейнеры</div><div class="step-desc">kubelet на выбранных Nodes запускает Pods через container runtime.</div></div>
+  <div class="step"><div class="step-title">7. Направить трафик</div><div class="step-desc">Service начинает направлять трафик на готовые Pods, которые прошли readinessProbe.</div></div>
+</div>
+</div>
+
+<div class="card">
+<h3>Аналогия с рестораном</h3>
+<p>Deployment — заявка: «на кухне должны работать 3 повара». Controller Manager проверяет, что поваров действительно 3. Scheduler решает, на какую кухню отправить нового повара. kubelet на конкретной кухне выводит повара на смену. Service — стойка выдачи заказов, которая не меняет адрес, даже если повара внутри сменились.</p>
+</div>
+
+<div class="card">
+<h3>HPA, PDB и Anti-Affinity — что важно поддержке</h3>
+
+<p>Помимо базовых сущностей (Pod, ReplicaSet, Deployment), для стабильной работы приложения в production почти всегда используются дополнительные механизмы: <b>HPA</b>, <b>PDB</b> и <b>anti-affinity</b>.</p>
+
+<table>
+<tr>
+<th>Механизм</th>
+<th>Что делает</th>
+<th>Почему важно</th>
+</tr>
+<tr>
+<td>HPA (Horizontal Pod Autoscaler)</td>
+<td>Автоматически масштабирует количество Pod по метрикам (CPU, память, кастомные метрики).</td>
+<td>Без HPA приложение может «захлебнуться» под нагрузкой или наоборот держать лишние ресурсы.</td>
+</tr>
+<tr>
+<td>PDB (PodDisruptionBudget)</td>
+<td>Ограничивает, сколько Pod можно одновременно остановить (например, при обновлении Node).</td>
+<td>Без PDB можно случайно «уронить» все Pod при обслуживании кластера.</td>
+</tr>
+<tr>
+<td>Anti-affinity</td>
+<td>Разносит Pod по разным Node.</td>
+<td>Если все Pod на одной Node — падение Node = падение сервиса.</td>
+</tr>
+</table>
+
+<div class="callout">
+<b>Аналогия:</b>
+<ul>
+<li>HPA — это автоматическое увеличение количества операторов при наплыве клиентов.</li>
+<li>PDB — правило: «нельзя одновременно уволить всех операторов».</li>
+<li>Anti-affinity — нельзя посадить всех операторов в одну комнату.</li>
+</ul>
+</div>
+
+<div class="callout warn">
+<b>Для поддержки:</b>
+<ul>
+<li>Если приложение падает под нагрузкой — проверьте, есть ли HPA.</li>
+<li>Если во время работ кластер «роняет» сервис — проверьте PDB.</li>
+<li>Если outage произошёл из-за падения Node — проверьте anti-affinity.</li>
+</ul>
+</div>
+
+</div>
+
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Какой компонент выбирает Node, на которой будет запущен новый Pod?</p>
+<button onclick="q('qbasic1','a','b','API Server принимает запросы, но не выбирает Node.')">API Server</button>
+<button onclick="q('qbasic1','b','b')">Scheduler</button>
+<button onclick="q('qbasic1','c','b','etcd хранит состояние, но не планирует запуск.')">etcd</button>
+<div id="qbasic1" class="res">
+</div>
+</div>
+</section>
+
+
+<section id="support-view" class="page">
+<h2>1.2 Что важно прикладной поддержке</h2>
+
+<div class="card">
+<h3>Как думать при инциденте</h3>
+<p>В Kubernetes проблема редко ограничивается одной точкой. Нужно пройти цепочку: приложение → Pod → Deployment → Service → Node → конфигурация → сеть.</p>
+<ol>
+<li>
+<b>Есть ли Pod?</b> <code>kubectl get pods</code>
+</li>
+<li>
+<b>Готов ли Pod?</b> статус Ready, рестарты, события.</li>
+<li>
+<b>Есть ли endpoints у Service?</b> если endpoints пустые, трафик некуда отправлять.</li>
+<li>
+<b>Совпадают ли labels и selectors?</b> частая причина «Service есть, но не работает».</li>
+<li>
+<b>Хватает ли ресурсов?</b> Pending часто связан с CPU/RAM, quota или ограничениями Node.</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>Типовые симптомы</h3>
+
+<table>
+<tr>
+<th>Симптом</th>
+<th>Возможная причина</th>
+<th>Первая проверка</th>
+</tr>
+<tr>
+<td>Pod в CrashLoopBackOff</td>
+<td>Приложение стартует и падает.</td>
+<td>
+<code>kubectl logs pod-name --previous</code>
+</td>
+</tr>
+<tr>
+<td>Pod в Pending</td>
+<td>Не хватает ресурсов или нет подходящей Node.</td>
+<td>
+<code>kubectl describe pod pod-name</code>
+</td>
+</tr>
+<tr>
+<td>Service не отвечает</td>
+<td>Нет endpoints или неверный targetPort.</td>
+<td>
+<code>kubectl get endpoints service-name</code>
+</td>
+</tr>
+<tr>
+<td>После деплоя 502/503</td>
+<td>Pods не проходят readinessProbe.</td>
+<td>
+<code>kubectl describe pod pod-name</code>
+</td>
+</tr>
+<tr>
+<td>Новая настройка не применялась</td>
+<td>ConfigMap изменён, но Pod не перезапущен.</td>
+<td>
+<code>kubectl rollout restart deployment/name</code>
+</td>
+</tr>
+</table>
+
+</div>
+<div class="card callout warn">
+<b>Операционное правило:</b> «ресурс создан» не значит «приложение работает». Проверяйте состояние, события, endpoints, readiness и фактический ответ сервиса.</div>
+</section>
+
+
+<section id="entities" class="page">
+<h2>2. Сущности Kubernetes</h2>
+
+<div class="card">
+<h3>Зачем нужны сущности</h3>
+<p>Kubernetes управляется декларативно: вы описываете объекты, а кластер выполняет работу. Каждый объект отвечает за свою часть: запуск, масштабирование, сеть, конфигурацию, безопасность или хранение.</p>
+<div class="grid">
+<div class="tile">
+<span class="badge">Запуск</span>
+<h3>Pod / Deployment</h3>
+<p>Контейнеры, реплики, обновления и откаты.</p>
+</div>
+<div class="tile">
+<span class="badge">Доступ</span>
+<h3>Service / Ingress</h3>
+<p>Стабильный адрес внутри и снаружи кластера.</p>
+</div>
+<div class="tile">
+<span class="badge">Настройки</span>
+<h3>ConfigMap / Secret</h3>
+<p>Параметры приложения без пересборки образа.</p>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>Карта основных сущностей</h3>
+
+<pre>Namespace
+  |
+  +-- Deployment
+  |      |
+  |      +-- ReplicaSet
+  |              |
+  |              +-- Pod(s)
+  |                    |
+  |                    +-- Container(s)
+  |
+  +-- Service --selector--&gt; Pod labels
+  |
+  +-- ConfigMap / Secret --&gt; env, files, volumes
+  |
+  +-- Ingress --&gt; Service --&gt; Pod</pre>
+
+</div>
+</section>
+
+
+<section id="workload" class="page">
+<h2>2.1 Pod, ReplicaSet, Deployment</h2>
+
+<div class="card">
+<h3>Pod</h3>
+<p>
+<b>Pod</b> — минимальная единица запуска в Kubernetes. Обычно в Pod находится один основной контейнер приложения. Иногда рядом есть sidecar-контейнер: например, агент логирования или прокси.</p>
+<div class="callout">
+<b>Аналогия:</b> Pod — это квартира. Контейнеры внутри Pod живут по одному адресу, имеют общую сеть и могут общаться через <code>localhost</code>.</div>
+
+<pre>kubectl get pods
+kubectl describe pod payment-api-7c9d
+kubectl logs payment-api-7c9d</pre>
+
+</div>
+
+<div class="card">
+<h3>ReplicaSet</h3>
+<p>
+<b>ReplicaSet</b> следит, чтобы существовало нужное количество одинаковых Pods. Обычно вы не создаёте ReplicaSet руками: его создаёт Deployment.</p>
+<div class="callout">
+<b>Аналогия:</b> норматив смены: «на линии должно быть 3 оператора». Если один ушёл, нужен новый.</div>
+</div>
+
+<div class="card">
+<h3>Deployment</h3>
+<p>
+<b>Deployment</b> управляет жизненным циклом приложения: создаёт ReplicaSet, поддерживает количество реплик, выполняет rolling update и позволяет откатиться.</p>
+
+<pre>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payment-api
+  template:
+    metadata:
+      labels:
+        app: payment-api
+    spec:
+      containers:
+      - name: payment-api
+        image: registry.local/payment-api:1.2.0
+        ports:
+        - containerPort: 8080</pre>
+
+<div class="callout success">
+<b>Связь:</b> Deployment выбирает свои Pods через selector. Labels в template должны совпадать с selector, иначе управление репликами нарушится.</div>
+</div>
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Что делает Deployment?</p>
+<button onclick="q('qwork1','a','c','Стабильный адрес даёт Service.')">Даёт постоянный IP для Pods</button>
+<button onclick="q('qwork1','b','c','Это делает ConfigMap или Secret.')">Хранит параметры приложения</button>
+<button onclick="q('qwork1','c','c')">Управляет репликами, обновлениями и откатами</button>
+<div id="qwork1" class="res">
+</div>
+</div>
+</section>
+
+
+<section id="network" class="page">
+<h2>2.2 Service, Ingress, DNS</h2>
+
+<div class="card">
+<h3>Service</h3>
+<p>
+<b>Service</b> даёт стабильный адрес для группы Pods. Pods могут пересоздаваться и получать новые IP, но имя Service остаётся тем же.</p>
+<div class="callout">
+<b>Аналогия:</b> Service — единый номер контакт-центра. Сотрудники меняются, но клиент звонит на один и тот же номер.</div>
+
+<pre>apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: payment-api
+  ports:
+  - port: 80
+    targetPort: 8080</pre>
+
+<p>Критичная связь: <code>selector</code> Service должен совпадать с <code>labels</code> Pod. Если не совпадает, у Service будут пустые endpoints.</p>
+
+<pre>kubectl get service payment-api-svc
+kubectl get endpoints payment-api-svc</pre>
+
+</div>
+
+<div class="card">
+<h3>Типы Service</h3>
+
+<table>
+<tr>
+<th>Тип</th>
+<th>Когда используется</th>
+<th>Пример</th>
+</tr>
+<tr>
+<td>ClusterIP</td>
+<td>Доступ только внутри кластера.</td>
+<td>backend-service для frontend.</td>
+</tr>
+<tr>
+<td>NodePort</td>
+<td>Открывает порт на каждой Node.</td>
+<td>Тестовый доступ без балансировщика.</td>
+</tr>
+<tr>
+<td>LoadBalancer</td>
+<td>Внешний балансировщик от облака или инфраструктуры.</td>
+<td>Входной публичный API.</td>
+</tr>
+<tr>
+<td>ExternalName</td>
+<td>DNS-алиас на внешний адрес.</td>
+<td>Ссылка на внешний managed database endpoint.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Ingress</h3>
+<p>
+<b>Ingress</b> управляет HTTP/HTTPS-входом в кластер: маршруты по домену и пути, TLS, правила доступа. Сам Ingress обычно работает вместе с Ingress Controller.</p>
+
+<pre>internet
+   |
+   v
+Ingress Controller
+   |
+   v
+Ingress rule: payments.example.ru/api -&gt; payment-api-svc:80
+   |
+   v
+Service -&gt; Pods</pre>
+
+</div>
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Service создан, но <code>kubectl get endpoints</code> показывает пустой список. Что проверить первым?</p>
+<button onclick="q('qnet1','a','b','Логи важны, но пустые endpoints чаще про selector/labels.')">Логи приложения</button>
+<button onclick="q('qnet1','b','b')">Совпадение selector Service и labels Pod</button>
+<button onclick="q('qnet1','c','b','etcd редко является первой прикладной причиной такой ошибки.')">Состояние etcd</button>
+<div id="qnet1" class="res">
+</div>
+</div>
+</section>
+
+
+<section id="config" class="page">
+<h2>2.3 ConfigMap, Secret, Volume</h2>
+
+<div class="card">
+<h3>ConfigMap</h3>
+<p>
+<b>ConfigMap</b> хранит неконфиденциальные настройки: адреса сервисов, режимы работы, feature flags, имена очередей.</p>
+<div class="callout">
+<b>Аналогия:</b> ConfigMap — инструкция на стене: её можно заменить без пересборки приложения, но сотрудник должен заново прочитать инструкцию.</div>
+
+<pre>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-config
+data:
+  LOG_LEVEL: "info"
+  CURRENCY_SERVICE_URL: "http://currency-svc"</pre>
+
+<div class="callout warn">Если ConfigMap подключён как переменные окружения, работающий Pod обычно не увидит новые значения без перезапуска.</div>
+</div>
+
+<div class="card">
+<h3>Secret</h3>
+<p>
+<b>Secret</b> используется для чувствительных данных: паролей, токенов, ключей. Важно: base64 в Secret — это не полноценное шифрование для человека, а формат хранения значения.</p>
+
+<pre>kubectl get secret payment-secret
+kubectl describe secret payment-secret</pre>
+
+</div>
+
+<div class="card">
+<h3>Volume и PersistentVolumeClaim</h3>
+<p>
+<b>Volume</b> подключает данные к Pod. Для временных данных можно использовать ephemeral volume, для постоянных — PersistentVolumeClaim.</p>
+<div class="callout">
+<b>Аналогия:</b> Pod — временная машина. Volume — подключённый диск. Если машина сломалась, диск можно подключить к другой машине.</div>
+
+<table>
+<tr>
+<th>Сущность</th>
+<th>Задача</th>
+<th>Пример</th>
+</tr>
+<tr>
+<td>Volume</td>
+<td>Дать контейнеру файловое пространство.</td>
+<td>Каталог для временных файлов.</td>
+</tr>
+<tr>
+<td>PersistentVolume</td>
+<td>Реальное хранилище в кластере.</td>
+<td>Сетевой диск.</td>
+</tr>
+<tr>
+<td>PersistentVolumeClaim</td>
+<td>Запрос приложения на хранилище.</td>
+<td>«Нужно 10Gi для данных».</td>
+</tr>
+</table>
+
+</div>
+</section>
+
+
+<section id="ops" class="page">
+<h2>2.4 Namespace, labels, probes</h2>
+
+<div class="card">
+<h3>Namespace</h3>
+<p>
+<b>Namespace</b> разделяет ресурсы внутри одного кластера. Часто используются пространства по средам или командам: <code>dev</code>, <code>test</code>, <code>prod-payments</code>.</p>
+<div class="callout">
+<b>Аналогия:</b> Namespace — отдельный кабинет в офисе. Люди работают в одном здании, но документы, права и ресурсы разделены.</div>
+
+<pre>kubectl get pods -n prod-payments
+kubectl config set-context --current --namespace=prod-payments</pre>
+
+</div>
+
+<div class="card">
+<h3>Labels и selectors</h3>
+<p>
+<b>Labels</b> — метки объектов. <b>Selectors</b> — правила выбора объектов по меткам. На них держатся связи Deployment → Pod и Service → Pod.</p>
+
+<pre>metadata:
+  labels:
+    app: payment-api
+    tier: backend
+    env: prod</pre>
+
+<div class="callout success">Для поддержки это одна из первых проверок: если метки не совпали, объект существует, но связь не работает.</div>
+</div>
+
+<div class="card">
+<h3>Readiness и liveness probes</h3>
+
+<table>
+<tr>
+<th>Probe</th>
+<th>Что проверяет</th>
+<th>Что происходит при проблеме</th>
+</tr>
+<tr>
+<td>readinessProbe</td>
+<td>Готов ли Pod принимать трафик.</td>
+<td>Pod убирается из endpoints Service.</td>
+</tr>
+<tr>
+<td>livenessProbe</td>
+<td>Жив ли процесс внутри контейнера.</td>
+<td>Контейнер перезапускается.</td>
+</tr>
+<tr>
+<td>startupProbe</td>
+<td>Успело ли приложение стартовать.</td>
+<td>Защищает медленный старт от преждевременного рестарта.</td>
+</tr>
+</table>
+
+
+<pre>readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5</pre>
+
+</div>
+</section>
+
+
+<section id="links" class="page">
+<h2>2.5 Связи сущностей Kubernetes</h2>
+
+<div class="card">
+<h3>Главная цепочка приложения</h3>
+
+<pre>Ingress
+  |
+  v
+Service payment-api-svc
+  selector: app=payment-api
+  |
+  v
+Pods with label app=payment-api
+  ^
+  |
+Deployment payment-api
+  replicas: 3
+  template labels: app=payment-api
+  |
+  +-- ConfigMap: payment-config
+  +-- Secret: payment-secret
+  +-- Volume/PVC: payment-data</pre>
+
+</div>
+
+<div class="card">
+<h3>Как читать YAML прикладной поддержки</h3>
+<ol>
+<li>Найдите <code>kind</code>: это тип сущности.</li>
+<li>Найдите <code>metadata.name</code> и <code>namespace</code>: где объект живёт.</li>
+<li>Проверьте <code>labels</code> и <code>selector</code>: как объект связан с другими.</li>
+<li>Для Deployment проверьте <code>replicas</code>, <code>image</code>, <code>env</code>, <code>resources</code>, probes.</li>
+<li>Для Service проверьте <code>port</code>, <code>targetPort</code>, <code>type</code>, endpoints.</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>Пример диагностики: сервис не открывается</h3>
+<div class="playbook">
+  <div class="playbook-intro"><b>Симптом:</b> payment-api недоступен</div>
+  <div class="step"><div class="step-title">1. Проверить Pods</div><div class="step-desc">Смотрим Running, Ready и количество рестартов.</div><pre>kubectl get pods -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">2. Проверить события Pod</div><div class="step-desc">Ищем ошибки probes, image pull, ресурсов и планирования.</div><pre>kubectl describe pod &lt;pod&gt; -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">3. Проверить Service и endpoints</div><div class="step-desc">Понимаем, есть ли готовые Pods, на которые можно отправлять трафик.</div><pre>kubectl get svc,endpoints -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">4. Сверить labels и selector</div><div class="step-desc">Проверяем, выбирает ли Service нужные Pods.</div><pre>kubectl get pods --show-labels -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">5. Проверить логи приложения</div><div class="step-desc">Ищем прикладную ошибку, stack trace или проблему подключения.</div><pre>kubectl logs deploy/payment-api -n prod-payments</pre></div>
+</div>
+</div>
+<div class="card danger callout">
+<b>Частая ошибка:</b> после изменения имени приложения в labels забыли обновить selector Service. Deployment работает, Pods Ready, но Service не направляет трафик никуда.</div>
+</section>
+
+
+<section id="istio" class="page">
+<h2>3. Istio для прикладной поддержки</h2>
+
+<div class="card">
+<h3>Что такое Istio</h3>
+<p>
+<b>Istio</b> — это service mesh, то есть слой управления сетевым взаимодействием между сервисами. Он помогает контролировать, как сервисы общаются друг с другом: куда идёт трафик, по каким правилам, с какой безопасностью и с какой наблюдаемостью.</p>
+<p>Для прикладного администратора поддержки Istio важен потому, что часть проблем доступности может быть не в Pod, Deployment или Service, а в правилах маршрутизации, политике безопасности, mTLS, Gateway или VirtualService.</p>
+<div class="callout">
+<b>Простая аналогия:</b> Kubernetes Service похож на внутренний номер отдела, а Istio — на умную телефонную станцию. Она может направить 90% звонков в старую версию сервиса, 10% в новую, запретить звонки без пропуска, записать статистику и показать, где именно произошёл сбой.</div>
+</div>
+
+<div class="card">
+<h3>Зачем нужен Istio</h3>
+
+<table>
+<tr>
+<th>Задача</th>
+<th>Что даёт Istio</th>
+<th>Пример для поддержки</th>
+</tr>
+<tr>
+<td>Управление трафиком</td>
+<td>Маршрутизация по host, path, headers, версиям сервиса и весам.</td>
+<td>10% пользователей отправили на новую версию payment-api, 90% оставили на старой.</td>
+</tr>
+<tr>
+<td>Безопасность</td>
+<td>mTLS, политики доступа, проверка личности сервиса.</td>
+<td>Сервис catalog не может обратиться к payment-api без разрешения.</td>
+</tr>
+<tr>
+<td>Наблюдаемость</td>
+<td>Метрики, трассировка, коды ответов, задержки, процент ошибок.</td>
+<td>Видно, что 503 появляется между frontend и backend, а не на внешнем балансировщике.</td>
+</tr>
+<tr>
+<td>Отказоустойчивость</td>
+<td>Timeout, retry, circuit breaking.</td>
+<td>Если внешний сервис отвечает медленно, Istio ограничивает ожидание и повторяет запрос по правилу.</td>
+</tr>
+<tr>
+<td>Безопасные релизы</td>
+<td>Canary, blue-green, traffic shifting.</td>
+<td>Новая версия проверяется на малом проценте трафика без полного переключения.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Как Istio работает технически</h3>
+<p>Обычно рядом с приложением в Pod запускается дополнительный контейнер-прокси — <b>sidecar</b>. Чаще всего это Envoy. Приложение продолжает работать как раньше, но сетевой трафик проходит через sidecar.</p>
+
+<pre>Клиентский сервис
+      |
+      v
+Envoy sidecar  ---- правила Istio ----&gt;  Envoy sidecar
+      |                                      |
+      v                                      v
+Приложение A                           Приложение B</pre>
+
+<p>Благодаря этому Istio может управлять трафиком без изменения кода приложения.</p>
+<div class="callout success">
+<b>Для поддержки:</b> если приложение «живое», Pods Ready, Service имеет endpoints, но запросы всё равно падают, нужно проверить Istio-правила: Gateway, VirtualService, DestinationRule, политики авторизации и mTLS.</div>
+</div>
+
+<div class="card">
+<h3>Что меняется в диагностике</h3>
+
+<table>
+<tr>
+<th>Обычная проверка Kubernetes</th>
+<th>Дополнительная проверка с Istio</th>
+</tr>
+<tr>
+<td>
+<code>kubectl get pods</code>
+</td>
+<td>Проверить, есть ли sidecar-контейнер и готов ли он.</td>
+</tr>
+<tr>
+<td>
+<code>kubectl get svc,endpoints</code>
+</td>
+<td>Проверить, куда VirtualService направляет трафик.</td>
+</tr>
+<tr>
+<td>
+<code>kubectl logs app-container</code>
+</td>
+<td>Смотреть также логи proxy/istio-proxy.</td>
+</tr>
+<tr>
+<td>Проверить Ingress</td>
+<td>Проверить Gateway и host/path в VirtualService.</td>
+</tr>
+<tr>
+<td>Проверить ошибку приложения</td>
+<td>Проверить 401/403 из AuthorizationPolicy или mTLS.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Типовые симптомы Istio-проблем</h3>
+
+<table>
+<tr>
+<th>Симптом</th>
+<th>Возможная причина</th>
+<th>Что смотреть</th>
+</tr>
+<tr>
+<td>404 при обращении по домену</td>
+<td>Host или path не совпал с VirtualService.</td>
+<td>
+<code>kubectl get virtualservice -A</code>
+</td>
+</tr>
+<tr>
+<td>503 UF / no healthy upstream</td>
+<td>Нет доступных endpoints, неверный subset или DestinationRule.</td>
+<td>Service, endpoints, labels, subsets.</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Запрос запрещён политикой авторизации.</td>
+<td>AuthorizationPolicy, service account.</td>
+</tr>
+<tr>
+<td>Запросы идут не в ту версию</td>
+<td>Неверные веса или subsets в VirtualService.</td>
+<td>VirtualService и DestinationRule.</td>
+</tr>
+<tr>
+<td>Приложение работает напрямую, но не через домен</td>
+<td>Ошибка Gateway или VirtualService.</td>
+<td>Gateway host, TLS, selector ingress gateway.</td>
+</tr>
+</table>
+
+</div>
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Для чего Istio чаще всего нужен прикладной поддержке?</p>
+<button onclick="q('qistio1','a','c','Запуском Pods управляет Kubernetes через Deployment и kubelet.')">Чтобы запускать Pods вместо Kubernetes</button>
+<button onclick="q('qistio1','b','c','Хранение данных не является основной задачей Istio.')">Чтобы хранить данные приложения</button>
+<button onclick="q('qistio1','c','c')">Чтобы управлять трафиком, безопасностью и наблюдаемостью между сервисами</button>
+<div id="qistio1" class="res">
+</div>
+</div>
+</section>
+
+
+<section id="istio-entities" class="page">
+<h2>3.1 Сущности Istio: Gateway, VirtualService, Service</h2>
+
+<div class="card">
+<h3>Главная цепочка входящего трафика</h3>
+<p>В Kubernetes без Istio внешний трафик часто идёт через Ingress. В Istio для HTTP/HTTPS-входа обычно используются <b>Gateway</b> и <b>VirtualService</b>, а конечной точкой остаётся обычный Kubernetes <b>Service</b>.</p>
+
+<pre>Пользователь / внешний клиент
+          |
+          v
+Istio Ingress Gateway
+          |
+          v
+Gateway: принимает host и port
+          |
+          v
+VirtualService: выбирает маршрут по host/path/header
+          |
+          v
+Kubernetes Service
+          |
+          v
+Pods приложения</pre>
+
+</div>
+
+<div class="card">
+<h3>Gateway</h3>
+<p>
+<b>Gateway</b> описывает, какой входящий трафик Istio должен принять: порт, протокол, host и настройки TLS. Gateway не решает, в какой Service отправлять запрос. Он только открывает «дверь» в mesh.</p>
+<div class="callout">
+<b>Аналогия:</b> Gateway — это проходная здания. Она знает, какие двери открыты, по каким адресам можно прийти и нужен ли пропуск TLS.</div>
+
+<pre>apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: payment-gateway
+  namespace: prod-payments
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - payments.example.ru</pre>
+
+<p>
+<b>Что проверяет поддержка:</b> совпадает ли host, открыт ли нужный port, правильно ли выбран ingress gateway через selector, нет ли ошибки TLS-сертификата.</p>
+</div>
+
+<div class="card">
+<h3>VirtualService</h3>
+<p>
+<b>VirtualService</b> описывает правила маршрутизации: какой host обрабатывать, какой path или header учитывать и в какой Kubernetes Service отправлять запрос.</p>
+<div class="callout">
+<b>Аналогия:</b> VirtualService — это диспетчер на проходной. Он смотрит, куда именно идёт человек: в отдел платежей, кабинет возвратов или тестовую комнату новой версии.</div>
+
+<pre>apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: payment-vs
+  namespace: prod-payments
+spec:
+  hosts:
+  - payments.example.ru
+  gateways:
+  - payment-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: payment-api-svc
+        port:
+          number: 80</pre>
+
+<p>
+<b>Что проверяет поддержка:</b> совпадает ли host с Gateway, указан ли правильный gateway, верный ли path, правильное ли имя Service в destination.host, совпадает ли port.</p>
+</div>
+
+<div class="card">
+<h3>Service в Istio-сценарии</h3>
+<p>
+<b>Kubernetes Service</b> остаётся обязательной точкой назначения. Istio не заменяет Service, а использует его как стабильный адрес группы Pods.</p>
+
+<pre>apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api-svc
+  namespace: prod-payments
+spec:
+  selector:
+    app: payment-api
+  ports:
+  - port: 80
+    targetPort: 8080</pre>
+
+<div class="callout success">
+<b>Связь:</b> VirtualService отправляет трафик в Service, Service выбирает Pods по selector, Pods должны иметь подходящие labels и проходить readinessProbe.</div>
+</div>
+
+<div class="card">
+<h3>Как связаны Gateway, VirtualService и Service</h3>
+
+<table>
+<tr>
+<th>Сущность</th>
+<th>Главный вопрос</th>
+<th>Типичная ошибка</th>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>Принимаем ли мы внешний трафик на нужный host/port?</td>
+<td>Host в запросе не указан в Gateway.</td>
+</tr>
+<tr>
+<td>VirtualService</td>
+<td>Куда направить запрос после входа?</td>
+<td>Path не совпал, указан неверный gateway или Service.</td>
+</tr>
+<tr>
+<td>Service</td>
+<td>Есть ли стабильная цель внутри Kubernetes?</td>
+<td>Пустые endpoints из-за несовпадения selector и labels.</td>
+</tr>
+<tr>
+<td>Pod</td>
+<td>Есть ли живые экземпляры приложения?</td>
+<td>Pods не Ready, CrashLoopBackOff, ошибка readinessProbe.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Диагностика входящего запроса через Istio</h3>
+<div class="playbook">
+  <div class="playbook-intro"><b>Симптом:</b> https://payments.example.ru/api не открывается</div>
+  <div class="step"><div class="step-title">1. Проверить Gateway</div><div class="step-desc">Проверяем, принимает ли Istio внешний host и нужный порт.</div><pre>kubectl get gateway -n prod-payments
+kubectl describe gateway payment-gateway -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">2. Проверить VirtualService</div><div class="step-desc">Проверяем host, gateway, path и destination Service.</div><pre>kubectl get virtualservice -n prod-payments
+kubectl describe virtualservice payment-vs -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">3. Проверить Kubernetes Service и endpoints</div><div class="step-desc">Убеждаемся, что VirtualService ведёт в Service, у которого есть endpoints.</div><pre>kubectl get svc,endpoints payment-api-svc -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">4. Проверить Pods</div><div class="step-desc">Проверяем готовность Pods и события приложения.</div><pre>kubectl get pods -n prod-payments -l app=payment-api
+kubectl describe pod &lt;pod&gt; -n prod-payments</pre></div>
+  <div class="step"><div class="step-title">5. Проверить логи приложения и sidecar</div><div class="step-desc">Сравниваем прикладные ошибки и сообщения proxy.</div><pre>kubectl logs &lt;pod&gt; -c payment-api -n prod-payments
+kubectl logs &lt;pod&gt; -c istio-proxy -n prod-payments</pre></div>
+</div>
+</div>
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Какая сущность Istio описывает правила маршрутизации по host/path и указывает destination Service?</p>
+<button onclick="q('qistio2','a','b','Gateway принимает входящий трафик, но не является основной таблицей маршрутов.')">Gateway</button>
+<button onclick="q('qistio2','b','b')">VirtualService</button>
+<button onclick="q('qistio2','c','b','Kubernetes Service выбирает Pods, но не описывает Istio-маршруты по host/path.')">Service</button>
+<div id="qistio2" class="res">
+</div>
+</div>
+</section>
+
+
+<section id="quiz" class="page">
+<h2>Проверочный квиз</h2>
+<div class="card quiz">
+<h3>Вопросы</h3>
+<div id="quizProgress" class="quiz-progress">Прогресс: 0/10 правильных ответов</div>
+<p>1. Что хранит etcd?</p>
+<button onclick="q('q1','a','b','Контейнеры запускаются на Worker Nodes через runtime.')">Контейнеры приложения</button>
+<button onclick="q('q1','b','b')">Состояние и данные кластера</button>
+<button onclick="q('q1','c','b','Логи обычно собираются отдельной системой.')">Только логи Pods</button>
+<div id="q1" class="res"></div>
+<div id="q1-explain" class="answer-explain"><b>Разбор:</b> etcd хранит всё состояние кластера: какие есть объекты, сколько реплик, где они запущены. Это "источник правды" Kubernetes.</div>
+<p>2. Что такое Pod?</p>
+<button onclick="q('q2','a','c','Это ближе к Node.')">Физический сервер</button>
+<button onclick="q('q2','b','c','Это ближе к RBAC.')">Правило доступа</button>
+<button onclick="q('q2','c','c')">Минимальная единица запуска контейнеров</button>
+<div id="q2" class="res"></div>
+<div id="q2-explain" class="answer-explain"><b>Разбор:</b> Pod — минимальная единица запуска. Именно внутри Pod запускаются контейнеры приложения, и все остальные сущности работают вокруг него.</div>
+<p>3. Что даёт Service?</p>
+<button onclick="q('q3','a','a')">Стабильный адрес для группы Pods</button>
+<button onclick="q('q3','b','a','Обновлениями управляет Deployment.')">Rolling update</button>
+<button onclick="q('q3','c','a','Секреты хранит Secret.')">Хранение паролей</button>
+<div id="q3" class="res"></div>
+<div id="q3-explain" class="answer-explain"><b>Разбор:</b> Service даёт стабильный адрес. Даже если Pods пересоздаются и меняют IP, доступ к приложению остаётся через одно имя.</div>
+<p>4. Почему endpoints Service могут быть пустыми?</p>
+<button onclick="q('q4','a','b','Image влияет на запуск Pod, но пустые endpoints чаще из-за selector/labels или readiness.')">Слишком длинное имя image</button>
+<button onclick="q('q4','b','b')">Selector Service не совпадает с labels готовых Pods</button>
+<button onclick="q('q4','c','b','Namespace сам по себе не создаёт endpoints.')">Namespace называется prod</button>
+<div id="q4" class="res"></div>
+<div id="q4-explain" class="answer-explain"><b>Разбор:</b> Самая частая причина — selector Service не совпадает с labels Pod или Pod не прошёл readinessProbe, поэтому не попал в endpoints.</div>
+<p>5. Что делает readinessProbe?</p>
+<button onclick="q('q5','a','b','Liveness отвечает за перезапуск при неживом процессе.')">Всегда перезапускает контейнер</button>
+<button onclick="q('q5','b','b')">Определяет, можно ли отправлять трафик на Pod</button>
+<button onclick="q('q5','c','b','Scheduler выбирает Node.')">Выбирает Node для Pod</button>
+<div id="q5" class="res"></div>
+<div id="q5-explain" class="answer-explain"><b>Разбор:</b> readinessProbe определяет, можно ли направлять трафик на Pod. Если probe не проходит — Pod исключается из Service, но не перезапускается.</div>
+
+<p>6. Что делает sidecar (Envoy) в Istio?</p>
+<button onclick="q('q6','a','b','Sidecar не запускает приложение — это делает kubelet.')">Запускает контейнеры приложения</button>
+<button onclick="q('q6','b','b')">Перехватывает и управляет сетевым трафиком</button>
+<button onclick="q('q6','c','b','Состояние хранит etcd.')">Хранит состояние кластера</button>
+<div id="q6" class="res"></div>
+<div id="q6-explain" class="answer-explain"><b>Разбор:</b> Envoy sidecar перехватывает весь сетевой трафик и применяет правила Istio (routing, retry, security).</div>
+
+<p>7. Почему Service может работать, а запрос через Istio — нет?</p>
+<button onclick="q('q7','a','b','Проблема не всегда в Kubernetes.')">Потому что Kubernetes сломан</button>
+<button onclick="q('q7','b','b')">Проблема в VirtualService или Gateway</button>
+<button onclick="q('q7','c','b','Endpoints — это другая проблема.')">Потому что нет endpoints</button>
+<div id="q7" class="res"></div>
+<div id="q7-explain" class="answer-explain"><b>Разбор:</b> Istio добавляет слой маршрутизации — ошибка может быть именно в нём.</div>
+
+<p>8. Что означает ошибка 503 (no healthy upstream) в Istio?</p>
+<button onclick="q('q8','a','b','403 — это доступ.')">Нет прав доступа</button>
+<button onclick="q('q8','b','b')">Нет доступных Pod или ошибка маршрутизации</button>
+<button onclick="q('q8','c','b','DNS не основная причина.')">Ошибка DNS</button>
+<div id="q8" class="res"></div>
+<div id="q8-explain" class="answer-explain"><b>Разбор:</b> 503 = нет healthy upstream (обычно endpoints пустые или ошибка routing).</div>
+
+<p>9. Какая сущность принимает внешний трафик?</p>
+<button onclick="q('q9','a','b','Service не принимает внешний трафик напрямую.')">Service</button>
+<button onclick="q('q9','b','b')">Gateway</button>
+<button onclick="q('q9','c','b','VirtualService маршрутизирует.')">VirtualService</button>
+<div id="q9" class="res"></div>
+<div id="q9-explain" class="answer-explain"><b>Разбор:</b> Gateway — точка входа в Istio mesh.</div>
+
+<p>10. Зачем нужен VirtualService?</p>
+<button onclick="q('q10','a','c','Это функция Gateway.')">Открывать порт</button>
+<button onclick="q('q10','b','c','Service не умеет routing.')">Хранить IP</button>
+<button onclick="q('q10','c','c')">Маршрутизировать трафик</button>
+<div id="q10" class="res"></div>
+<div id="q10-explain" class="answer-explain"><b>Разбор:</b> VirtualService управляет маршрутизацией: path, host, веса.</div>
+
+</div>
+</section>
+
+
+<section id="cheatsheet" class="page">
+<h2>Шпаргалка поддержки</h2>
+
+<div class="card">
+<h3>Команды первого уровня</h3>
+
+<pre>kubectl get nodes
+kubectl get namespace
+kubectl get pods -n &lt;namespace&gt;
+kubectl get deploy,rs,pod,svc,endpoints -n &lt;namespace&gt;
+kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;
+kubectl logs &lt;pod-name&gt; -n &lt;namespace&gt;
+kubectl logs deploy/&lt;deployment-name&gt; -n &lt;namespace&gt;
+kubectl rollout status deploy/&lt;deployment-name&gt; -n &lt;namespace&gt;
+kubectl rollout history deploy/&lt;deployment-name&gt; -n &lt;namespace&gt;</pre>
+
+</div>
+
+<div class="card">
+<h3>Что проверять при обращении</h3>
+
+<table>
+<tr>
+<th>Вопрос</th>
+<th>Команда</th>
+<th>Что ищем</th>
+</tr>
+<tr>
+<td>Приложение запущено?</td>
+<td>
+<code>kubectl get pods</code>
+</td>
+<td>Running, Ready, Restarts.</td>
+</tr>
+<tr>
+<td>Почему Pod не готов?</td>
+<td>
+<code>kubectl describe pod</code>
+</td>
+<td>Events, probes, ресурсы, image pull.</td>
+</tr>
+<tr>
+<td>Есть ли трафик к Pod?</td>
+<td>
+<code>kubectl get endpoints</code>
+</td>
+<td>IP готовых Pods.</td>
+</tr>
+<tr>
+<td>Service выбирает нужные Pods?</td>
+<td>
+<code>kubectl get pods --show-labels</code>
+</td>
+<td>Совпадение labels и selector.</td>
+</tr>
+<tr>
+<td>Что пишет приложение?</td>
+<td>
+<code>kubectl logs</code>
+</td>
+<td>Stack trace, ошибки конфигурации, подключения.</td>
+</tr>
+</table>
+
+</div>
+
+<div class="card callout">
+<b>Итоговое правило:</b> в Kubernetes нужно мыслить связями. Pod может быть жив, но Service не видит его. Deployment может быть создан, но Pods не стартуют. ConfigMap может быть изменён, но приложение не перечитало настройки.</div>
+</section>
+
+<section id="practice" class="page">
+<h2>Диагностика и самопроверка</h2>
+
+<div class="card">
+<h3>Проверь свой кластер</h3>
+
+<ol>
+<li><b>Открой Deployment и проверь:</b> количество реплик, настроены ли HPA, PDB и probes (readiness/liveness).</li>
+<li><b>Проверь ресурсы:</b> заданы ли в Deployment requests и limits по CPU/RAM.</li>
+<li><b>Проверь устойчивость:</b> что произойдёт, если одна Node упадёт? Останется ли приложение доступным (реплики, распределение по Node, anti-affinity)?</li>
+</ol>
+
+<div class="callout warn">
+<b>Важно:</b> эти проверки помогают найти проблемы до инцидента, а не после него.
+</div>
+
+</div>
+
+<div class="card">
+<h3>Вопросы для самопроверки</h3>
+
+<ol>
+<li>
+<b>Объясните, что произойдёт с трафиком, если Deployment убьёт старый Pod и поднимет новый с новым IP — и почему клиент этого не заметит.</b>
+<p class="small">Подумайте про роль Service и endpoints.</p>
+</li>
+
+<li>
+<b>Инженер говорит: «Обновил пароль от базы, нужно пересобрать образ». Что не так с этим утверждением и как выглядит правильный процесс?</b>
+<p class="small">Вспомните про Secret и разделение кода и конфигурации.</p>
+</li>
+
+<li>
+<b>Pod в статусе Running, но сервис отдаёт 503. Какие 3 проверки вы сделаете в первую очередь?</b>
+<p class="small">Подсказка: readiness, endpoints, labels.</p>
+</li>
+
+<li>
+<b>После деплоя новая версия приложения не принимает трафик. Какие причины возможны на уровне Kubernetes?</b>
+<p class="small">Подумайте про readinessProbe, Service selector и rollout.</p>
+</li>
+
+<li>
+<b>Приложение доступно внутри кластера, но не открывается по домену снаружи. Где искать проблему?</b>
+<p class="small">Подсказка: Ingress / Gateway / VirtualService.</p>
+</li>
+</ol>
+
+<div class="callout success">
+<b>Совет:</b> попробуйте отвечать вслух или объяснить коллеге. Если можете объяснить — значит понимаете.
+</div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+  <script src="course-shell.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>УСиЭСКБ. Prometheus, Grafana и метрики для прикладной поддержки</title>
+<style>
+:root{--bg:#070b16;--panel:#0f172a;--text:#e5e7eb;--muted:#94a3b8;--blue:#60a5fa;--cyan:#22d3ee;--green:#86efac;--red:#fca5a5;--yellow:#fde68a;--accent:linear-gradient(135deg,#2563eb,#06b6d4 55%,#14b8a6);--shadow:0 18px 50px rgba(0,0,0,.35);--radius:22px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,rgba(37,99,235,.22),transparent 34%),radial-gradient(circle at top right,rgba(20,184,166,.16),transparent 32%),var(--bg);color:var(--text);line-height:1.65}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 80%)}header{background:rgba(15,23,42,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);padding:18px 26px;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}header h1{margin:0;font-size:25px;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}.version{font-size:12px;color:#bbf7d0;border:1px solid rgba(34,197,94,.4);background:rgba(20,83,45,.28);padding:5px 10px;border-radius:999px}.searchBox{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:280px;max-width:560px;flex:1 1 360px;justify-content:flex-end}.searchBox input{width:min(420px,100%);padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.88);color:var(--text);outline:none}.searchBox button,.mobile-toggle{padding:11px 13px;border-radius:14px;border:1px solid rgba(148,163,184,.24);background:rgba(30,41,59,.82);color:#fff;cursor:pointer}.search-count{font-size:13px;color:#93c5fd;white-space:nowrap;min-width:88px}.mobile-toggle{display:none;width:100%;margin-top:12px;text-align:left;font-size:16px}.layout{display:flex;min-height:100vh}aside{width:350px;background:rgba(15,23,42,.74);backdrop-filter:blur(16px);padding:18px;border-right:1px solid rgba(148,163,184,.16);position:sticky;top:78px;height:calc(100vh - 78px);overflow:auto;flex-shrink:0}main{flex:1;padding:32px;min-width:0;max-width:1180px;margin:0 auto}.page{display:none}.page.active{display:block}.menu{display:flex;align-items:center;gap:9px;color:#cbd5e1;text-decoration:none;padding:11px 13px;border-radius:14px;margin:6px 0;font-size:15px;border:1px solid transparent;transition:.18s}.menu:hover{background:rgba(30,41,59,.75);color:#fff;border-color:rgba(148,163,184,.18);transform:translateX(2px)}.menu.active,.menu.search-match{background:linear-gradient(135deg,rgba(37,99,235,.26),rgba(6,182,212,.16));color:#fff;border-color:rgba(96,165,250,.38);box-shadow:0 10px 26px rgba(37,99,235,.12)}.menu.search-hidden{display:none!important}.card{background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(15,23,42,.92));border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);padding:22px;margin:18px 0;overflow:hidden;box-shadow:var(--shadow);position:relative}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(96,165,250,.65),transparent)}.card.quiz{border-color:rgba(34,211,238,.28);background:linear-gradient(180deg,rgba(8,47,73,.42),rgba(15,23,42,.94))}.quiz button{padding:11px 14px;border:1px solid rgba(96,165,250,.32);border-radius:13px;background:rgba(37,99,235,.22);color:#fff;cursor:pointer;margin:6px;min-height:42px}.res{margin-top:9px;font-weight:800}.quiz-progress{margin:14px 0 18px;padding:12px 14px;border-radius:16px;background:rgba(20,83,45,.22);border:1px solid rgba(34,197,94,.3);color:#bbf7d0;font-weight:800}.answer-explain{display:none;margin-top:10px;border-left:4px solid #22c55e;padding:12px 14px;background:rgba(20,83,45,.25);border-radius:14px;color:#bbf7d0}.answer-explain.show{display:block}.ok{color:var(--green)}.bad{color:var(--red)}h2{color:#bfdbfe;font-size:30px;margin:0 0 18px;line-height:1.2}h2:after{content:"";display:block;width:72px;height:4px;margin-top:12px;border-radius:999px;background:var(--accent)}h3{color:#dbeafe;margin-top:12px;font-size:20px}p{margin:10px 0}ul,ol{padding-left:23px}li{margin:5px 0}.badge{display:inline-flex;padding:4px 9px;border-radius:999px;background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.26);color:#bfdbfe;font-size:13px}.callout{border-left:4px solid var(--cyan);padding:12px 14px;background:rgba(8,47,73,.28);border-radius:14px;margin:14px 0;color:#dbeafe}.warn{border-left-color:#fbbf24;background:rgba(113,63,18,.25);color:#fde68a}.success{border-left-color:#22c55e;background:rgba(20,83,45,.25);color:#bbf7d0}.danger{border-left-color:#ef4444;background:rgba(127,29,29,.22);color:#fecaca}pre{background:#020617;color:#a7f3d0;padding:15px;border-radius:16px;overflow-x:auto;white-space:pre;max-width:100%;font-size:14px;border:1px solid rgba(148,163,184,.16)}code{background:#020617;color:#a7f3d0;padding:3px 7px;border-radius:8px;border:1px solid rgba(148,163,184,.14)}table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(148,163,184,.2);margin:12px 0}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;vertical-align:top}th{background:rgba(37,99,235,.18);color:#dbeafe}tr:last-child td{border-bottom:0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tile{padding:16px;border-radius:18px;background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.16);transition:.22s;position:relative;overflow:hidden}.tile:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.14),transparent 46%,rgba(34,211,238,.08));opacity:0;transition:.22s;pointer-events:none}.tile:hover{transform:translateY(-4px);border-color:rgba(96,165,250,.48);box-shadow:0 16px 34px rgba(37,99,235,.18)}.tile:hover:before{opacity:1}.tile h3,.tile p,.tile .badge{position:relative;z-index:1}.flow{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#020617;border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:16px;color:#a7f3d0;overflow:auto;white-space:pre-line}.playbook{display:flex;flex-direction:column;gap:14px;margin:14px 0}.playbook-intro{border-left:4px solid var(--cyan);background:rgba(8,47,73,.28);border-radius:14px;padding:12px 14px;color:#dbeafe}.step{background:rgba(30,41,59,.55);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:14px;transition:.2s}.step:hover{border-color:rgba(96,165,250,.5);box-shadow:0 8px 20px rgba(37,99,235,.15);transform:translateY(-1px)}.step-title{font-weight:800;color:#bfdbfe;margin-bottom:8px;display:flex;align-items:center;gap:8px}.step-title:before{content:"▶";font-size:11px;color:#22d3ee}.step-desc{color:#cbd5e1;margin:6px 0 10px}.step pre{margin:0;background:#020617;color:#a7f3d0;padding:13px;border-radius:14px;border:1px solid rgba(148,163,184,.16);overflow-x:auto}.small{color:var(--muted);font-size:14px}mark.search-hit{background:#facc15;color:#111827;border-radius:5px;padding:0 3px}.search-empty{display:none;margin:18px 0;padding:16px;border-radius:16px;background:rgba(127,29,29,.22);border:1px solid rgba(252,165,165,.25);color:#fecaca}.search-empty.active{display:block}@media(max-width:900px){header h1{font-size:20px}.mobile-toggle{display:block}.searchBox{order:3;width:100%;max-width:none;min-width:0}.searchBox input{width:100%;flex:1}.layout{display:block}aside{display:none;position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid rgba(148,163,184,.16);padding:10px 14px;background:rgba(15,23,42,.96)}body.menu-open aside{display:block}main{padding:17px}.grid,.grid2{grid-template-columns:1fr}.card{padding:16px}.quiz button{display:block;width:100%;margin:8px 0;text-align:left}table{display:block;overflow-x:auto;white-space:nowrap}}
+
+</style>
+<script>
+function safeId(id){return String(id||'').replace(/[^a-zA-Z0-9_-]/g,'')}
+function getMenuTargetId(item){const m=(item.getAttribute('onclick')||'').match(/show\(['"]([^'"]+)['"]\)/);return m?safeId(m[1]):''}
+function show(id){const t=document.getElementById(safeId(id));if(!t)return false;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.menu').forEach(i=>i.classList.toggle('active',getMenuTargetId(i)===t.id));document.body.classList.remove('menu-open');window.scrollTo(0,0);return false}
+function updateQuizProgress(){const progress=document.getElementById('quizProgress');if(!progress)return;const total=document.querySelectorAll('#quiz .quiz-question').length||15;const correct=document.querySelectorAll('#quiz .res.ok').length;progress.textContent=`Прогресс: ${correct}/${total} правильных ответов`;progress.style.display='block'}
+function q(id,a,c,msg){const r=document.getElementById(safeId(id));if(!r)return;const ok=a===c;r.className='res '+(ok?'ok':'bad');r.textContent=ok?'Верно ✅':'Неверно ❌ '+(msg||'Попробуйте ещё раз.');const explain=document.getElementById(safeId(id)+'-explain');if(explain){explain.classList.toggle('show',ok)}updateQuizProgress()}
+function clearMarks(root){root.querySelectorAll('mark.search-hit').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));root.normalize()}
+function highlight(root,term){let count=0;const skip=new Set(['SCRIPT','STYLE','INPUT','BUTTON','MARK']);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){const p=n.parentElement;if(!p||skip.has(p.tagName)||!n.nodeValue.trim())return NodeFilter.FILTER_REJECT;return n.nodeValue.toLowerCase().includes(term)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});const nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(n=>{const text=n.nodeValue,lower=text.toLowerCase(),frag=document.createDocumentFragment();let pos=0,idx=lower.indexOf(term);while(idx!==-1){frag.appendChild(document.createTextNode(text.slice(pos,idx)));const mark=document.createElement('mark');mark.className='search-hit';mark.textContent=text.slice(idx,idx+term.length);frag.appendChild(mark);count++;pos=idx+term.length;idx=lower.indexOf(term,pos)}frag.appendChild(document.createTextNode(text.slice(pos)));n.parentNode.replaceChild(frag,n)});return count}
+function searchCourse(){const input=document.getElementById('courseSearch'),counter=document.getElementById('searchCount'),empty=document.getElementById('searchEmpty'),term=(input.value||'').trim().toLowerCase();let total=0,sections=0,first='';document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'));empty.classList.remove('active');if(!term){counter.textContent='';return}document.querySelectorAll('.page').forEach(p=>{if(p.textContent.toLowerCase().includes(term)){p.dataset.searchMatch='1';sections++;total+=highlight(p,term);if(!first)first=p.id}});document.querySelectorAll('.menu').forEach(i=>{const target=document.getElementById(getMenuTargetId(i));const match=target&&target.dataset.searchMatch==='1';i.classList.toggle('search-hidden',!match);i.classList.toggle('search-match',!!match)});counter.textContent=total?`Найдено: ${total} / разделов: ${sections}`:'Ничего не найдено';if(!total)empty.classList.add('active');if(first)show(first)}
+function clearCourseSearch(){document.getElementById('courseSearch').value='';document.getElementById('searchCount').textContent='';document.getElementById('searchEmpty').classList.remove('active');document.querySelectorAll('.page').forEach(p=>{clearMarks(p);p.dataset.searchMatch=''});document.querySelectorAll('.menu').forEach(i=>i.classList.remove('search-hidden','search-match'))}
+document.addEventListener('DOMContentLoaded',()=>show('home'));
+
+</script>
+  <link rel="stylesheet" href="course-shell.css">
+</head>
+<body>
+<header>
+<h1>УСиЭСКБ. Prometheus, Grafana и метрики для прикладной поддержки</h1>
+<div class="searchBox">
+<input id="courseSearch" type="search" placeholder="🔍 Поиск по курсу: rate, histogram, panel, alert..." oninput="searchCourse()">
+<button onclick="clearCourseSearch()">Сброс</button>
+<span id="searchCount" class="search-count"></span>
+</div>
+<button class="mobile-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню курса</button>
+</header>
+<div class="layout">
+<aside>
+<a class="menu" href="javascript:void(0)" onclick="return show('home')">🏠 Главная</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('observability')">👀 1. Наблюдаемость и роль поддержки</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('prometheus-architecture')">🏗️ 2. Устройство Prometheus</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('scrape-model')">🔄 2.1 Scrape, targets, exporters</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('metrics-model')">🏷️ 3. Модель метрик и labels</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('metric-types')">📊 3.1 Типы метрик</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('promql-basics')">🧮 4. Основы PromQL</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('promql-functions')">🛠️ 4.1 Функции PromQL</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('query-recipes')">🍳 4.2 Готовые запросы</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('grafana-basics')">🖥️ 5. Grafana</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('grafana-panels')">📈 5.1 Панели визуализации</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('grafana-transform')">🔀 5.2 Transform в Grafana</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('dashboard-design')">🧭 5.3 Проектирование дашбордов</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('golden-signals')">🟡 5.4 Золотые сигналы</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('grafana-variables')">🎛️ 5.5 Переменные Grafana</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('incident-cases')">🔥 5.6 Типовые инциденты</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('promql-mistakes')">🧩 5.7 Ошибки PromQL и Cardinality</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('sli-slo-sla')">📏 6. SLI / SLO / SLA</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('alerts')">🚨 7. Алерты и правила</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('alert-runbook')">📟 7.1 Runbook при алерте</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('troubleshooting')">🧯 8. Диагностика</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('quiz')">✅ Проверочный квиз</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('cheatsheet')">📌 Шпаргалка</a>
+<a class="menu" href="javascript:void(0)" onclick="return show('practice')">🧪 Практика</a>
+</aside>
+<main>
+<div id="searchEmpty" class="search-empty">Ничего не найдено. Попробуйте другой запрос.</div>
+
+<section id="home" class="page">
+<h2>Курс: Prometheus, Grafana и метрики для прикладной поддержки</h2>
+<div class="card">
+<p>Курс помогает прикладному администратору сопровождения понимать, какие метрики собирать, как читать PromQL-запросы, как выбирать панели Grafana и как быстро отличать прикладную проблему от проблемы мониторинга.</p>
+<div class="grid">
+<div class="tile"><span class="badge">Раздел 1</span><h3>👀 Наблюдаемость</h3><p>Роль поддержки, метрики, логи, трейсы и движение от симптома к причине.</p></div>
+<div class="tile"><span class="badge">Раздел 2</span><h3>🏗️ Prometheus</h3><p>Устройство Prometheus, pull-модель, scrape, targets, exporters и хранение данных.</p></div>
+<div class="tile"><span class="badge">Раздел 3</span><h3>🏷️ Метрики и labels</h3><p>Модель метрик, label <code>ris_code</code>, типы метрик и правила работы с labels.</p></div>
+<div class="tile"><span class="badge">Раздел 4</span><h3>🧮 PromQL</h3><p>Базовый синтаксис, функции, готовые запросы, типичные ошибки и cardinality.</p></div>
+<div class="tile"><span class="badge">Раздел 5</span><h3>🖥️ Grafana</h3><p>Панели, Transform, переменные, проектирование дашбордов и типовые инциденты.</p></div>
+<div class="tile"><span class="badge">Раздел 6</span><h3>📏 SLI / SLO / SLA</h3><p>Как измерять успешность, задавать целевой уровень и понимать договорённости по сервису.</p></div>
+<div class="tile"><span class="badge">Раздел 7</span><h3>🚨 Алерты и runbook</h3><p>Правила алертинга, параметр <code>for</code>, пригодные для действия алерты и порядок реакции.</p></div>
+<div class="tile"><span class="badge">Раздел 8</span><h3>🧯 Диагностика</h3><p>Как проверять отсутствие данных, ошибки datasource, scrape и проблемы Grafana/Prometheus.</p></div>
+<div class="tile"><span class="badge">Закрепление</span><h3>✅ Квиз, шпаргалка, практика</h3><p>Проверочные вопросы, рабочая памятка поддержки и практические задания по мониторингу.</p></div>
+</div>
+<div class="card callout"><b>Главная идея:</b> Prometheus отвечает на вопрос «что меняется во времени?», а Grafana помогает быстро увидеть отклонение, тренд и масштаб влияния.</div>
+</div>
+</section>
+
+<section id="observability" class="page">
+<h2>1. Наблюдаемость и роль прикладной поддержки</h2>
+<div class="card">
+<h3>Метрики, логи, трейсы — чем отличаются</h3>
+<table>
+<tr><th>Сигнал</th><th>Что показывает</th><th>Пример вопроса</th><th>Когда нужен поддержке</th></tr>
+<tr><td>Метрики</td><td>Числовые значения во времени.</td><td>Сколько ошибок 5xx за 5 минут?</td><td>Для алертов, трендов, SLA/SLO, сравнения до/после релиза.</td></tr>
+<tr><td>Логи</td><td>События и текстовые сообщения приложения.</td><td>Какая конкретная ошибка была в stack trace?</td><td>Для детализации причины после обнаружения симптома по метрикам.</td></tr>
+<tr><td>Трейсы</td><td>Путь запроса между сервисами.</td><td>На каком сервисе выросла latency?</td><td>Для распределённых систем, где один запрос проходит несколько компонентов.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Как думать при инциденте</h3>
+<ol>
+<li><b>Есть ли симптом?</b> Ошибки, latency, падение throughput, рост очередей.</li>
+<li><b>Где масштаб?</b> Один pod, один namespace, один endpoint, весь кластер.</li>
+<li><b>Когда началось?</b> Сравнить с релизом, изменением конфигурации, пиком нагрузки.</li>
+<li><b>Что первично?</b> Например, рост latency мог вызвать рост 5xx, а не наоборот.</li>
+<li><b>Что подтверждает гипотезу?</b> Метрика + лог + событие деплоя лучше одной красивой панели.</li>
+</ol>
+<div class="callout warn"><b>Правило:</b> один график редко доказывает причину. Он показывает направление расследования.</div>
+</div>
+</section>
+
+<section id="prometheus-architecture" class="page">
+<h2>2. Устройство Prometheus</h2>
+<div class="card">
+<h3>Что такое Prometheus</h3>
+<p><b>Prometheus</b> — система мониторинга временных рядов. Она периодически опрашивает цели, сохраняет значения метрик с timestamp и labels, позволяет писать запросы PromQL и формировать алерты.</p>
+<div class="flow">Приложение / Exporter
+      ↑ endpoint /metrics, /prometheus или /actuator/prometheus
+      |
+Prometheus scrape loop
+      |
+      +-- Service Discovery
+      +-- Relabeling
+      +-- TSDB blocks / WAL
+      +-- PromQL API
+      +-- Alerting rules
+      |
+Grafana / Alertmanager / API clients</div>
+</div>
+<div class="card">
+<h3>Ключевые компоненты</h3>
+<table>
+<tr><th>Компонент</th><th>Задача</th><th>Аналогия</th><th>Что важно поддержке</th></tr>
+<tr><td>Scrape loop</td><td>Регулярно забирает метрики с targets.</td><td>Обходчик, который снимает показания счётчиков.</td><td>Проверять up, scrape_duration_seconds, scrape_samples_scraped.</td></tr>
+<tr><td>Service Discovery</td><td>Находит targets в Kubernetes, файлах, Consul и других источниках.</td><td>Адресная книга.</td><td>Если target пропал — проверить discovery и labels.</td></tr>
+<tr><td>TSDB</td><td>Хранит временные ряды локально блоками.</td><td>Архив показаний.</td><td>Следить за местом на диске, cardinality, retention.</td></tr>
+<tr><td>PromQL engine</td><td>Выполняет запросы по метрикам.</td><td>Аналитик, который считает скорость, процентили и агрегации.</td><td>Уметь читать запросы в панелях и алертах.</td></tr>
+<tr><td>Rules</td><td>Recording rules и alerting rules.</td><td>Регламент расчётов и тревог.</td><td>Понимать, почему алерт сработал и какие series участвовали.</td></tr>
+<tr><td>Alertmanager</td><td>Группирует, подавляет и маршрутизирует алерты.</td><td>Диспетчер уведомлений.</td><td>Проверять route, silence, inhibition, receivers.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Особенность Prometheus</h3>
+<p>Prometheus в классическом сценарии сам забирает метрики по pull-модели. Это удобно: мониторинг контролирует частоту опроса, видит, какие targets живы, и может обнаружить недоступность через метрику <code>up</code>.</p>
+<div class="callout success"><b>Для поддержки:</b> если приложение не отдаёт endpoint с метриками, Prometheus не сможет «угадать» значения. Проверяйте не только <code>/metrics</code>, но и <code>/prometheus</code> или <code>/actuator/prometheus</code> — фактический путь зависит от фреймворка и настройки scrape.</div>
+<div class="callout warn"><b>Ограничение:</b> Prometheus локально хранит time series. Для долгого хранения, глобальных запросов и высокой доступности часто добавляют Thanos, Mimir, Cortex или VictoriaMetrics.</div>
+</div>
+</section>
+
+<section id="scrape-model" class="page">
+<h2>2.1 Scrape, targets, exporters</h2>
+<div class="card">
+<h3>Как Prometheus получает метрики</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Найти target</div><div class="step-desc">Prometheus получает список целей через service discovery или статическую конфигурацию.</div><pre>scrape_configs:
+- job_name: payment-api
+  static_configs:
+  - targets: ['payment-api:8080']</pre></div>
+<div class="step"><div class="step-title">2. Опросить endpoint метрик</div><div class="step-desc">По расписанию scrape_interval Prometheus делает HTTP-запрос к endpoint. Частые варианты: <code>/metrics</code>, <code>/prometheus</code>, <code>/actuator/prometheus</code>.</div><pre>curl http://payment-api:8080/metrics
+curl http://payment-api:8080/prometheus
+curl http://payment-api:8080/actuator/prometheus</pre></div>
+<div class="step"><div class="step-title">3. Разобрать samples</div><div class="step-desc">Каждая строка становится sample: имя метрики, labels, значение, timestamp.</div><pre>http_requests_total{method="GET",code="200"} 15342</pre></div>
+<div class="step"><div class="step-title">4. Сохранить time series</div><div class="step-desc">Уникальная комбинация metric name + labels создаёт отдельный временной ряд.</div></div>
+</div>
+</div>
+
+<div class="card">
+<h3>/actuator/prometheus в Spring Boot</h3>
+<p><code>/actuator/prometheus</code> — частый endpoint для приложений на Spring Boot с Actuator и Micrometer. Он отдаёт метрики приложения в формате Prometheus: HTTP-запросы, JVM, пул потоков, базы данных, бизнес-счётчики и пользовательские метрики.</p>
+<div class="callout"><b>Для поддержки:</b> если в документации сервиса указан Actuator, то вместо обычного <code>/metrics</code> Prometheus часто опрашивает именно <code>/actuator/prometheus</code>. Также в некоторых сервисах встречается путь <code>/prometheus</code>. Это нужно проверять при пропаже данных на панели.</div>
+<table>
+<tr><th>Что проверить</th><th>Команда / пример</th><th>Что означает проблема</th></tr>
+<tr><td>Endpoint отвечает</td><td><code>curl http://payment-api:8080/metrics</code><br><code>curl http://payment-api:8080/prometheus</code><br><code>curl http://payment-api:8080/actuator/prometheus</code></td><td>Если 404 — endpoint не включён, используется другой путь или другой management path/port.</td></tr>
+<tr><td>Есть нужные метрики</td><td><code>curl ... | grep http_server_requests</code></td><td>Если метрики нет — приложение её не публикует или фильтрует.</td></tr>
+<tr><td>Prometheus scrape path</td><td><code>metrics_path: /actuator/prometheus</code></td><td>Если путь неверный — target может быть up=0 или без нужных samples.</td></tr>
+<tr><td>Порт management</td><td><code>management.server.port</code></td><td>Actuator может жить на отдельном порту, отличном от порта приложения.</td></tr>
+</table>
+<pre>scrape_configs:
+- job_name: payment-api
+  metrics_path: /actuator/prometheus
+  static_configs:
+  - targets: ['payment-api:8080']</pre>
+<div class="callout warn"><b>Важно:</b> не публикуйте чувствительные Actuator endpoints наружу. Для мониторинга обычно нужен только endpoint Prometheus, доступный Prometheus внутри защищённой сети или кластера.</div>
+</div>
+<div class="card">
+<h3>Что такое exporter</h3>
+<p><b>Exporter</b> — процесс, который переводит состояние системы в формат Prometheus. Например, node_exporter отдаёт метрики Linux, postgres_exporter — PostgreSQL, redis_exporter — Redis.</p>
+<table>
+<tr><th>Exporter</th><th>Что показывает</th><th>Пример метрик</th><th>Когда смотреть</th></tr>
+<tr><td>node_exporter</td><td>CPU, RAM, disk, network.</td><td><code>node_cpu_seconds_total</code>, <code>node_filesystem_avail_bytes</code></td><td>Подозрение на нехватку ресурсов node/VM.</td></tr>
+<tr><td>kube-state-metrics</td><td>Состояние объектов Kubernetes.</td><td><code>kube_pod_status_phase</code>, <code>kube_deployment_status_replicas_available</code></td><td>Pod Pending, Deployment не выкатился, реплик меньше нужного.</td></tr>
+<tr><td>application metrics</td><td>Бизнес- и техническое поведение приложения.</td><td><code>http_requests_total</code>, <code>request_duration_seconds_bucket</code></td><td>Ошибки, latency, RPS, очереди, интеграции.</td></tr>
+<tr><td>blackbox_exporter</td><td>Проверки снаружи: HTTP, TCP, ICMP.</td><td><code>probe_success</code>, <code>probe_duration_seconds</code></td><td>Проверка доступности с точки зрения клиента.</td></tr>
+</table>
+</div>
+<div class="card quiz"><h3>Мини-квиз</h3><p>Что означает <code>up == 0</code> для target?</p><button onclick="q('qscrape1','a','b','Высокая нагрузка не всегда делает up равным 0.')">Приложение обязательно перегружено</button><button onclick="q('qscrape1','b','b')">Prometheus не смог успешно опросить target</button><button onclick="q('qscrape1','c','b','Ошибки 500 считаются другой метрикой приложения.')">Все запросы приложения возвращают 500</button><div id="qscrape1" class="res"></div></div>
+</section>
+
+<section id="metrics-model" class="page">
+<h2>3. Модель метрик и labels</h2>
+<div class="card">
+<h3>Из чего состоит метрика</h3>
+<pre>http_requests_total{job="payment-api",instance="10.1.2.3:8080",method="GET",code="200"} 15342
+└ metric name       └ labels                                           └ value</pre>
+<p>В Prometheus отдельный временной ряд создаётся для каждой уникальной комбинации имени метрики и labels.</p>
+</div>
+<div class="card">
+<h3>Labels: сила и риск</h3>
+<table>
+<tr><th>Label</th><th>Хороший пример</th><th>Плохой пример</th><th>Почему</th></tr>
+<tr><td><code>method</code></td><td>GET, POST</td><td>полный URL с query string</td><td>Методов мало, URL с id создаст взрыв cardinality.</td></tr>
+<tr><td><code>code</code></td><td>200, 404, 500</td><td>текст ошибки</td><td>Коды ограничены, текст ошибки почти бесконечен.</td></tr>
+<tr><td><code>endpoint</code></td><td>/api/payments/{id}</td><td>/api/payments/123456</td><td>Шаблон безопасен, конкретный id создаёт тысячи series.</td></tr>
+<tr><td><code>pod</code></td><td>payment-api-7c9d...</td><td>request_id</td><td>Pod допустим для диагностики, request_id недопустим как label.</td></tr>
+</table>
+<div class="callout danger"><b>Cardinality</b> — количество уникальных временных рядов. Слишком много series увеличивает память, диск, время запросов и риск деградации Prometheus.</div>
+</div>
+<div class="card">
+<h3>Именование метрик</h3>
+<ul>
+<li>Счётчики обычно заканчиваются на <code>_total</code>: <code>http_requests_total</code>.</li>
+<li>Длительности обычно содержат единицу: <code>request_duration_seconds</code>.</li>
+<li>Размеры — <code>_bytes</code>: <code>response_size_bytes</code>.</li>
+<li>Гистограммы создают серии <code>_bucket</code>, <code>_sum</code>, <code>_count</code>.</li>
+</ul>
+</div>
+</section>
+
+<section id="metric-types" class="page">
+<h2>3.1 Типы метрик</h2>
+<div class="card">
+<h3>Сравнение типов</h3>
+<table>
+<tr><th>Тип</th><th>Что означает</th><th>Пример</th><th>Типовые функции</th><th>Когда использовать</th></tr>
+<tr><td>Counter</td><td>Только растёт или сбрасывается при рестарте.</td><td><code>http_requests_total</code>, <code>errors_total</code></td><td><code>rate</code>, <code>increase</code>, <code>irate</code>, <code>resets</code></td><td>Количество событий: запросы, ошибки, ретраи, обработанные сообщения.</td></tr>
+<tr><td>Gauge</td><td>Может расти и падать.</td><td><code>queue_depth</code>, <code>memory_usage_bytes</code></td><td><code>avg_over_time</code>, <code>max_over_time</code>, <code>delta</code>, <code>predict_linear</code></td><td>Текущее состояние: память, размер очереди, активные сессии, температура.</td></tr>
+<tr><td>Histogram</td><td>Распределение значений по buckets + sum/count.</td><td><code>request_duration_seconds_bucket</code></td><td><code>histogram_quantile</code>, <code>rate</code>, <code>sum by (le)</code></td><td>Latency, размер ответа, длительность задач; нужен p95/p99 на серверной стороне.</td></tr>
+<tr><td>Summary</td><td>Квантили считаются на стороне клиента.</td><td><code>rpc_duration_seconds{quantile="0.99"}</code></td><td>Обычно читают готовый quantile; <code>rate</code> для sum/count</td><td>Когда нужны клиентские квантили и не требуется агрегация по многим инстансам.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Counter: пример</h3>
+<pre># Сколько запросов в секунду за последние 5 минут
+sum(rate(http_requests_total[5m]))
+
+# Доля ошибок 5xx
+sum(rate(http_requests_total{code=~"5.."}[5m]))
+/
+sum(rate(http_requests_total[5m]))</pre>
+<div class="callout"><b>Используйте:</b> <code>rate()</code> для графиков RPS и error rate; <code>increase()</code> для ответа «сколько событий произошло за период».</div>
+</div>
+<div class="card">
+<h3>Gauge: пример</h3>
+<pre># Текущая глубина очереди
+queue_depth{queue="payment-events"}
+
+# Максимальная глубина очереди за 15 минут
+max_over_time(queue_depth{queue="payment-events"}[15m])
+
+# Прогноз заполнения диска через 4 часа
+predict_linear(node_filesystem_avail_bytes[2h], 4 * 3600)</pre>
+<div class="callout"><b>Используйте:</b> Gauge для значений «сколько сейчас». Не применяйте <code>rate()</code> к обычному Gauge как к счётчику.</div>
+</div>
+<div class="card">
+<h3>Histogram: пример p95 latency</h3>
+<pre>histogram_quantile(
+  0.95,
+  sum by (le, service) (
+    rate(http_request_duration_seconds_bucket[5m])
+  )
+)</pre>
+<div class="callout success"><b>Когда лучше Histogram:</b> если нужно агрегировать latency по pod, instance, zone или service и считать p90/p95/p99 в Prometheus.</div>
+</div>
+<div class="card">
+<h3>Summary: когда осторожно</h3>
+<p>Summary удобно показывает quantile на конкретном instance, но quantile нельзя корректно агрегировать обычным <code>avg</code> между pod. Поэтому для SLO и общих p95 по сервису чаще выбирают Histogram.</p>
+<div class="callout warn"><b>Типичная ошибка:</b> <code>avg(summary_metric{quantile="0.95"})</code> по pod не равен p95 сервиса.</div>
+</div>
+<div class="card quiz"><h3>Мини-квиз</h3><p>Какой тип метрики лучше для p95 latency по нескольким pod?</p><button onclick="q('qtypes1','a','c','Counter считает события, но не распределение длительности.')">Counter</button><button onclick="q('qtypes1','b','c','Gauge показывает текущее значение, а не распределение.')">Gauge</button><button onclick="q('qtypes1','c','c')">Histogram</button><div id="qtypes1" class="res"></div></div>
+</section>
+
+<section id="promql-basics" class="page">
+<h2>4. Основы PromQL</h2>
+<div class="card">
+<h3>Instant vector и range vector</h3>
+<table>
+<tr><th>Тип выражения</th><th>Что возвращает</th><th>Пример</th><th>Когда используется</th></tr>
+<tr><td>Instant vector</td><td>Текущие значения series на момент времени.</td><td><code>up{job="payment-api"}</code></td><td>Статусы, таблицы, одиночные значения.</td></tr>
+<tr><td>Range vector</td><td>Набор значений series за период.</td><td><code>http_requests_total[5m]</code></td><td>Функции <code>rate</code>, <code>increase</code>, <code>avg_over_time</code>.</td></tr>
+<tr><td>Scalar</td><td>Одно число.</td><td><code>100</code></td><td>Пороги, вычисления процентов.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Фильтрация labels</h3>
+<pre># Равно
+http_requests_total{job="payment-api"}
+
+# Не равно
+http_requests_total{code!="200"}
+
+# Регулярное выражение
+http_requests_total{code=~"5..", method=~"GET|POST"}
+
+# Не соответствует regex
+http_requests_total{endpoint!~"/health|/metrics"}</pre>
+</div>
+<div class="card">
+<h3>Агрегации</h3>
+<pre># Сумма RPS по всем pod с сохранением service
+sum by (service) (rate(http_requests_total[5m]))
+
+# Убрать pod/instance, но оставить остальные labels
+sum without (pod, instance) (rate(http_requests_total[5m]))
+
+# Топ-5 endpoint по ошибкам
+topk(5, sum by (endpoint) (rate(http_requests_total{code=~"5.."}[5m])))</pre>
+<div class="callout"><b>Правило:</b> сначала преобразуйте Counter через <code>rate</code>, потом агрегируйте: <code>sum(rate(counter[5m]))</code>.</div>
+</div>
+</section>
+
+<section id="promql-functions" class="page">
+<h2>4.1 Функции PromQL: когда какую использовать</h2>
+<div class="card">
+<h3>Функции для Counter</h3>
+<table>
+<tr><th>Функция</th><th>Что делает</th><th>Когда лучше</th><th>Пример</th></tr>
+<tr><td><code>rate(counter[5m])</code></td><td>Средняя скорость роста в секунду.</td><td>Графики RPS, error rate, стабильные алерты.</td><td><code>sum(rate(http_requests_total[5m]))</code></td></tr>
+<tr><td><code>irate(counter[1m])</code></td><td>Мгновенная скорость по двум последним точкам.</td><td>Быстрые всплески на графиках, не для шумных алертов.</td><td><code>irate(node_cpu_seconds_total[1m])</code></td></tr>
+<tr><td><code>increase(counter[1h])</code></td><td>Сколько событий добавилось за период.</td><td>Отчёт «сколько ошибок за час».</td><td><code>increase(errors_total[1h])</code></td></tr>
+<tr><td><code>resets(counter[1h])</code></td><td>Сколько раз counter сбросился.</td><td>Поиск рестартов/сбросов процесса.</td><td><code>resets(process_cpu_seconds_total[1h])</code></td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Функции для Gauge</h3>
+<table>
+<tr><th>Функция</th><th>Что делает</th><th>Когда лучше</th><th>Пример</th></tr>
+<tr><td><code>avg_over_time(gauge[15m])</code></td><td>Среднее значение за окно.</td><td>Сгладить шум CPU, latency gauge, размер очереди.</td><td><code>avg_over_time(queue_depth[15m])</code></td></tr>
+<tr><td><code>max_over_time(gauge[15m])</code></td><td>Максимум за окно.</td><td>Поймать пики памяти, очереди, connection pool.</td><td><code>max_over_time(jvm_memory_used_bytes[15m])</code></td></tr>
+<tr><td><code>delta(gauge[30m])</code></td><td>Разница между началом и концом окна.</td><td>Понять, насколько выросла очередь/диск.</td><td><code>delta(queue_depth[30m])</code></td></tr>
+<tr><td><code>deriv(gauge[1h])</code></td><td>Линейный тренд изменения.</td><td>Долгий тренд роста памяти.</td><td><code>deriv(process_resident_memory_bytes[1h])</code></td></tr>
+<tr><td><code>predict_linear(gauge[2h], 3600)</code></td><td>Прогноз через N секунд.</td><td>Диск закончится через час?</td><td><code>predict_linear(node_filesystem_avail_bytes[2h], 3600)</code></td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Функции для Histogram</h3>
+<pre># p99 latency по service
+histogram_quantile(0.99,
+  sum by (le, service) (rate(http_request_duration_seconds_bucket[5m]))
+)
+
+# Средняя latency по sum/count
+sum(rate(http_request_duration_seconds_sum[5m]))
+/
+sum(rate(http_request_duration_seconds_count[5m]))</pre>
+<div class="callout warn"><b>Важно:</b> для classic histogram всегда сохраняйте label <code>le</code> при агрегации перед <code>histogram_quantile</code>.</div>
+</div>
+<div class="card">
+<h3>Логические и диагностические функции</h3>
+<table>
+<tr><th>Функция/оператор</th><th>Когда нужен</th><th>Пример</th></tr>
+<tr><td><code>absent()</code></td><td>Алерт, если метрика исчезла.</td><td><code>absent(up{job="payment-api"})</code></td></tr>
+<tr><td><code>changes()</code></td><td>Сколько раз значение менялось.</td><td><code>changes(kube_pod_container_status_restarts_total[30m])</code></td></tr>
+<tr><td><code>clamp_min()</code></td><td>Убрать отрицательные артефакты.</td><td><code>clamp_min(delta(queue_depth[5m]), 0)</code></td></tr>
+<tr><td><code>label_replace()</code></td><td>Преобразовать label для join/группировки.</td><td><code>label_replace(metric, "app", "$1", "pod", "(.*)-[a-z0-9]+")</code></td></tr>
+<tr><td><code>unless</code></td><td>Исключить series из результата.</td><td><code>up == 0 unless maintenance_mode == 1</code></td></tr>
+</table>
+</div>
+<div class="card quiz"><h3>Мини-квиз</h3><p>Какая функция лучше для стабильного графика RPS по Counter?</p><button onclick="q('qfunc1','a','b','delta подходит для Gauge, но не основной выбор для Counter.')">delta()</button><button onclick="q('qfunc1','b','b')">rate()</button><button onclick="q('qfunc1','c','b','avg_over_time сгладит значения, но не обработает counter reset как rate.')">avg_over_time()</button><div id="qfunc1" class="res"></div></div>
+</section>
+
+<section id="query-recipes" class="page">
+<h2>4.2 Готовые PromQL-рецепты для поддержки</h2>
+<div class="card">
+<h3>HTTP-сервис</h3>
+<pre># RPS по сервисам
+sum by (service) (rate(http_requests_total[5m]))
+
+# Error rate 5xx в процентах
+100 * sum(rate(http_requests_total{code=~"5.."}[5m]))
+/ sum(rate(http_requests_total[5m]))
+
+# p95 latency по endpoint
+histogram_quantile(0.95,
+  sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m]))
+)
+
+# Топ endpoint по 5xx
+topk(10, sum by (endpoint) (rate(http_requests_total{code=~"5.."}[5m])))</pre>
+</div>
+<div class="card">
+<h3>Kubernetes</h3>
+<pre># Pod не Ready
+sum by (namespace, pod) (kube_pod_status_ready{condition="false"} == 1)
+
+# Рестарты контейнеров за 15 минут
+sum by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total[15m]))
+
+# Deployment: доступных реплик меньше желаемых
+kube_deployment_spec_replicas - kube_deployment_status_replicas_available
+
+# CPU usage pod
+sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]))</pre>
+</div>
+<div class="card">
+<h3>Инфраструктура</h3>
+<pre># Использование CPU node
+100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])))
+
+# Свободное место на filesystem
+100 * node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}
+/ node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}
+
+# Сетевые ошибки
+rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m])</pre>
+</div>
+<div class="card">
+<h3>Бизнес-метрики</h3>
+<pre># Успешные платежи в минуту
+sum(rate(payment_success_total[5m])) * 60
+
+# Доля отклонённых платежей
+sum(rate(payment_declined_total[5m]))
+/
+sum(rate(payment_attempt_total[5m]))
+
+# Задержка обработки очереди p95
+histogram_quantile(0.95,
+  sum by (le, queue) (rate(queue_processing_duration_seconds_bucket[5m]))
+)</pre>
+<div class="callout success"><b>Хорошая бизнес-метрика</b> должна отвечать на вопрос пользователя или процесса: платежи, заявки, сообщения, успешные операции, отказы.</div>
+</div>
+</section>
+
+<section id="grafana-basics" class="page">
+<h2>5. Grafana</h2>
+<div class="card">
+<h3>Что делает Grafana</h3>
+<p><b>Grafana</b> визуализирует данные из Prometheus и других источников: строит панели, дашборды, переменные, transformations, thresholds и алерты. Для поддержки важны не номера версий, а рабочий процесс: найти источник данных, проверить PromQL, выбрать правильную панель, настроить единицы, thresholds, transformations и алерты.</p>
+</div>
+<div class="card">
+<h3>Из чего состоит дашборд</h3>
+<table>
+<tr><th>Элемент</th><th>Задача</th><th>Пример</th></tr>
+<tr><td>Data source</td><td>Источник данных.</td><td>Prometheus prod, Loki, Elasticsearch.</td></tr>
+<tr><td>Panel</td><td>Визуализация одного или нескольких запросов.</td><td>Time series для RPS, Stat для статуса.</td></tr>
+<tr><td>Variable</td><td>Фильтр дашборда.</td><td><code>$namespace</code>, <code>$service</code>, <code>$pod</code>.</td></tr>
+<tr><td>Transformation</td><td>Преобразование результата перед показом.</td><td>Join, Labels to fields, Organize fields.</td></tr>
+<tr><td>Field options</td><td>Единицы, decimals, thresholds, mappings.</td><td>ms, %, req/s, зелёный/жёлтый/красный.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Transformations: что это и когда использовать</h3>
+<p><b>Transform</b> в Grafana — это преобразование результата запроса перед отображением на панели. Transform не меняет данные в Prometheus и не заменяет PromQL, а только помогает подготовить данные к визуализации: переименовать поля, объединить несколько запросов, скрыть лишние колонки, посчитать поле или развернуть labels в таблицу.</p>
+<table>
+<tr><th>Transform</th><th>Когда полезен</th><th>Пример для поддержки</th></tr>
+<tr><td>Organize fields</td><td>Убрать лишние колонки, переименовать поля, изменить порядок.</td><td>В таблице targets оставить только <code>ris_code</code>, <code>job</code>, <code>instance</code>, <code>up</code>.</td></tr>
+<tr><td>Labels to fields</td><td>Превратить labels Prometheus в отдельные колонки таблицы.</td><td>Показать список ИС по label <code>ris_code</code> и их состояние.</td></tr>
+<tr><td>Join by field</td><td>Объединить результаты нескольких запросов по общему полю.</td><td>Свести availability, latency и error rate по одному сервису в таблицу.</td></tr>
+<tr><td>Reduce</td><td>Свести временной ряд к одному значению: last, max, min, mean.</td><td>Для Stat-панели взять последнее значение availability за выбранный период.</td></tr>
+<tr><td>Add field from calculation</td><td>Посчитать новое поле из существующих.</td><td>Вычислить процент успешных 200-ответов из total и success.</td></tr>
+<tr><td>Filter data by values</td><td>Оставить только строки по условию.</td><td>Показать только ИС, где <code>up=0</code> или error rate выше порога.</td></tr>
+</table>
+<div class="callout success"><b>Правило:</b> если расчёт нужен для алерта или должен быть единым для всех дашбордов — лучше делать его в PromQL или recording rule. Если нужно только красиво подготовить таблицу или подписи на панели — используйте Transform.</div>
+</div>
+<div class="card">
+<h3>Базовый workflow создания панели</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Выбрать data source</div><div class="step-desc">Обычно Prometheus для метрик.</div></div>
+<div class="step"><div class="step-title">2. Написать PromQL</div><div class="step-desc">Проверить результат в Explore или Query inspector.</div><pre>sum by (service) (rate(http_requests_total[5m]))</pre></div>
+<div class="step"><div class="step-title">3. Выбрать визуализацию</div><div class="step-desc">Time series для тренда, Stat/Gauge для текущего состояния, Table для списков.</div></div>
+<div class="step"><div class="step-title">4. Настроить единицы и thresholds</div><div class="step-desc">Например, проценты для error rate, milliseconds для latency.</div></div>
+<div class="step"><div class="step-title">5. Проверить читаемость</div><div class="step-desc">Панель должна отвечать на один операционный вопрос.</div></div>
+</div>
+</div>
+</section>
+
+<section id="grafana-panels" class="page">
+<h2>5.1 Панели визуализации: что когда использовать</h2>
+<div class="card">
+<h3>Выбор панели</h3>
+<table>
+<tr><th>Панель Grafana</th><th>Лучше использовать для</th><th>Пример запроса</th><th>Ошибка выбора</th></tr>
+<tr><td>Time series</td><td>Тренды во времени: RPS, latency, CPU, error rate.</td><td><code>sum(rate(http_requests_total[5m]))</code></td><td>Показывать 50 pod одновременно без фильтрации.</td></tr>
+<tr><td>Stat</td><td>Одно главное значение: текущий error rate, SLA, up/down.</td><td><code>100 * errors / total</code></td><td>Пытаться анализировать тренд только по одному числу.</td></tr>
+<tr><td>Gauge</td><td>Значение в диапазоне: CPU %, disk %, saturation.</td><td><code>100 - free_percent</code></td><td>Использовать без понятных min/max.</td></tr>
+<tr><td>Bar gauge</td><td>Сравнение нескольких объектов: pod CPU, очереди, сервисы.</td><td><code>sum by (pod) (...)</code></td><td>Использовать для временного ряда вместо snapshot.</td></tr>
+<tr><td>Table</td><td>Списки проблем: топ ошибок, pod restarts, targets down.</td><td><code>topk(20, ...)</code></td><td>Делать таблицу без сортировки и единиц.</td></tr>
+<tr><td>Heatmap</td><td>Распределения и плотность значений: latency buckets.</td><td><code>sum(rate(..._bucket[5m])) by (le)</code></td><td>Использовать, если нужны только p95/p99.</td></tr>
+<tr><td>State timeline</td><td>Изменение состояния во времени: Ready/NotReady, deploy status.</td><td><code>kube_pod_status_ready</code></td><td>Показывать непрерывные числовые метрики.</td></tr>
+<tr><td>Status history</td><td>Периодические статусы по объектам.</td><td><code>probe_success</code></td><td>Заменять им полноценный тренд latency.</td></tr>
+<tr><td>Bar chart</td><td>Категориальные сравнения.</td><td><code>sum by (code) (increase(http_requests_total[1h]))</code></td><td>Использовать для высокочастотного временного ряда.</td></tr>
+<tr><td>Pie chart</td><td>Доли категорий в конкретный момент/период.</td><td><code>sum by (code) (increase(http_requests_total[1h]))</code></td><td>Показывать слишком много категорий.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Примеры панелей для сервиса</h3>
+<div class="grid2">
+<div class="tile"><h3>RPS</h3><p><b>Panel:</b> Time series</p><pre>sum by (endpoint) (rate(http_requests_total{service="$service"}[5m]))</pre></div>
+<div class="tile"><h3>Error rate</h3><p><b>Panel:</b> Stat + sparkline или Time series</p><pre>100 * sum(rate(http_requests_total{service="$service",code=~"5.."}[5m]))
+/ sum(rate(http_requests_total{service="$service"}[5m]))</pre></div>
+<div class="tile"><h3>p95 latency</h3><p><b>Panel:</b> Time series</p><pre>histogram_quantile(0.95,
+ sum by (le) (rate(http_request_duration_seconds_bucket{service="$service"}[5m]))
+)</pre></div>
+<div class="tile"><h3>Top errors</h3><p><b>Panel:</b> Table</p><pre>topk(10, sum by (endpoint, code) (rate(http_requests_total{code=~"5.."}[5m])))</pre></div>
+</div>
+</div>
+<div class="card quiz"><h3>Мини-квиз</h3><p>Какая панель лучше для тренда p95 latency за сутки?</p><button onclick="q('qpanel1','a','c','Stat покажет одно значение, но не тренд.')">Stat</button><button onclick="q('qpanel1','b','c','Table хороша для списков, не для временного тренда.')">Table</button><button onclick="q('qpanel1','c','c')">Time series</button><div id="qpanel1" class="res"></div></div>
+</section>
+
+
+<section id="grafana-transform" class="page">
+<h2>5.2 Transform в Grafana</h2>
+<div class="card">
+<h3>Зачем нужны Transform</h3>
+<p>Transformations применяются после выполнения запроса к data source и до вывода результата на панель. Для прикладной поддержки это особенно полезно в таблицах, светофорах и обзорных дашбордах, где нужно показать не «сырой» временной ряд, а понятный список систем, статусов и отклонений.</p>
+<div class="callout"><b>Аналогия:</b> PromQL достаёт и считает данные, а Transform приводит результат к форме отчёта: переименовывает колонки, объединяет таблицы, оставляет нужные поля и подсвечивает важное.</div>
+</div>
+<div class="card">
+<h3>Типовые сценарии</h3>
+<table>
+<tr><th>Сценарий</th><th>Как сделать</th><th>Пример</th></tr>
+<tr><td>Сделать таблицу ИС</td><td>Запрос Prometheus → Labels to fields → Organize fields.</td><td><code>max by (ris_code, job) (up)</code></td></tr>
+<tr><td>Светофор по сервисам</td><td>Запросы availability/error/latency → Join by field → Thresholds/value mappings.</td><td>Зелёный: OK, жёлтый: degradation, красный: incident.</td></tr>
+<tr><td>Показать последнее состояние</td><td>Reduce: Last not null.</td><td>Последний статус target, pod или blackbox-проверки.</td></tr>
+<tr><td>Скрыть технические поля</td><td>Organize fields.</td><td>Убрать <code>Time</code>, <code>__name__</code>, лишние labels.</td></tr>
+<tr><td>Посчитать поле в панели</td><td>Add field from calculation.</td><td>Success % = success / total * 100.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Пример: таблица доступности ИС по ris_code</h3>
+<p>Запрос возвращает состояние targets в разрезе информационных систем:</p>
+<pre>max by (ris_code, job) (up{ris_code!=""})</pre>
+<ol>
+<li>Panel: <b>Table</b>.</li>
+<li>Transform: <b>Labels to fields</b>, чтобы <code>ris_code</code> стал колонкой.</li>
+<li>Transform: <b>Organize fields</b>, оставить <code>ris_code</code>, <code>job</code>, <code>Value</code>.</li>
+<li>Value mappings: <code>1 → OK</code>, <code>0 → DOWN</code>.</li>
+<li>Thresholds: зелёный для 1, красный для 0.</li>
+</ol>
+</div>
+<div class="card warn callout"><b>Частая ошибка:</b> пытаться через Transform исправить неправильный PromQL. Если series слишком много, labels не те или агрегация неверная — сначала исправьте запрос, иначе панель будет красивой, но misleading.</div>
+</section>
+
+<section id="dashboard-design" class="page">
+<h2>5.3 Проектирование дашбордов поддержки</h2>
+<div class="card">
+<h3>Структура хорошего прикладного дашборда</h3>
+<ol>
+<li><b>Верхний ряд:</b> здоровье сервиса — availability, error rate, p95/p99 latency, RPS.</li>
+<li><b>Второй ряд:</b> разрезы — endpoints, status codes, методы, consumer groups, очереди.</li>
+<li><b>Третий ряд:</b> инфраструктура — pod restarts, CPU/RAM, throttling, GC, DB pool.</li>
+<li><b>Нижний ряд:</b> диагностика — таблицы top offenders, down targets, recent deploy annotations.</li>
+</ol>
+</div>
+<div class="card">
+<h3>Variables</h3>
+<pre># namespace variable
+label_values(kube_namespace_status_phase, namespace)
+
+# service variable
+label_values(http_requests_total{namespace="$namespace"}, service)
+
+# pod variable
+label_values(up{namespace="$namespace", service="$service"}, pod)</pre>
+<div class="callout"><b>Для поддержки:</b> variables экономят время: один дашборд работает для dev/test/prod и разных сервисов.</div>
+</div>
+<div class="card">
+<h3>Thresholds и units</h3>
+<table>
+<tr><th>Метрика</th><th>Unit</th><th>Threshold пример</th><th>Комментарий</th></tr>
+<tr><td>Error rate</td><td>percent</td><td>жёлтый &gt; 1%, красный &gt; 5%</td><td>Зависит от SLO и критичности.</td></tr>
+<tr><td>Latency</td><td>seconds / milliseconds</td><td>жёлтый &gt; 300ms, красный &gt; 1s</td><td>Не смешивайте секунды и миллисекунды.</td></tr>
+<tr><td>Disk usage</td><td>percent</td><td>жёлтый &gt; 80%, красный &gt; 90%</td><td>Дополнить прогнозом predict_linear.</td></tr>
+<tr><td>Queue depth</td><td>short</td><td>по бизнес-лимиту</td><td>Лучше вместе с processing rate.</td></tr>
+</table>
+</div>
+<div class="card callout warn"><b>Антипаттерн:</b> дашборд «всё обо всём» с 80 панелями. В инциденте он замедляет расследование. Лучше несколько дашбордов: обзор, HTTP, Kubernetes, БД/очереди, бизнес.</div>
+</section>
+
+
+<section id="golden-signals" class="page">
+<h2>5.4 Золотые сигналы SRE для прикладной поддержки</h2>
+<div class="card">
+<h3>Зачем поддержке золотые сигналы</h3>
+<p><b>Золотые сигналы</b> — это минимальный набор метрик, который помогает быстро понять состояние сервиса: он доступен, насколько быстро отвечает, сколько запросов обрабатывает и не упирается ли в лимиты.</p>
+<div class="callout"><b>Главная идея:</b> в инциденте не надо сразу смотреть 50 графиков. Сначала проверьте четыре сигнала: Latency, Traffic, Errors, Saturation.</div>
+</div>
+<div class="card">
+<h3>Четыре сигнала</h3>
+<table>
+<tr><th>Сигнал</th><th>Что показывает</th><th>Типовой вопрос поддержки</th><th>Панель Grafana</th></tr>
+<tr><td>Latency</td><td>Скорость ответа сервиса: p95, p99, среднее.</td><td>Сервис отвечает медленно или нормально?</td><td>Time series, Stat</td></tr>
+<tr><td>Traffic</td><td>Количество запросов: RPS, запросы по endpoint, методам, ИС.</td><td>Есть ли нагрузка, всплеск или провал трафика?</td><td>Time series, Bar gauge</td></tr>
+<tr><td>Errors</td><td>Доля ошибок: 4xx, 5xx, неуспешные операции.</td><td>Пользователи получают ошибки?</td><td>Stat, Time series, Table</td></tr>
+<tr><td>Saturation</td><td>Насыщение ресурсов: CPU, RAM, thread pool, DB pool, очереди.</td><td>Сервис близок к пределу?</td><td>Gauge, Bar gauge, Table</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>PromQL-примеры по ris_code</h3>
+<pre># Traffic: RPS по информационным системам
+sum by (ris_code) (rate(http_requests_total{ris_code!=""}[5m]))
+
+# Errors: процент 5xx по ИС
+100 *
+sum by (ris_code) (rate(http_requests_total{ris_code!="",code=~"5.."}[5m]))
+/
+sum by (ris_code) (rate(http_requests_total{ris_code!=""}[5m]))
+
+# Latency: p95 по ИС
+histogram_quantile(
+  0.95,
+  sum by (ris_code, le) (rate(http_request_duration_seconds_bucket{ris_code!=""}[5m]))
+)
+
+# Saturation: рестарты контейнеров за 15 минут
+sum by (ris_code) (increase(kube_pod_container_status_restarts_total{ris_code!=""}[15m]))</pre>
+<div class="callout warn"><b>Проверьте имена метрик:</b> в Spring Boot часто встречаются <code>http_server_requests_seconds_count</code> и <code>http_server_requests_seconds_bucket</code>, а в других приложениях — <code>http_requests_total</code> и <code>http_request_duration_seconds_bucket</code>.</div>
+</div>
+<div class="card quiz">
+<h3>Мини-квиз</h3>
+<p>Какой золотой сигнал отвечает на вопрос «сервис близок к пределу ресурсов?»</p>
+<button onclick="q('qgold1','a','c','Traffic показывает объём запросов.')">Traffic</button>
+<button onclick="q('qgold1','b','c','Errors показывает долю неуспешных запросов.')">Errors</button>
+<button onclick="q('qgold1','c','c')">Saturation</button>
+<div id="qgold1" class="res"></div>
+</div>
+</section>
+
+<section id="grafana-variables" class="page">
+<h2>5.5 Переменные Grafana</h2>
+<div class="card">
+<h3>Что такое variable</h3>
+<p><b>Переменные Grafana</b> позволяют сделать один универсальный dashboard для разных ИС, namespace, сервисов, pod и окружений. Пользователь выбирает значение в выпадающем списке, а Grafana подставляет его в PromQL.</p>
+<div class="callout success"><b>Для сопровождения:</b> вместо десяти одинаковых dashboard по разным ИС лучше сделать один dashboard с переменной <code>$ris_code</code>.</div>
+</div>
+<div class="card">
+<h3>Базовый набор переменных</h3>
+<table>
+<tr><th>Переменная</th><th>Зачем нужна</th><th>Пример query</th></tr>
+<tr><td><code>$ris_code</code></td><td>Выбор информационной системы.</td><td><code>label_values(up, ris_code)</code></td></tr>
+<tr><td><code>$namespace</code></td><td>Выбор Kubernetes namespace.</td><td><code>label_values(up{ris_code="$ris_code"}, namespace)</code></td></tr>
+<tr><td><code>$service</code></td><td>Выбор сервиса/приложения.</td><td><code>label_values(up{ris_code="$ris_code",namespace="$namespace"}, service)</code></td></tr>
+<tr><td><code>$pod</code></td><td>Диагностика конкретного pod.</td><td><code>label_values(up{ris_code="$ris_code",namespace="$namespace"}, pod)</code></td></tr>
+<tr><td><code>$interval</code></td><td>Окно агрегации для rate/increase.</td><td><code>5m</code>, <code>15m</code>, <code>1h</code></td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Как использовать переменные в PromQL</h3>
+<pre># RPS выбранной ИС
+sum(rate(http_requests_total{ris_code="$ris_code"}[$interval]))
+
+# 5xx выбранной ИС по endpoint
+sum by (endpoint) (
+  rate(http_requests_total{ris_code="$ris_code",code=~"5.."}[$interval])
+)
+
+# p95 latency выбранной ИС
+histogram_quantile(
+  0.95,
+  sum by (le, endpoint) (
+    rate(http_request_duration_seconds_bucket{ris_code="$ris_code"}[$interval])
+  )
+)</pre>
+<div class="callout warn"><b>Осторожно с All:</b> если включить значение <code>All</code>, запрос может стать тяжёлым. Для больших окружений лучше ограничивать список namespace/ris_code или использовать regex аккуратно.</div>
+</div>
+<div class="card">
+<h3>Практический порядок настройки</h3>
+<ol>
+<li>Dashboard settings → Variables → New variable.</li>
+<li>Type: <b>Query</b>, Data source: Prometheus.</li>
+<li>Name: <code>ris_code</code>.</li>
+<li>Query: <code>label_values(up, ris_code)</code>.</li>
+<li>Включите <b>Refresh: On dashboard load</b>.</li>
+<li>Повторите для <code>namespace</code>, <code>service</code>, <code>pod</code>.</li>
+</ol>
+</div>
+</section>
+
+<section id="incident-cases" class="page">
+<h2>5.6 Типовые инциденты по метрикам</h2>
+<div class="card">
+<h3>Как читать инцидент через метрики</h3>
+<p>Метрики помогают быстро отделить прикладную ошибку от инфраструктурной, массовую проблему от локальной, деградацию производительности от полной недоступности.</p>
+<div class="callout"><b>Правило:</b> сначала определите масштаб — одна ИС, один namespace, один pod, один endpoint или весь контур.</div>
+</div>
+<div class="card">
+<h3>Сценарии</h3>
+<table>
+<tr><th>Симптом</th><th>Что смотреть</th><th>PromQL-старт</th><th>Вывод</th></tr>
+<tr><td>Сервис недоступен</td><td><code>up</code>, targets, endpoints, pod ready.</td><td><code>max by (ris_code) (up{ris_code="$ris_code"})</code></td><td>Если <code>up=0</code>, Prometheus не может опросить target. Это может быть сеть, target, ServiceMonitor, auth/TLS.</td></tr>
+<tr><td>Выросли 5xx</td><td>Error rate, top endpoints, свежий релиз.</td><td><code>100 * sum(rate(http_requests_total{ris_code="$ris_code",code=~"5.."}[5m])) / sum(rate(http_requests_total{ris_code="$ris_code"}[5m]))</code></td><td>Если RPS обычный, а 5xx выросли — вероятна прикладная ошибка или зависимость.</td></tr>
+<tr><td>Сервис стал медленным</td><td>p95/p99, RPS, DB pool, CPU/RAM.</td><td><code>histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{ris_code="$ris_code"}[5m])))</code></td><td>Если latency растёт без роста RPS — ищите зависимость, БД, внешний сервис или GC.</td></tr>
+<tr><td>RPS резко упал</td><td>Traffic, upstream, gateway, frontend.</td><td><code>sum(rate(http_requests_total{ris_code="$ris_code"}[5m]))</code></td><td>Проблема может быть до сервиса: маршрутизация, балансировщик, frontend, gateway.</td></tr>
+<tr><td>Grafana показывает N/A</td><td>Time range, query, labels, data source.</td><td><code>count by (__name__) ({ris_code="$ris_code"})</code></td><td>Нужно понять: нет данных вообще или запрос фильтрует несуществующие labels.</td></tr>
+<tr><td>После релиза деградация</td><td>Latency, errors, pod restarts, версии pod.</td><td><code>increase(kube_pod_container_status_restarts_total{ris_code="$ris_code"}[30m])</code></td><td>Сравните до/после деплоя и разрез по pod/version.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Мини-плейбук: рост 5xx</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Подтвердить долю 5xx</div><pre>100 * sum(rate(http_requests_total{ris_code="$ris_code",code=~"5.."}[5m]))
+/
+sum(rate(http_requests_total{ris_code="$ris_code"}[5m]))</pre></div>
+<div class="step"><div class="step-title">2. Найти endpoint</div><pre>topk(10,
+  sum by (endpoint, code) (rate(http_requests_total{ris_code="$ris_code",code=~"5.."}[5m]))
+)</pre></div>
+<div class="step"><div class="step-title">3. Проверить, вырос ли трафик</div><pre>sum(rate(http_requests_total{ris_code="$ris_code"}[5m]))</pre></div>
+<div class="step"><div class="step-title">4. Проверить latency</div><pre>histogram_quantile(0.95,
+  sum by (le, endpoint) (rate(http_request_duration_seconds_bucket{ris_code="$ris_code"}[5m]))
+)</pre></div>
+<div class="step"><div class="step-title">5. Сформировать передачу разработке</div><div class="step-desc">Укажите период, ris_code, endpoint, код ответа, RPS, p95 и что изменилось после релиза.</div></div>
+</div>
+</div>
+</section>
+
+<section id="promql-mistakes" class="page">
+<h2>5.7 Типичные ошибки PromQL и Cardinality</h2>
+<div class="card">
+<h3>Ошибки, которые чаще всего ломают графики</h3>
+<table>
+<tr><th>Ошибка</th><th>Почему плохо</th><th>Как правильно</th></tr>
+<tr><td>Используют <code>rate()</code> для gauge</td><td><code>rate()</code> нужен для counter, который только растёт.</td><td>Для gauge использовать <code>avg_over_time</code>, <code>max_over_time</code>, <code>min_over_time</code>.</td></tr>
+<tr><td>Строят процент без одинаковой группировки</td><td>Prometheus не сможет корректно сопоставить числитель и знаменатель.</td><td>Одинаковые <code>by (...)</code> в обеих частях выражения.</td></tr>
+<tr><td>Берут слишком маленькое окно <code>[1m]</code></td><td>График шумит, особенно при редком scrape.</td><td>Начать с <code>[5m]</code> или <code>[10m]</code>.</td></tr>
+<tr><td>Не фильтруют статусы</td><td>Нельзя понять, что именно растёт: 2xx, 4xx или 5xx.</td><td>Использовать <code>status=~"5.."</code>, <code>status="200"</code>.</td></tr>
+<tr><td>Группируют по слишком многим labels</td><td>Dashboard становится тяжёлым, график нечитаемым.</td><td>Оставлять только важные labels: <code>ris_code</code>, <code>status</code>, <code>method</code>.</td></tr>
+<tr><td>Сравнивают instant-значение без окна</td><td>Можно поймать случайный всплеск.</td><td>Для алертов использовать окно и условие <code>for</code>.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Пример: процент 5xx</h3>
+<p>Неправильно: числитель сгруппирован по <code>ris_code</code>, а знаменатель — по <code>status</code>. Результат может быть пустым или некорректным.</p>
+<pre># Плохо
+100 *
+sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (ris_code)
+/
+sum(rate(http_server_requests_seconds_count[5m])) by (status)</pre>
+<p>Правильно: одинаковая группировка в числителе и знаменателе.</p>
+<pre># Хорошо
+100 *
+sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (ris_code)
+/
+sum(rate(http_server_requests_seconds_count[5m])) by (ris_code)</pre>
+</div>
+<div class="card">
+<h3>Как выбирать окно для rate</h3>
+<table>
+<tr><th>Ситуация</th><th>Рекомендуемое окно</th><th>Почему</th></tr>
+<tr><td>Быстрая диагностика</td><td><code>[5m]</code></td><td>Хороший баланс между скоростью реакции и шумом.</td></tr>
+<tr><td>Низкий трафик</td><td><code>[10m]</code> или <code>[15m]</code></td><td>На малом числе запросов короткое окно даёт скачки.</td></tr>
+<tr><td>Отчёт за сутки</td><td><code>[30m]</code> или агрегация по большому периоду</td><td>Нужен сглаженный тренд, а не секундные всплески.</td></tr>
+<tr><td>Алертинг</td><td><code>[5m]</code> + <code>for: 5m</code></td><td>Алерт сработает только при устойчивой проблеме.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Что такое cardinality</h3>
+<p><b>Cardinality</b> — это количество уникальных временных рядов, которые создаёт метрика из-за комбинаций labels.</p>
+<p>Одна метрика с большим количеством уникальных label-значений может породить тысячи или миллионы рядов. Это увеличивает нагрузку на Prometheus, замедляет запросы и делает dashboard тяжёлым.</p>
+<div class="callout">
+<b>Простая формула:</b> временные ряды = имя метрики × все комбинации labels.</div>
+</div>
+<div class="card">
+<h3>Хорошие и плохие labels</h3>
+<table>
+<tr><th>Label</th><th>Оценка</th><th>Почему</th></tr>
+<tr><td><code>ris_code</code></td><td class="ok">Хорошо</td><td>Ограниченный справочник информационных систем.</td></tr>
+<tr><td><code>status</code></td><td class="ok">Хорошо</td><td>Ограниченное число HTTP-статусов.</td></tr>
+<tr><td><code>method</code></td><td class="ok">Хорошо</td><td>GET, POST, PUT, DELETE — мало значений.</td></tr>
+<tr><td><code>uri</code> с шаблоном <code>/orders/{id}</code></td><td class="ok">Хорошо</td><td>Шаблон не создаёт ряд на каждый заказ.</td></tr>
+<tr><td><code>user_id</code></td><td class="bad">Плохо</td><td>Уникальное значение на пользователя.</td></tr>
+<tr><td><code>request_id</code></td><td class="bad">Плохо</td><td>Уникальное значение на запрос.</td></tr>
+<tr><td><code>session_id</code></td><td class="bad">Плохо</td><td>Может создать огромное количество рядов.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Пример</h3>
+<pre># Плохо: каждый user_id создаёт новые ряды
+http_requests_total{ris_code="PAY", user_id="12345", status="200"}
+
+# Хорошо: labels стабильны и имеют ограниченное число значений
+http_requests_total{ris_code="PAY", endpoint="/api/payments", status="200"}</pre>
+</div>
+<div class="card">
+<h3>Как поддержке заметить проблему cardinality</h3>
+<pre># Сколько рядов есть по каждой метрике
+count by (__name__) ({ris_code="PAY"})
+
+# Какие labels создают много комбинаций
+count by (ris_code, uri, status) (http_server_requests_seconds_count)
+
+# Топ uri по количеству рядов
+sort_desc(count by (uri) (http_server_requests_seconds_count))</pre>
+<div class="callout warn"><b>Правило:</b> в labels нельзя выносить персональные, уникальные и бесконечно растущие значения: телефон, счёт, ФИО, request_id, session_id, trace_id.</div>
+</div>
+</section>
+
+<section id="sli-slo-sla" class="page">
+<h2>6. SLI / SLO / SLA простыми словами</h2>
+<div class="card">
+<h3>Зачем это прикладной поддержке</h3>
+<p><b>SLI, SLO и SLA</b> помогают переводить технические метрики в язык качества сервиса: насколько система доступна, насколько быстро отвечает и когда нарушение действительно критично для бизнеса.</p>
+<div class="callout">
+<b>Главная идея:</b> не каждый всплеск ошибки — авария. Аварией становится устойчивое нарушение согласованного уровня качества.</div>
+<table>
+<tr><th>Термин</th><th>Что означает</th><th>Пример для ИС</th><th>Что делает поддержка</th></tr>
+<tr><td>SLI</td><td>Service Level Indicator — показатель, который измеряем.</td><td>Процент успешных HTTP-ответов, p95 latency, доступность scrape.</td><td>Строит метрику и проверяет фактическое значение.</td></tr>
+<tr><td>SLO</td><td>Service Level Objective — целевой уровень качества.</td><td>99.5% успешных запросов за сутки, p95 меньше 2 секунд.</td><td>Смотрит, нарушена ли цель и как долго.</td></tr>
+<tr><td>SLA</td><td>Service Level Agreement — обязательство перед заказчиком.</td><td>Доступность ИС не ниже 99% в месяц.</td><td>Фиксирует факт нарушения и передаёт корректные данные.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Примеры SLI на PromQL</h3>
+<p>SLI обычно строят как процент хороших событий от общего количества событий.</p>
+<pre># Процент успешных 2xx-ответов по ИС
+100 *
+sum(rate(http_server_requests_seconds_count{status=~"2.."}[5m])) by (ris_code)
+/
+sum(rate(http_server_requests_seconds_count[5m])) by (ris_code)</pre>
+<pre># p95 latency по ИС
+histogram_quantile(
+  0.95,
+  sum(rate(http_server_requests_seconds_bucket[5m])) by (le, ris_code)
+)</pre>
+<div class="callout warn"><b>Важно:</b> SLI должен быть понятным и устойчивым. Например, "процент 2xx" хорош для доступности, а "p95 latency" — для производительности.</div>
+</div>
+<div class="card">
+<h3>Как читать нарушение SLO</h3>
+<table>
+<tr><th>Ситуация</th><th>Как интерпретировать</th><th>Действие</th></tr>
+<tr><td>2xx = 99.9%, SLO = 99.5%</td><td>Цель выполняется.</td><td>Наблюдать, инцидент не заводить.</td></tr>
+<tr><td>2xx = 96%, SLO = 99.5% в течение 2 минут</td><td>Краткий всплеск, нужно подтвердить устойчивость.</td><td>Проверить график за 15–30 минут.</td></tr>
+<tr><td>2xx = 96%, SLO = 99.5% в течение 20 минут</td><td>Устойчивое нарушение.</td><td>Запустить runbook, собрать факты, эскалировать.</td></tr>
+<tr><td>p95 latency выше SLO, но 5xx нет</td><td>Проблема производительности, а не полной недоступности.</td><td>Проверить saturation: CPU, memory, DB pool, очереди.</td></tr>
+</table>
+</div>
+</section>
+
+<section id="alerts" class="page">
+<h2>7. Алерты и правила</h2>
+<div class="card">
+<h3>Alerting rule: пример</h3>
+<pre>groups:
+- name: payment-api
+  rules:
+  - alert: PaymentApiHighErrorRate
+    expr: |
+      100 * sum(rate(http_requests_total{service="payment-api",code=~"5.."}[5m]))
+      / sum(rate(http_requests_total{service="payment-api"}[5m])) > 5
+    for: 10m
+    labels:
+      severity: critical
+      team: payments
+    annotations:
+      summary: "High 5xx error rate in payment-api"
+      description: "5xx error rate is above 5% for 10 minutes."</pre>
+</div>
+<div class="card">
+<h3>Recording rules</h3>
+<p><b>Recording rule</b> заранее считает тяжёлый или часто используемый запрос и сохраняет результат как новую метрику.</p>
+<pre>- record: job:http_requests:rate5m
+  expr: sum by (job) (rate(http_requests_total[5m]))</pre>
+<div class="callout success"><b>Когда использовать:</b> сложные p95, error rate и агрегаты, которые нужны на многих панелях или в алертах.</div>
+</div>
+<div class="card">
+<h3>Как делать алерты полезными</h3>
+<table>
+<tr><th>Правило</th><th>Почему</th><th>Пример</th></tr>
+<tr><td>Алерт должен быть пригодным для действия</td><td>Дежурный должен понимать, что делать.</td><td>«Payment API 5xx &gt; 5% 10m», а не «metric high».</td></tr>
+<tr><td>Используйте <code>for</code></td><td>Защищает от секундных всплесков.</td><td><code>for: 10m</code></td></tr>
+<tr><td>Разделяйте warning/critical</td><td>Не всё требует ночного звонка.</td><td>warning &gt; 1%, critical &gt; 5%.</td></tr>
+<tr><td>Добавляйте labels</td><td>Маршрутизация и группировка.</td><td><code>team</code>, <code>service</code>, <code>severity</code>.</td></tr>
+<tr><td>Добавляйте runbook</td><td>Ускоряет реакцию.</td><td>Ссылка на инструкцию диагностики.</td></tr>
+</table>
+</div>
+<div class="card quiz"><h3>Мини-квиз</h3><p>Зачем в alerting rule нужен параметр <code>for</code>?</p><button onclick="q('qalert1','a','b','for не меняет источник данных.')">Чтобы выбрать data source</button><button onclick="q('qalert1','b','b')">Чтобы алерт сработал только если условие держится заданное время</button><button onclick="q('qalert1','c','b','Группировка делается labels и Alertmanager.')">Чтобы сгруппировать уведомления</button><div id="qalert1" class="res"></div></div>
+</section>
+
+<section id="alert-runbook" class="page">
+<h2>7.1 Runbook при срабатывании алерта</h2>
+<div class="card">
+<h3>Цель runbook</h3>
+<p><b>Runbook</b> — это инструкция, что делает поддержка после уведомления. Хороший runbook уменьшает время реакции и помогает передать разработке не эмоции, а факты.</p>
+</div>
+<div class="card">
+<h3>Универсальный порядок действий</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Подтвердить алерт</div><div class="step-desc">Откройте dashboard/Explore и проверьте, что условие действительно выполняется сейчас или выполнялось в указанном периоде.</div></div>
+<div class="step"><div class="step-title">2. Определить масштаб</div><div class="step-desc">Одна ИС, несколько ИС, один namespace, один pod, один endpoint или массовая проблема?</div><pre>count by (ris_code) (up{ris_code!=""} == 0)</pre></div>
+<div class="step"><div class="step-title">3. Проверить золотые сигналы</div><div class="step-desc">Latency, Traffic, Errors, Saturation.</div></div>
+<div class="step"><div class="step-title">4. Сравнить с изменениями</div><div class="step-desc">Был ли релиз, переключение маршрутов, изменение конфигурации, рост нагрузки?</div></div>
+<div class="step"><div class="step-title">5. Локализовать источник</div><div class="step-desc">Разрез по endpoint, pod, instance, status, namespace, version.</div></div>
+<div class="step"><div class="step-title">6. Принять действие или эскалировать</div><div class="step-desc">Если причина инфраструктурная — передать платформе. Если прикладная — разработке. Если массовая — координатору инцидента.</div></div>
+</div>
+</div>
+<div class="card">
+<h3>Шаблон сообщения по алерту</h3>
+<pre>ИС / ris_code: ORDERS
+Алерт: High 5xx error rate
+Период: 14:05–14:20
+Текущее значение: 8.7% 5xx
+Норма / threshold: critical &gt; 5% for 10m
+Затронутые endpoints: /api/orders/create, /api/orders/pay
+RPS: без роста / вырос с 20 до 120
+Latency p95: 0.4s → 2.8s
+Pods: 2 рестарта за 15 минут / рестартов нет
+Свежие изменения: релиз 1.8.4 в 13:55 / изменений не найдено
+Вывод поддержки: похоже на прикладную деградацию после релиза, нужна проверка логов по endpoint.</pre>
+</div>
+<div class="card">
+<h3>Что должно быть в описании alert rule</h3>
+<table>
+<tr><th>Поле</th><th>Что писать</th><th>Пример</th></tr>
+<tr><td>summary</td><td>Коротко: что сломалось.</td><td><code>High 5xx for ORDERS</code></td></tr>
+<tr><td>description</td><td>Значение, threshold, период.</td><td><code>5xx &gt; 5% for 10m</code></td></tr>
+<tr><td>labels</td><td>Маршрутизация.</td><td><code>severity, team, ris_code, environment</code></td></tr>
+<tr><td>runbook_url</td><td>Ссылка на инструкцию.</td><td>Ссылка на страницу с шагами диагностики.</td></tr>
+</table>
+</div>
+</section>
+
+<section id="troubleshooting" class="page">
+<h2>8. Диагностика Prometheus/Grafana</h2>
+<div class="card">
+<h3>Симптомы и первые проверки</h3>
+<table>
+<tr><th>Симптом</th><th>Возможная причина</th><th>Первая проверка</th></tr>
+<tr><td>В Grafana нет данных</td><td>Неверный PromQL, time range, data source, target down.</td><td>Explore → тот же запрос; Prometheus → Status → Targets.</td></tr>
+<tr><td>Алерт не сработал</td><td>Нет series, неверный label, условие не держалось <code>for</code>.</td><td>Выполнить expr в Prometheus на нужном time range.</td></tr>
+<tr><td>Запрос медленный</td><td>Высокая cardinality, большой range, тяжёлые regex.</td><td>Упростить labels, уменьшить диапазон, использовать recording rule.</td></tr>
+<tr><td>Prometheus ест много RAM</td><td>Слишком много active series.</td><td>TSDB status, top metrics by cardinality.</td></tr>
+<tr><td>Target down</td><td>Endpoint недоступен, TLS/basic auth, network policy, ServiceMonitor.</td><td><code>up{job="..."}</code>, target error, curl <code>/metrics</code>, <code>/prometheus</code> или <code>/actuator/prometheus</code>.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Плейбук: Grafana показывает N/A</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Проверить time range</div><div class="step-desc">N/A может быть из-за выбранного периода без данных.</div></div>
+<div class="step"><div class="step-title">2. Открыть Explore</div><div class="step-desc">Выполнить PromQL отдельно, без transformations панели.</div></div>
+<div class="step"><div class="step-title">3. Проверить labels</div><div class="step-desc">Убедиться, что переменные <code>$namespace</code>, <code>$service</code> подставляются корректно.</div></div>
+<div class="step"><div class="step-title">4. Проверить target</div><div class="step-desc">В Prometheus посмотреть Status → Targets и метрику up.</div><pre>up{job="payment-api"}</pre></div>
+<div class="step"><div class="step-title">5. Проверить scrape</div><div class="step-desc">Ошибки HTTP, timeout, TLS, auth, неверный metrics_path или слишком долгий endpoint метрик.</div><pre>scrape_duration_seconds{job="payment-api"}
+scrape_samples_scraped{job="payment-api"}</pre></div>
+</div>
+</div>
+<div class="card">
+<h3>Плейбук: резкий рост 5xx</h3>
+<div class="playbook">
+<div class="step"><div class="step-title">1. Подтвердить симптом</div><pre>100 * sum(rate(http_requests_total{code=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))</pre></div>
+<div class="step"><div class="step-title">2. Найти источник</div><pre>topk(10, sum by (service, endpoint, code) (rate(http_requests_total{code=~"5.."}[5m])))</pre></div>
+<div class="step"><div class="step-title">3. Сравнить latency и нагрузку</div><pre>sum(rate(http_requests_total[5m]))
+histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket[5m])))</pre></div>
+<div class="step"><div class="step-title">4. Проверить Kubernetes состояние</div><pre>increase(kube_pod_container_status_restarts_total[15m])
+kube_deployment_spec_replicas - kube_deployment_status_replicas_available</pre></div>
+<div class="step"><div class="step-title">5. Перейти в логи/трейсы</div><div class="step-desc">Метрики показывают масштаб, логи и трейсы уточняют конкретную причину.</div></div>
+</div>
+</div>
+</section>
+
+<section id="quiz" class="page">
+<h2>Проверочный квиз</h2>
+<div class="card quiz">
+<h3>Вопросы</h3>
+<div id="quizProgress" class="quiz-progress">Прогресс: 0/15 правильных ответов</div>
+<p class="quiz-question">1. Какая модель сбора обычно используется Prometheus?</p>
+<button onclick="q('q1','a','b','Push используется через Pushgateway только для отдельных сценариев.')">Только push от приложений</button><button onclick="q('q1','b','b')">Pull: Prometheus сам опрашивает targets</button><button onclick="q('q1','c','b','Логи — другой сигнал наблюдаемости.')">Чтение логов с диска</button><div id="q1" class="res"></div><div id="q1-explain" class="answer-explain"><b>Разбор:</b> Prometheus обычно сам ходит на endpoint метрик по scrape_interval. Это может быть <code>/metrics</code>, <code>/prometheus</code> или <code>/actuator/prometheus</code>.</div>
+<p class="quiz-question">2. Что означает метрика <code>up == 0</code>?</p>
+<button onclick="q('q2','a','c','Это не бизнес-статус приложения.')">Бизнес-операции не проходят</button><button onclick="q('q2','b','c','CPU может быть нормальным.')">CPU сервиса равен нулю</button><button onclick="q('q2','c','c')">Prometheus не смог успешно опросить target</button><div id="q2" class="res"></div><div id="q2-explain" class="answer-explain"><b>Разбор:</b> up отражает успех scrape target.</div>
+<p class="quiz-question">3. Какой тип метрики только растёт или сбрасывается?</p>
+<button onclick="q('q3','a','a')">Counter</button><button onclick="q('q3','b','a','Gauge может расти и падать.')">Gauge</button><button onclick="q('q3','c','a','Histogram — распределение по buckets.')">Histogram</button><div id="q3" class="res"></div><div id="q3-explain" class="answer-explain"><b>Разбор:</b> Counter подходит для запросов, ошибок, событий.</div>
+<p class="quiz-question">4. Какую функцию чаще использовать для RPS?</p>
+<button onclick="q('q4','a','b','increase отвечает на вопрос сколько за период, но RPS — скорость.')">increase()</button><button onclick="q('q4','b','b')">rate()</button><button onclick="q('q4','c','b','max_over_time применяется к range vector, но RPS по counter считают rate.')">max_over_time()</button><div id="q4" class="res"></div><div id="q4-explain" class="answer-explain"><b>Разбор:</b> rate(counter[5m]) даёт среднюю скорость роста в секунду.</div>
+<p class="quiz-question">5. Что опасно помещать в label?</p>
+<button onclick="q('q5','a','c','Метод обычно имеет малое количество значений.')">method=GET</button><button onclick="q('q5','b','c','Код ответа ограничен.')">code=500</button><button onclick="q('q5','c','c')">request_id или user_id</button><div id="q5" class="res"></div><div id="q5-explain" class="answer-explain"><b>Разбор:</b> request_id/user_id создают высокую cardinality.</div>
+<p class="quiz-question">6. Как считать p95 latency по histogram?</p>
+<button onclick="q('q6','a','c','avg покажет среднее, не p95.')">avg(rate(..._sum[5m]))</button><button onclick="q('q6','b','c','topk не считает квантили.')">topk()</button><button onclick="q('q6','c','c')">histogram_quantile(0.95, sum by (le)(rate(..._bucket[5m])))</button><div id="q6" class="res"></div><div id="q6-explain" class="answer-explain"><b>Разбор:</b> для classic histogram нужен rate по buckets и агрегация с label le.</div>
+<p class="quiz-question">7. Почему нельзя усреднять summary quantile по pod?</p>
+<button onclick="q('q7','a','b','Это математически некорректно для квантилей.')">Потому что Grafana не умеет avg</button><button onclick="q('q7','b','b')">Потому что quantile на pod нельзя корректно агрегировать как среднее</button><button onclick="q('q7','c','b','Prometheus может хранить summary.')">Потому что Prometheus не хранит summary</button><div id="q7" class="res"></div><div id="q7-explain" class="answer-explain"><b>Разбор:</b> для агрегируемых p95/p99 обычно используют histogram.</div>
+<p class="quiz-question">8. Какая панель лучше для RPS во времени?</p>
+<button onclick="q('q8','a','a')">Time series</button><button onclick="q('q8','b','a','Pie chart показывает доли, а не тренд.')">Pie chart</button><button onclick="q('q8','c','a','Gauge показывает значение в диапазоне.')">Gauge</button><div id="q8" class="res"></div><div id="q8-explain" class="answer-explain"><b>Разбор:</b> RPS — временной ряд, поэтому Time series.</div>
+<p class="quiz-question">9. Какая панель лучше для списка top-10 endpoints по 5xx?</p>
+<button onclick="q('q9','a','c','Gauge плохо подходит для списков.')">Gauge</button><button onclick="q('q9','b','c','State timeline для статусов во времени.')">State timeline</button><button onclick="q('q9','c','c')">Table</button><div id="q9" class="res"></div><div id="q9-explain" class="answer-explain"><b>Разбор:</b> таблица удобна для сортируемых списков проблем.</div>
+<p class="quiz-question">10. Зачем нужны recording rules?</p>
+<button onclick="q('q10','a','b','Они не заменяют exporters.')">Чтобы приложения отдавали /metrics</button><button onclick="q('q10','b','b')">Чтобы заранее сохранять часто используемые или тяжёлые вычисления</button><button onclick="q('q10','c','b','Уведомления маршрутизирует Alertmanager.')">Чтобы отправлять сообщения в Telegram</button><div id="q10" class="res"></div><div id="q10-explain" class="answer-explain"><b>Разбор:</b> recording rules ускоряют панели и упрощают алерты.</div>
+<p class="quiz-question">11. Что делает параметр <code>for</code> в алерте?</p>
+<button onclick="q('q11','a','a')">Ждёт, пока условие продержится заданное время</button><button onclick="q('q11','b','a','Silence настраивается отдельно.')">Отключает алерт</button><button onclick="q('q11','c','a','Retention — настройка хранения.')">Увеличивает retention</button><div id="q11" class="res"></div><div id="q11-explain" class="answer-explain"><b>Разбор:</b> for снижает шум от кратковременных всплесков.</div>
+<p class="quiz-question">12. Что первым проверить, если в Grafana N/A?</p>
+<button onclick="q('q12','a','c','Перезапуск — не первая диагностика.')">Перезапустить Grafana</button><button onclick="q('q12','b','c','Смена цвета не влияет на данные.')">Поменять цвет панели</button><button onclick="q('q12','c','c')">Time range, PromQL в Explore и наличие series в Prometheus</button><div id="q12" class="res"></div><div id="q12-explain" class="answer-explain"><b>Разбор:</b> сначала отделяем проблему запроса/диапазона от проблемы данных.</div>
+<p class="quiz-question">13. Какая функция подходит для прогноза заполнения диска?</p>
+<button onclick="q('q13','a','b','rate не прогнозирует будущее значение gauge.')">rate()</button><button onclick="q('q13','b','b')">predict_linear()</button><button onclick="q('q13','c','b','resets применяется к counter.')">resets()</button><div id="q13" class="res"></div><div id="q13-explain" class="answer-explain"><b>Разбор:</b> predict_linear применяют к gauge для линейного прогноза.</div>
+<p class="quiz-question">14. Почему запрос может быть медленным?</p>
+<button onclick="q('q14','a','a')">Высокая cardinality, большой диапазон, тяжёлые regex</button><button onclick="q('q14','b','a','Название панели почти не влияет.')">Слишком длинное название панели</button><button onclick="q('q14','c','a','Цвет thresholds не влияет на PromQL.')">Красный threshold</button><div id="q14" class="res"></div><div id="q14-explain" class="answer-explain"><b>Разбор:</b> нагрузку создают объём series и сложность вычислений.</div>
+<p class="quiz-question">15. Что лучше показывает состояние Ready/NotReady по pod во времени?</p>
+<button onclick="q('q15','a','b','Stat покажет текущее значение.')">Stat</button><button onclick="q('q15','b','b')">State timeline</button><button onclick="q('q15','c','b','Heatmap нужен для распределений.')">Heatmap</button><div id="q15" class="res"></div><div id="q15-explain" class="answer-explain"><b>Разбор:</b> State timeline показывает смену дискретных состояний во времени.</div>
+</div>
+</section>
+
+<section id="cheatsheet" class="page">
+<h2>Шпаргалка поддержки</h2>
+<div class="card callout">
+<b>Назначение раздела:</b> быстрые подсказки для смены сопровождения: PromQL, выбор панели, Explore, Query inspector и первые действия при проблемах с данными.
+</div>
+<div class="card">
+<h3>Explore / Query inspector: когда что использовать</h3>
+<table>
+<tr><th>Инструмент</th><th>Когда использовать</th><th>Пример</th></tr>
+<tr><td>Dashboard</td><td>Для постоянного наблюдения по готовым панелям.</td><td>Светофор ИС, RPS, 5xx, latency, JVM.</td></tr>
+<tr><td>Explore</td><td>Для расследования, проверки гипотез и быстрых PromQL-запросов.</td><td>Проверить конкретный <code>ris_code</code>, endpoint или pod.</td></tr>
+<tr><td>Query inspector</td><td>Когда панель не показывает данные или тормозит.</td><td>Посмотреть фактический запрос, время выполнения, ответ datasource.</td></tr>
+<tr><td>Table view</td><td>Когда нужно увидеть сырые серии и labels.</td><td>Проверить, есть ли label <code>ris_code</code> и какие значения он принимает.</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Как расследовать через Explore</h3>
+<div class="playbook">
+  <div class="step"><div class="step-title">1. Открыть Explore</div><div class="step-desc">Выбрать datasource Prometheus и начать с самого простого запроса.</div><pre>up</pre></div>
+  <div class="step"><div class="step-title">2. Найти доступные ИС</div><div class="step-desc">Проверить, какие <code>ris_code</code> вообще есть в метриках.</div><pre>count by (ris_code) (up)</pre></div>
+  <div class="step"><div class="step-title">3. Проверить нужную ИС</div><div class="step-desc">Ограничить запрос конкретным кодом ИС.</div><pre>up{ris_code="PAY"}</pre></div>
+  <div class="step"><div class="step-title">4. Посмотреть HTTP-метрики</div><div class="step-desc">Проверить, есть ли запросы, статусы и endpoints.</div><pre>sum(rate(http_server_requests_seconds_count{ris_code="PAY"}[5m])) by (status, uri)</pre></div>
+  <div class="step"><div class="step-title">5. Переключиться в Table view</div><div class="step-desc">Посмотреть labels и убедиться, что группировка корректна.</div></div>
+</div>
+</div>
+<div class="card">
+<h3>Когда нужен Query inspector</h3>
+<table>
+<tr><th>Симптом</th><th>Что проверить в Query inspector</th></tr>
+<tr><td>Панель пустая</td><td>Фактический PromQL, выбранный datasource, переменные, диапазон времени.</td></tr>
+<tr><td>Панель долго грузится</td><td>Время выполнения запроса, объём возвращённых series, слишком широкая группировка.</td></tr>
+<tr><td>В Explore данные есть, а на dashboard нет</td><td>Подстановку переменных, фильтры панели, transformations, time range.</td></tr>
+<tr><td>Странные значения</td><td>Response data, legend, labels, единицы измерения и reduce/calculation.</td></tr>
+</table>
+<div class="callout success"><b>Практическое правило:</b> если график не объясним визуально, откройте Query inspector и Table view. Сначала проверяйте данные, потом оформление панели.</div>
+</div>
+
+<div class="card">
+<h3>PromQL: быстро</h3>
+<table>
+<tr><th>Задача</th><th>Запрос</th></tr>
+<tr><td>Target down</td><td><code>up == 0</code></td></tr>
+<tr><td>RPS</td><td><code>sum(rate(http_requests_total[5m]))</code></td></tr>
+<tr><td>Error rate %</td><td><code>100 * sum(rate(http_requests_total{code=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))</code></td></tr>
+<tr><td>p95 latency</td><td><code>histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))</code></td></tr>
+<tr><td>Событий за час</td><td><code>increase(my_counter_total[1h])</code></td></tr>
+<tr><td>Максимум gauge за окно</td><td><code>max_over_time(my_gauge[15m])</code></td></tr>
+<tr><td>Рестарты pod</td><td><code>increase(kube_pod_container_status_restarts_total[15m])</code></td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Выбор функции</h3>
+<ul>
+<li><code>rate</code> — стабильная скорость Counter для графиков и алертов.</li>
+<li><code>irate</code> — резкие всплески на графике, осторожно с алертами.</li>
+<li><code>increase</code> — сколько событий произошло за период.</li>
+<li><code>avg_over_time</code> — сгладить Gauge.</li>
+<li><code>max_over_time</code> — поймать пик Gauge.</li>
+<li><code>histogram_quantile</code> — p90/p95/p99 из Histogram.</li>
+<li><code>predict_linear</code> — прогноз по Gauge, например диск.</li>
+</ul>
+</div>
+<div class="card">
+<h3>Выбор панели Grafana</h3>
+<ul>
+<li><b>Time series</b> — всё, что меняется во времени.</li>
+<li><b>Stat</b> — одно ключевое значение.</li>
+<li><b>Gauge</b> — значение в известном диапазоне.</li>
+<li><b>Bar gauge</b> — сравнение нескольких объектов сейчас.</li>
+<li><b>Table</b> — топы, списки, проблемные объекты.</li>
+<li><b>Heatmap</b> — распределения.</li>
+<li><b>State timeline</b> — состояния во времени.</li>
+</ul>
+</div>
+</section>
+
+<section id="practice" class="page">
+<h2>Практика и самопроверка</h2>
+<div class="card callout">
+<b>Как выполнять практику:</b> здесь оставлены только задания, PromQL и ожидаемый результат. Теорию смотрите в разделах про PromQL, Grafana, Transform, переменные, золотые сигналы и runbook.
+</div>
+<div class="card">
+<h3>Задание 1. Сервис стал медленным</h3>
+<p><b>Симптом:</b> пользователи жалуются на долгий ответ <code>payment-api</code>.</p>
+<ol>
+<li>Постройте p95 и p99 latency по endpoint.</li>
+<li>Сравните RPS и error rate за тот же период.</li>
+<li>Найдите top-5 endpoint по latency.</li>
+<li>Проверьте pod restarts и CPU throttling.</li>
+</ol>
+<pre>histogram_quantile(0.95,
+  sum by (le, endpoint) (rate(http_request_duration_seconds_bucket{service="payment-api"}[5m]))
+)
+
+histogram_quantile(0.99,
+  sum by (le, endpoint) (rate(http_request_duration_seconds_bucket{service="payment-api"}[5m]))
+)
+
+topk(5,
+  histogram_quantile(0.95,
+    sum by (le, endpoint) (rate(http_request_duration_seconds_bucket{service="payment-api"}[5m]))
+  )
+)</pre>
+<p class="small">Ожидаемый результат: найден endpoint, который даёт основной вклад в задержку.</p>
+</div>
+<div class="card">
+<h3>Задание 2. В Grafana пропали данные</h3>
+<ol>
+<li>Откройте Explore и выполните запрос панели.</li>
+<li>Проверьте переменные dashboard: <code>$ris_code</code>, <code>$namespace</code>, <code>$service</code>, <code>$pod</code>.</li>
+<li>Проверьте <code>up</code> и targets в Prometheus.</li>
+<li>Откройте Query inspector и проверьте ошибку datasource.</li>
+</ol>
+<pre>up{ris_code="$ris_code"}
+count by (__name__) ({ris_code="$ris_code"})</pre>
+<p class="small">Ожидаемый результат: понятно, проблема в запросе, переменной, datasource или scrape.</p>
+</div>
+<div class="card">
+<h3>Задание 3. Спроектируйте dashboard поддержки</h3>
+<p>Сделайте набор панелей для сервиса <code>order-api</code>:</p>
+<ul>
+<li>Stat: текущий error rate.</li>
+<li>Time series: RPS, p95 latency, 5xx.</li>
+<li>Table: top endpoint по ошибкам.</li>
+<li>Bar gauge: CPU по pod.</li>
+<li>State timeline: Ready/NotReady pod.</li>
+</ul>
+<p class="small">Ожидаемый результат: dashboard отвечает на вопросы «работает ли сервис?», «есть ли деградация?», «куда смотреть дальше?».</p>
+</div>
+<div class="card">
+<h3>Задание 4. Постройте график процента 200-ответов</h3>
+<ol>
+<li>Откройте Explore или новую Time series panel.</li>
+<li>Постройте success rate по коду 200.</li>
+<li>Unit: <b>Percent (0-100)</b>.</li>
+<li>Thresholds: зелёный ≥ 99, жёлтый 95–99, красный &lt; 95.</li>
+</ol>
+<pre>100 *
+sum(rate(http_requests_total{service="$service",code="200"}[5m]))
+/
+sum(rate(http_requests_total{service="$service"}[5m]))</pre>
+<p class="small">Ожидаемый результат: график показывает долю HTTP 200 во времени. Если label кода ответа называется иначе, замените <code>code</code> на <code>status</code>, <code>status_code</code> или <code>outcome</code>.</p>
+</div>
+<div class="card">
+<h3>Задание 5. Узнайте, какие ИС доступны для мониторинга через ris_code</h3>
+<pre># Все ИС, которые присутствуют в targets
+count by (ris_code) (up{ris_code!=""})
+
+# ИС, где есть хотя бы один живой target
+max by (ris_code) (up{ris_code!=""}) == 1
+
+# Проблемные targets
+max by (ris_code, job, instance) (up{ris_code!=""} == 0)</pre>
+<ol>
+<li>Panel: <b>Table</b>.</li>
+<li>Transform: <b>Labels to fields</b>.</li>
+<li>Transform: <b>Organize fields</b>: оставьте <code>ris_code</code>, <code>job</code>, <code>instance</code>, <code>Value</code>.</li>
+<li>Value mappings: <code>1 = доступно</code>, <code>0 = недоступно</code>.</li>
+</ol>
+<p class="small">Ожидаемый результат: таблица ИС и их targets с понятным статусом доступности.</p>
+</div>
+<div class="card">
+<h3>Задание 6. Какие метрики вынести на дашборд типа «светофор»</h3>
+<table>
+<tr><th>Индикатор</th><th>PromQL-идея</th><th>Панель</th></tr>
+<tr><td>Доступность target</td><td><code>max by (ris_code) (up{ris_code!=""})</code></td><td>Stat / Table</td></tr>
+<tr><td>Процент 200</td><td><code>100 * sum by (ris_code) (rate(http_requests_total{code="200"}[5m])) / sum by (ris_code) (rate(http_requests_total[5m]))</code></td><td>Stat / Time series</td></tr>
+<tr><td>5xx error rate</td><td><code>100 * sum by (ris_code) (rate(http_requests_total{code=~"5.."}[5m])) / sum by (ris_code) (rate(http_requests_total[5m]))</code></td><td>Stat / Bar gauge</td></tr>
+<tr><td>p95 latency</td><td><code>histogram_quantile(0.95, sum by (ris_code, le) (rate(http_request_duration_seconds_bucket[5m])))</code></td><td>Stat / Time series</td></tr>
+<tr><td>RPS</td><td><code>sum by (ris_code) (rate(http_requests_total[5m]))</code></td><td>Time series</td></tr>
+<tr><td>Pod restarts</td><td><code>sum by (ris_code) (increase(kube_pod_container_status_restarts_total[15m]))</code></td><td>Stat / Table</td></tr>
+</table>
+<p class="small">Ожидаемый результат: верхнеуровневый dashboard быстро показывает, какая ИС требует внимания.</p>
+</div>
+
+</section>
+
+</main>
+</div>
+  <script src="course-shell.js" defer></script>
+</body>
+</html>
